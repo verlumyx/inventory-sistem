@@ -17,6 +17,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Incluir rutas del módulo de items
     require __DIR__.'/items.php';
+
+    // Incluir rutas del módulo de entradas
+    require __DIR__.'/entries.php';
 });
 
 require __DIR__.'/settings.php';
