@@ -14,6 +14,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Incluir rutas del módulo de almacenes
     require __DIR__.'/warehouses.php';
+
+    // Incluir rutas del módulo de items
+    require __DIR__.'/items.php';
 });
 
 require __DIR__.'/settings.php';
