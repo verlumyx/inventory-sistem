@@ -44,6 +44,19 @@ class UpdateItemRequest extends FormRequest
                 'string',
                 'max:65535',
             ],
+            'price' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0',
+                'max:99999999.99',
+            ],
+            'unit' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:50',
+            ],
             'status' => [
                 'sometimes',
                 'boolean',
@@ -67,6 +80,11 @@ class UpdateItemRequest extends FormRequest
             'qr_code.unique' => 'El código QR ya existe. Por favor, elija otro.',
             'description.string' => 'La descripción debe ser una cadena de texto.',
             'description.max' => 'La descripción es demasiado larga.',
+            'price.numeric' => 'El precio debe ser un número.',
+            'price.min' => 'El precio no puede ser negativo.',
+            'price.max' => 'El precio no puede ser mayor a 99,999,999.99.',
+            'unit.string' => 'La unidad debe ser una cadena de texto.',
+            'unit.max' => 'La unidad no puede tener más de 50 caracteres.',
             'status.boolean' => 'El estado debe ser verdadero o falso.',
         ];
     }
@@ -81,6 +99,8 @@ class UpdateItemRequest extends FormRequest
 
             'qr_code' => 'código QR',
             'description' => 'descripción',
+            'price' => 'precio',
+            'unit' => 'unidad',
             'status' => 'estado',
         ];
     }
@@ -107,6 +127,15 @@ class UpdateItemRequest extends FormRequest
         if ($this->has('description')) {
             $description = trim($this->description);
             $data['description'] = empty($description) ? null : $description;
+        }
+
+        if ($this->has('price')) {
+            $data['price'] = $this->price ? (float) $this->price : null;
+        }
+
+        if ($this->has('unit')) {
+            $unit = trim($this->unit);
+            $data['unit'] = empty($unit) ? null : $unit;
         }
 
         if ($this->has('status')) {

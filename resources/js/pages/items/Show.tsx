@@ -12,6 +12,8 @@ interface Item {
     name: string;
     qr_code?: string;
     description?: string;
+    price?: number;
+    unit?: string;
     status: boolean;
     status_text: string;
     display_name: string;
@@ -100,6 +102,20 @@ export default function Show({ item, metadata }: Props) {
                                         <label className="text-sm font-medium text-gray-500">Código</label>
                                         <p className="text-gray-900 font-mono">{item.code}</p>
                                     </div>
+                                    {item.price && (
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-500">Precio</label>
+                                            <p className="text-gray-900 font-medium">
+                                                ${item.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </p>
+                                        </div>
+                                    )}
+                                    {item.unit && (
+                                        <div>
+                                            <label className="text-sm font-medium text-gray-500">Unidad</label>
+                                            <p className="text-gray-900">{item.unit}</p>
+                                        </div>
+                                    )}
                                 </div>
 
                                 {item.qr_code && (

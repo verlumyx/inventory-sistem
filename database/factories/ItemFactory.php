@@ -53,6 +53,8 @@ class ItemFactory extends Factory
             'name' => $name,
             'description' => $this->faker->boolean(70) ? $this->generateDescription($type, $brand, $category) : null,
             'qr_code' => $this->faker->boolean(60) ? $this->generateQrCode() : null,
+            'price' => $this->faker->boolean(80) ? $this->generatePrice($type) : null,
+            'unit' => $this->faker->boolean(75) ? $this->generateUnit($type) : null,
             'status' => $this->faker->boolean(85), // 85% activos
         ];
     }
@@ -100,6 +102,82 @@ class ItemFactory extends Factory
     private function generateQrCode(): string
     {
         return 'QR-' . strtoupper($this->faker->bothify('??##??##'));
+    }
+
+    /**
+     * Generate a realistic price based on item type.
+     */
+    private function generatePrice(string $type): float
+    {
+        $priceRanges = [
+            'Laptop' => [800, 3500],
+            'Monitor' => [150, 800],
+            'Teclado' => [20, 150],
+            'Mouse' => [10, 80],
+            'Impresora' => [100, 500],
+            'Escáner' => [80, 300],
+            'Tablet' => [200, 1200],
+            'Smartphone' => [300, 1500],
+            'Cámara' => [150, 2000],
+            'Proyector' => [300, 1500],
+            'Altavoces' => [30, 200],
+            'Auriculares' => [15, 300],
+            'Disco Duro' => [50, 300],
+            'Memoria USB' => [10, 50],
+            'Cable' => [5, 30],
+            'Adaptador' => [10, 50],
+            'Silla' => [100, 800],
+            'Mesa' => [150, 1000],
+            'Escritorio' => [200, 1500],
+            'Archivador' => [80, 400],
+            'Lámpara' => [25, 150],
+            'Calculadora' => [15, 100],
+            'Teléfono' => [50, 300],
+            'Router' => [40, 200],
+            'Switch' => [30, 500],
+            'Servidor' => [1000, 8000],
+        ];
+
+        $range = $priceRanges[$type] ?? [10, 100];
+        return round($this->faker->randomFloat(2, $range[0], $range[1]), 2);
+    }
+
+    /**
+     * Generate a realistic unit based on item type.
+     */
+    private function generateUnit(string $type): string
+    {
+        $unitMappings = [
+            'Laptop' => ['pcs', 'unidad'],
+            'Monitor' => ['pcs', 'unidad'],
+            'Teclado' => ['pcs', 'unidad'],
+            'Mouse' => ['pcs', 'unidad'],
+            'Impresora' => ['pcs', 'unidad'],
+            'Escáner' => ['pcs', 'unidad'],
+            'Tablet' => ['pcs', 'unidad'],
+            'Smartphone' => ['pcs', 'unidad'],
+            'Cámara' => ['pcs', 'unidad'],
+            'Proyector' => ['pcs', 'unidad'],
+            'Altavoces' => ['pcs', 'par', 'unidad'],
+            'Auriculares' => ['pcs', 'par', 'unidad'],
+            'Disco Duro' => ['pcs', 'unidad'],
+            'Memoria USB' => ['pcs', 'unidad'],
+            'Cable' => ['pcs', 'metros', 'unidad'],
+            'Adaptador' => ['pcs', 'unidad'],
+            'Silla' => ['pcs', 'unidad'],
+            'Mesa' => ['pcs', 'unidad'],
+            'Escritorio' => ['pcs', 'unidad'],
+            'Archivador' => ['pcs', 'unidad'],
+            'Lámpara' => ['pcs', 'unidad'],
+            'Calculadora' => ['pcs', 'unidad'],
+            'Teléfono' => ['pcs', 'unidad'],
+            'Router' => ['pcs', 'unidad'],
+            'Switch' => ['pcs', 'unidad'],
+            'Servidor' => ['pcs', 'unidad'],
+        ];
+
+        $units = $unitMappings[$type] ?? ['pcs', 'unidad', 'kg', 'litros', 'metros'];
+        return $this->faker->randomElement($units);
     }
 
     /**

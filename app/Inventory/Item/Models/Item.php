@@ -24,6 +24,8 @@ class Item extends Model
         'name',
         'qr_code',
         'description',
+        'price',
+        'unit',
         'status',
     ];
 
@@ -31,6 +33,7 @@ class Item extends Model
      * The attributes that should be cast.
      */
     protected $casts = [
+        'price' => 'decimal:2',
         'status' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
@@ -108,7 +111,8 @@ class Item extends Model
             $query->where('name', 'like', "%{$term}%")
                   ->orWhere('code', 'like', "%{$term}%")
                   ->orWhere('description', 'like', "%{$term}%")
-                  ->orWhere('qr_code', 'like', "%{$term}%");
+                  ->orWhere('qr_code', 'like', "%{$term}%")
+                  ->orWhere('unit', 'like', "%{$term}%");
         });
     }
 
@@ -142,6 +146,30 @@ class Item extends Model
     public function scopeByQrCode(Builder $query, string $qrCode): Builder
     {
         return $query->where('qr_code', 'like', "%{$qrCode}%");
+    }
+
+    /**
+     * Scope a query to filter by price range.
+     */
+    public function scopeByPriceRange(Builder $query, ?float $minPrice = null, ?float $maxPrice = null): Builder
+    {
+        if ($minPrice !== null) {
+            $query->where('price', '>=', $minPrice);
+        }
+
+        if ($maxPrice !== null) {
+            $query->where('price', '<=', $maxPrice);
+        }
+
+        return $query;
+    }
+
+    /**
+     * Scope a query to filter by unit.
+     */
+    public function scopeByUnit(Builder $query, string $unit): Builder
+    {
+        return $query->where('unit', 'like', "%{$unit}%");
     }
 
     /**
@@ -197,6 +225,14 @@ class Item extends Model
 
         if (!empty($filters['qr_code'])) {
             $query->byQrCode($filters['qr_code']);
+        }
+
+        if (!empty($filters['unit'])) {
+            $query->byUnit($filters['unit']);
+        }
+
+        if (isset($filters['min_price']) || isset($filters['max_price'])) {
+            $query->byPriceRange($filters['min_price'] ?? null, $filters['max_price'] ?? null);
         }
 
         return $query;
@@ -275,6 +311,8 @@ class Item extends Model
             'name' => $this->name,
             'qr_code' => $this->qr_code,
             'description' => $this->description,
+            'price' => $this->price,
+            'unit' => $this->unit,
             'status' => $this->status,
             'status_text' => $this->status_text,
             'display_name' => $this->display_name,

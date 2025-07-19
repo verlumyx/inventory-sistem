@@ -317,12 +317,15 @@ export default function Index({ warehouses, pagination, filters }: Props) {
                                 )}
                             </>
                         ) : (
-                            <div className="text-center py-8">
-                                <p className="text-gray-500 dark:text-gray-400">
-                                    No se encontraron almacenes con los filtros aplicados.
-                                </p>
-                                <Button variant="outline" onClick={clearFilters} className="mt-4">
-                                    Limpiar Filtros
+                            <div className="text-center py-12">
+                                <div className="text-gray-500 mb-4">
+                                    No se encontraron almacenes
+                                </div>
+                                <Button asChild>
+                                    <Link href="/warehouses/create">
+                                        <Plus className="h-4 w-4 mr-2" />
+                                        Crear Primer Almacén
+                                    </Link>
                                 </Button>
                             </div>
                         )}

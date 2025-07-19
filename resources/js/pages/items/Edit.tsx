@@ -14,6 +14,8 @@ interface Item {
     name: string;
     qr_code?: string;
     description?: string;
+    price?: number;
+    unit?: string;
     status: boolean;
     created_at: string;
     updated_at: string;
@@ -23,6 +25,8 @@ interface FormData {
     name: string;
     qr_code: string;
     description: string;
+    price: string;
+    unit: string;
     status: boolean;
 }
 
@@ -35,6 +39,8 @@ export default function Edit({ item }: Props) {
         name: item.name,
         qr_code: item.qr_code || '',
         description: item.description || '',
+        price: item.price ? item.price.toString() : '',
+        unit: item.unit || '',
         status: item.status,
     });
 
@@ -166,6 +172,55 @@ export default function Edit({ item }: Props) {
                                 <p className="text-sm text-gray-500">
                                     Descripción detallada del item (opcional, máximo 1000 caracteres)
                                 </p>
+                            </div>
+
+                            {/* Precio y Unidad */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {/* Precio */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="price">Precio</Label>
+                                    <Input
+                                        id="price"
+                                        type="number"
+                                        step="0.01"
+                                        min="0"
+                                        value={data.price}
+                                        onChange={(e) => setData('price', e.target.value)}
+                                        placeholder="0.00"
+                                        className={errors.price ? 'border-red-500' : ''}
+                                    />
+                                    {errors.price && (
+                                        <div className="flex items-center gap-2 text-red-600 text-sm">
+                                            <AlertCircle className="h-4 w-4" />
+                                            {errors.price}
+                                        </div>
+                                    )}
+                                    <p className="text-sm text-gray-500">
+                                        Precio del item (opcional)
+                                    </p>
+                                </div>
+
+                                {/* Unidad */}
+                                <div className="space-y-2">
+                                    <Label htmlFor="unit">Unidad</Label>
+                                    <Input
+                                        id="unit"
+                                        type="text"
+                                        value={data.unit}
+                                        onChange={(e) => setData('unit', e.target.value)}
+                                        placeholder="ej: pcs, kg, m, litros"
+                                        className={errors.unit ? 'border-red-500' : ''}
+                                    />
+                                    {errors.unit && (
+                                        <div className="flex items-center gap-2 text-red-600 text-sm">
+                                            <AlertCircle className="h-4 w-4" />
+                                            {errors.unit}
+                                        </div>
+                                    )}
+                                    <p className="text-sm text-gray-500">
+                                        Unidad de medida (opcional, máximo 50 caracteres)
+                                    </p>
+                                </div>
                             </div>
 
                             {/* Estado */}

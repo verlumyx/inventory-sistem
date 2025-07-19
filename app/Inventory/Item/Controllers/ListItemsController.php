@@ -51,6 +51,8 @@ class ListItemsController extends Controller
                         'name' => $item->name,
                         'qr_code' => $item->qr_code,
                         'description' => $item->description,
+                        'price' => $item->price,
+                        'unit' => $item->unit,
                         'status' => $item->status,
                         'status_text' => $item->status_text,
                         'created_at' => $item->created_at->toISOString(),

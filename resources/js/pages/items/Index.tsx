@@ -15,6 +15,8 @@ interface Item {
     name: string;
     qr_code?: string;
     description?: string;
+    price?: number;
+    unit?: string;
     status: boolean;
     status_text: string;
     created_at: string;
@@ -40,6 +42,9 @@ interface Props {
         name?: string;
         code?: string;
         qr_code?: string;
+        unit?: string;
+        min_price?: number;
+        max_price?: number;
     };
 }
 
@@ -226,8 +231,9 @@ export default function Index({ items, pagination, filters }: Props) {
                                             <TableRow>
                                                 <TableHead className="py-4">Código</TableHead>
                                                 <TableHead className="py-4">Nombre</TableHead>
+                                                <TableHead className="py-4">Precio</TableHead>
+                                                <TableHead className="py-4">Unidad</TableHead>
                                                 <TableHead className="py-4">QR Code</TableHead>
-                                                <TableHead className="py-4">Descripción</TableHead>
                                                 <TableHead className="py-4">Estado</TableHead>
                                                 <TableHead className="py-4">Fecha Creación</TableHead>
                                                 <TableHead className="text-right py-4">Acciones</TableHead>
@@ -243,6 +249,18 @@ export default function Index({ items, pagination, filters }: Props) {
                                                         {item.name}
                                                     </TableCell>
                                                     <TableCell className="py-4">
+                                                        {item.price ? (
+                                                            <span className="font-medium">
+                                                                ${item.price.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                            </span>
+                                                        ) : (
+                                                            <span className="text-gray-400">-</span>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell className="py-4">
+                                                        {item.unit || <span className="text-gray-400">-</span>}
+                                                    </TableCell>
+                                                    <TableCell className="py-4">
                                                         {item.qr_code ? (
                                                             <div className="flex items-center gap-2">
                                                                 <QrCode className="h-4 w-4 text-gray-500" />
@@ -253,9 +271,6 @@ export default function Index({ items, pagination, filters }: Props) {
                                                         ) : (
                                                             <span className="text-gray-400">-</span>
                                                         )}
-                                                    </TableCell>
-                                                    <TableCell className="max-w-xs truncate py-4">
-                                                        {item.description || '-'}
                                                     </TableCell>
                                                     <TableCell className="py-4">
                                                         <Badge 

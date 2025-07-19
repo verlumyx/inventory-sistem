@@ -44,6 +44,21 @@ class ListItemsRequest extends FormRequest
                 'string',
                 'max:255',
             ],
+            'unit' => [
+                'sometimes',
+                'string',
+                'max:50',
+            ],
+            'min_price' => [
+                'sometimes',
+                'numeric',
+                'min:0',
+            ],
+            'max_price' => [
+                'sometimes',
+                'numeric',
+                'min:0',
+            ],
             'per_page' => [
                 'sometimes',
                 'integer',
@@ -73,6 +88,12 @@ class ListItemsRequest extends FormRequest
             'code.max' => 'El código no puede tener más de 20 caracteres.',
             'qr_code.string' => 'El código QR debe ser una cadena de texto.',
             'qr_code.max' => 'El código QR no puede tener más de 255 caracteres.',
+            'unit.string' => 'La unidad debe ser una cadena de texto.',
+            'unit.max' => 'La unidad no puede tener más de 50 caracteres.',
+            'min_price.numeric' => 'El precio mínimo debe ser un número.',
+            'min_price.min' => 'El precio mínimo no puede ser negativo.',
+            'max_price.numeric' => 'El precio máximo debe ser un número.',
+            'max_price.min' => 'El precio máximo no puede ser negativo.',
             'per_page.integer' => 'El número de elementos por página debe ser un número entero.',
             'per_page.min' => 'El número de elementos por página debe ser al menos 1.',
             'per_page.max' => 'El número de elementos por página no puede ser mayor a 100.',
@@ -92,6 +113,9 @@ class ListItemsRequest extends FormRequest
             'name' => 'nombre',
             'code' => 'código',
             'qr_code' => 'código QR',
+            'unit' => 'unidad',
+            'min_price' => 'precio mínimo',
+            'max_price' => 'precio máximo',
             'per_page' => 'elementos por página',
             'page' => 'página',
         ];
@@ -124,6 +148,12 @@ class ListItemsRequest extends FormRequest
         if ($this->has('qr_code')) {
             $this->merge([
                 'qr_code' => trim($this->qr_code),
+            ]);
+        }
+
+        if ($this->has('unit')) {
+            $this->merge([
+                'unit' => trim($this->unit),
             ]);
         }
     }

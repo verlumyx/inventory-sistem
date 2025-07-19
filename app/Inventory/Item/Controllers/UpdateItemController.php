@@ -35,6 +35,8 @@ class UpdateItemController extends Controller
                     'name' => $item->name,
                     'qr_code' => $item->qr_code,
                     'description' => $item->description,
+                    'price' => $item->price,
+                    'unit' => $item->unit,
                     'status' => $item->status,
                     'created_at' => $item->created_at->toISOString(),
                     'updated_at' => $item->updated_at->toISOString(),
