@@ -26,7 +26,7 @@ class ListActiveWarehousesController extends Controller
         try {
             $warehouses = $this->listWarehousesHandler->handleActive();
 
-            return Inertia::render('Warehouses/Active', [
+            return Inertia::render('warehouses/Active', [
                 'warehouses' => $warehouses->map(function ($warehouse) {
                     return [
                         'id' => $warehouse->id,

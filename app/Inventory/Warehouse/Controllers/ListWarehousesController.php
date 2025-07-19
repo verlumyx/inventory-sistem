@@ -48,7 +48,7 @@ class ListWarehousesController extends Controller
 
             \Log::info('Sending filters to frontend:', $filters);
 
-            return Inertia::render('Warehouses/Index', [
+            return Inertia::render('warehouses/Index', [
                 'warehouses' => $warehouses->getCollection()->map(function ($warehouse) {
                     return [
                         'id' => $warehouse->id,

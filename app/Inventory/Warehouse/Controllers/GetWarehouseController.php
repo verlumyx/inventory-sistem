@@ -31,7 +31,7 @@ class GetWarehouseController extends Controller
         try {
             $warehouse = $this->getWarehouseHandler->handleById($id);
 
-            return Inertia::render('Warehouses/Show', [
+            return Inertia::render('warehouses/Show', [
                 'warehouse' => [
                     'id' => $warehouse->id,
                     'code' => $warehouse->code,

@@ -25,7 +25,7 @@ Route::get('/warehouses', ListWarehousesController::class)
 
 // Mostrar formulario de creación
 Route::get('/warehouses/create', function () {
-    return Inertia::render('Warehouses/Create');
+    return Inertia::render('warehouses/Create');
 })->name('warehouses.create');
 
 // Listar solo almacenes activos
@@ -46,7 +46,7 @@ Route::get('/warehouses/{warehouse}/edit', function (int $warehouse) {
     $getWarehouseHandler = app(\App\Inventory\Warehouse\Handlers\GetWarehouseHandler::class);
     try {
         $warehouseData = $getWarehouseHandler->handleById($warehouse);
-        return Inertia::render('Warehouses/Edit', [
+        return Inertia::render('warehouses/Edit', [
             'warehouse' => [
                 'id' => $warehouseData->id,
                 'code' => $warehouseData->code,
