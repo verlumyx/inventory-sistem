@@ -391,7 +391,7 @@ Log::error('Error en {acción}', [
 #### 12.4 Estructura de Respuestas API
 ```php
 // En Controllers - formato estándar
-return Inertia::render('{ModuleName}/Show', [
+return Inertia::render('{moduleName}/Show', [
     '{modelname}' => [
         'id' => $model->id,
         'code' => $model->code,
