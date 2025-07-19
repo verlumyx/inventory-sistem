@@ -7,10 +7,13 @@ Route::get('/', function () {
     return redirect('dashboard');
 })->name('home');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
         return Inertia::render('dashboard');
     })->name('dashboard');
+
+    // Incluir rutas del módulo de almacenes
+    require __DIR__.'/warehouses.php';
 });
 
 require __DIR__.'/settings.php';
