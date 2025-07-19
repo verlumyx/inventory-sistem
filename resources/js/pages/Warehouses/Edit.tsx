@@ -58,7 +58,7 @@ export default function Edit({ warehouse }: Props) {
         <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title={`Editar ${warehouse.name}`} />
 
-            <div className="space-y-6">
+            <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -86,7 +86,7 @@ export default function Edit({ warehouse }: Props) {
                 </div>
 
                 {/* Form */}
-                <Card className="max-w-2xl">
+                <Card className="max-w-2xl shadow-sm">
                     <CardHeader>
                         <CardTitle>Información del Almacén</CardTitle>
                         <CardDescription>
@@ -95,7 +95,7 @@ export default function Edit({ warehouse }: Props) {
                     </CardHeader>
                     
                     <CardContent>
-                        <form onSubmit={submit} className="space-y-6">
+                        <form onSubmit={submit} className="space-y-8">
                             {/* Code Display */}
                             <div className="space-y-2">
                                 <Label>Código</Label>

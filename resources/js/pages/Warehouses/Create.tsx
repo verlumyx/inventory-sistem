@@ -41,7 +41,7 @@ export default function Create() {
         <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title="Crear Almacén" />
 
-            <div className="space-y-6">
+            <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -61,7 +61,7 @@ export default function Create() {
                 </div>
 
                 {/* Form */}
-                <Card className="max-w-2xl">
+                <Card className="max-w-2xl shadow-sm">
                     <CardHeader>
                         <CardTitle>Información del Almacén</CardTitle>
                         <CardDescription>
@@ -70,7 +70,7 @@ export default function Create() {
                     </CardHeader>
                     
                     <CardContent>
-                        <form onSubmit={submit} className="space-y-6">
+                        <form onSubmit={submit} className="space-y-8">
                             {/* Name Field */}
                             <div className="space-y-2">
                                 <Label htmlFor="name">

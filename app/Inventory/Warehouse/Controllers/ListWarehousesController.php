@@ -28,21 +28,39 @@ class ListWarehousesController extends Controller
         try {
             $validated = $request->validated();
 
+            // Debug log
+            \Log::info('Warehouse filters received:', $validated);
+
             // Extraer parámetros de paginación
             $perPage = $validated['per_page'] ?? 15;
 
             // Preparar filtros
             $filters = array_filter([
                 'search' => $validated['search'] ?? null,
-                'status' => $validated['status'] ?? null,
+                'status' => isset($validated['status']) ? filter_var($validated['status'], FILTER_VALIDATE_BOOLEAN) : null,
                 'name' => $validated['name'] ?? null,
                 'code' => $validated['code'] ?? null,
-            ]);
+            ], function($value) {
+                return $value !== null;
+            });
 
             $warehouses = $this->listWarehousesHandler->handlePaginated($filters, $perPage);
 
+            \Log::info('Sending filters to frontend:', $filters);
+
             return Inertia::render('Warehouses/Index', [
-                'warehouses' => $warehouses->items(),
+                'warehouses' => $warehouses->getCollection()->map(function ($warehouse) {
+                    return [
+                        'id' => $warehouse->id,
+                        'code' => $warehouse->code,
+                        'name' => $warehouse->name,
+                        'description' => $warehouse->description,
+                        'status' => $warehouse->status,
+                        'status_text' => $warehouse->status_text,
+                        'created_at' => $warehouse->created_at->toISOString(),
+                        'updated_at' => $warehouse->updated_at->toISOString(),
+                    ];
+                }),
                 'pagination' => [
                     'current_page' => $warehouses->currentPage(),
                     'last_page' => $warehouses->lastPage(),

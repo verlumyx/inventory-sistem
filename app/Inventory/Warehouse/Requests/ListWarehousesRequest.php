@@ -40,7 +40,7 @@ class ListWarehousesRequest extends FormRequest
             ],
             'status' => [
                 'sometimes',
-                'boolean',
+                'in:true,false,1,0',
             ],
             'name' => [
                 'sometimes',

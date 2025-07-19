@@ -38,7 +38,7 @@ export default function Show({ warehouse }: Props) {
         <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title={warehouse.name} />
 
-            <div className="space-y-6">
+            <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-4">
@@ -76,7 +76,7 @@ export default function Show({ warehouse }: Props) {
                     {/* Main Information */}
                     <div className="lg:col-span-2 space-y-6">
                         {/* Basic Information */}
-                        <Card>
+                        <Card className="shadow-sm">
                             <CardHeader>
                                 <CardTitle className="flex items-center">
                                     <FileText className="h-5 w-5 mr-2" />
@@ -147,7 +147,7 @@ export default function Show({ warehouse }: Props) {
                         </Card>
 
                         {/* Additional Information */}
-                        <Card>
+                        <Card className="shadow-sm">
                             <CardHeader>
                                 <CardTitle className="flex items-center">
                                     <Clock className="h-5 w-5 mr-2" />
@@ -202,7 +202,7 @@ export default function Show({ warehouse }: Props) {
                     {/* Sidebar */}
                     <div className="space-y-6">
                         {/* Quick Actions */}
-                        <Card>
+                        <Card className="shadow-sm">
                             <CardHeader>
                                 <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
                             </CardHeader>
@@ -226,7 +226,7 @@ export default function Show({ warehouse }: Props) {
                         </Card>
 
                         {/* Status Information */}
-                        <Card>
+                        <Card className="shadow-sm">
                             <CardHeader>
                                 <CardTitle className="text-lg">Estado del Almacén</CardTitle>
                             </CardHeader>

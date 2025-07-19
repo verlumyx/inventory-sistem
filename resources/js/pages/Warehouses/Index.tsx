@@ -1,5 +1,5 @@
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -55,17 +55,43 @@ const breadcrumbs: BreadcrumbItem[] = [
 export default function Index({ warehouses, pagination, filters }: Props) {
     const { errors, flash } = usePage().props as any;
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
-    const [statusFilter, setStatusFilter] = useState<string>(
-        filters.status !== undefined ? (filters.status ? 'true' : 'false') : 'all'
-    );
+    const [statusFilter, setStatusFilter] = useState<string>(() => {
+        if (filters.status !== undefined && filters.status !== null) {
+            return filters.status ? 'true' : 'false';
+        }
+        return 'all';
+    });
     const [showFilters, setShowFilters] = useState(false);
 
-    const handleSearch = () => {
+    // Debug log to see what filters we're receiving
+    console.log('Received filters:', filters);
+
+    const applyFilters = () => {
         const params: any = {};
-        
+
         if (searchTerm) params.search = searchTerm;
         if (statusFilter !== 'all') params.status = statusFilter === 'true';
-        
+
+        router.get('/warehouses', params, {
+            preserveState: true,
+            preserveScroll: true,
+        });
+    };
+
+    const handleSearch = () => {
+        applyFilters();
+    };
+
+    const handleStatusChange = (value: string) => {
+        setStatusFilter(value);
+        // Apply filters immediately when status changes
+        const params: any = {};
+
+        if (searchTerm) params.search = searchTerm;
+        if (value !== 'all') params.status = value === 'true';
+
+        console.log('Applying filters:', params); // Debug log
+
         router.get('/warehouses', params, {
             preserveState: true,
             preserveScroll: true,
@@ -97,7 +123,7 @@ export default function Index({ warehouses, pagination, filters }: Props) {
         <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title="Almacenes" />
 
-            <div className="space-y-6">
+            <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
@@ -130,7 +156,7 @@ export default function Index({ warehouses, pagination, filters }: Props) {
                 )}
 
                 {/* Filters */}
-                <Card>
+                <Card className="shadow-sm">
                     <CardHeader className="pb-3">
                         <div className="flex items-center justify-between">
                             <CardTitle className="text-lg">Filtros</CardTitle>
@@ -165,7 +191,7 @@ export default function Index({ warehouses, pagination, filters }: Props) {
                                 
                                 <div>
                                     <Label htmlFor="status">Estado</Label>
-                                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                    <Select value={statusFilter} onValueChange={handleStatusChange}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Seleccionar estado" />
                                         </SelectTrigger>
@@ -191,7 +217,7 @@ export default function Index({ warehouses, pagination, filters }: Props) {
                 </Card>
 
                 {/* Results */}
-                <Card>
+                <Card className="shadow-sm">
                     <CardHeader>
                         <div className="flex items-center justify-between">
                             <div>
@@ -209,41 +235,41 @@ export default function Index({ warehouses, pagination, filters }: Props) {
                     <CardContent>
                         {warehouses.length > 0 ? (
                             <>
-                                <div className="rounded-md border">
+                                <div className="rounded-md border overflow-hidden">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Código</TableHead>
-                                                <TableHead>Nombre</TableHead>
-                                                <TableHead>Descripción</TableHead>
-                                                <TableHead>Estado</TableHead>
-                                                <TableHead>Fecha Creación</TableHead>
-                                                <TableHead className="text-right">Acciones</TableHead>
+                                                <TableHead className="py-4">Código</TableHead>
+                                                <TableHead className="py-4">Nombre</TableHead>
+                                                <TableHead className="py-4">Descripción</TableHead>
+                                                <TableHead className="py-4">Estado</TableHead>
+                                                <TableHead className="py-4">Fecha Creación</TableHead>
+                                                <TableHead className="text-right py-4">Acciones</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {warehouses.map((warehouse) => (
                                                 <TableRow key={warehouse.id}>
-                                                    <TableCell className="font-mono text-sm">
+                                                    <TableCell className="font-mono text-sm py-4">
                                                         {warehouse.code}
                                                     </TableCell>
-                                                    <TableCell className="font-medium">
+                                                    <TableCell className="font-medium py-4">
                                                         {warehouse.name}
                                                     </TableCell>
-                                                    <TableCell className="max-w-xs truncate">
+                                                    <TableCell className="max-w-xs truncate py-4">
                                                         {warehouse.description || '-'}
                                                     </TableCell>
-                                                    <TableCell>
-                                                        <Badge 
+                                                    <TableCell className="py-4">
+                                                        <Badge
                                                             variant={warehouse.status ? 'default' : 'secondary'}
                                                         >
                                                             {warehouse.status_text}
                                                         </Badge>
                                                     </TableCell>
-                                                    <TableCell>
+                                                    <TableCell className="py-4">
                                                         {new Date(warehouse.created_at).toLocaleDateString('es-ES')}
                                                     </TableCell>
-                                                    <TableCell className="text-right">
+                                                    <TableCell className="text-right py-4">
                                                         <div className="flex items-center justify-end space-x-2">
                                                             <Link href={`/warehouses/${warehouse.id}`}>
                                                                 <Button variant="ghost" size="sm">
