@@ -31,7 +31,7 @@ class Entry extends Model
      * The attributes that should be cast.
      */
     protected $casts = [
-        'status' => 'boolean',
+        'status' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -80,23 +80,39 @@ class Entry extends Model
      */
     public function getStatusTextAttribute(): string
     {
-        return $this->status ? 'Activo' : 'Inactivo';
+        return $this->status ? 'Recibido' : 'Por recibir';
     }
 
     /**
-     * Scope a query to only include active entries.
+     * Get the is pending attribute.
      */
-    public function scopeActive(Builder $query): Builder
+    public function getIsPendingAttribute(): bool
     {
-        return $query->where('status', true);
+        return $this->status === 0;
     }
 
     /**
-     * Scope a query to only include inactive entries.
+     * Get the is received attribute.
      */
-    public function scopeInactive(Builder $query): Builder
+    public function getIsReceivedAttribute(): bool
     {
-        return $query->where('status', false);
+        return $this->status === 1;
+    }
+
+    /**
+     * Scope a query to only include received entries.
+     */
+    public function scopeReceived(Builder $query): Builder
+    {
+        return $query->where('status', 1);
+    }
+
+    /**
+     * Scope a query to only include pending entries.
+     */
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', 0);
     }
 
     /**
@@ -255,12 +271,12 @@ class Entry extends Model
             'code' => $this->code,
             'name' => $this->name,
             'description' => $this->description,
-            'status' => $this->status,
+            'status' => (int) $this->status, // Asegurar que sea entero
             'status_text' => $this->status_text,
             'display_name' => $this->display_name,
             'short_description' => $this->short_description,
-            'is_active' => $this->isActive(),
-            'is_inactive' => $this->isInactive(),
+            'is_pending' => $this->is_pending,
+            'is_received' => $this->is_received,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

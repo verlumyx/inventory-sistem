@@ -38,7 +38,7 @@ class EntrySeeder extends Seeder
             [
                 'name' => 'Compra de Equipos de Oficina - Enero 2025',
                 'description' => 'Entrada de equipos de oficina para el nuevo año. Incluye laptops, monitores y periféricos para el equipo de desarrollo.',
-                'status' => true,
+                'status' => 0, // Por recibir
                 'items' => [
                     ['item_name_contains' => 'MacBook', 'amount' => 5],
                     ['item_name_contains' => 'Monitor', 'amount' => 10],
@@ -48,7 +48,7 @@ class EntrySeeder extends Seeder
             [
                 'name' => 'Recepción de Inventario - Diciembre 2024',
                 'description' => 'Entrada de inventario de fin de año. Equipos de reemplazo y nuevas adquisiciones.',
-                'status' => true,
+                'status' => 1, // Recibido
                 'items' => [
                     ['item_name_contains' => 'Impresora', 'amount' => 3],
                     ['item_name_contains' => 'Silla', 'amount' => 20],
@@ -58,7 +58,7 @@ class EntrySeeder extends Seeder
             [
                 'name' => 'Transferencia de Almacén Central',
                 'description' => 'Transferencia de equipos desde almacén central hacia sucursales.',
-                'status' => true,
+                'status' => 0, // Por recibir
                 'items' => [
                     ['item_name_contains' => 'Laptop', 'amount' => 12],
                     ['item_name_contains' => 'Mouse', 'amount' => 25],
@@ -67,7 +67,7 @@ class EntrySeeder extends Seeder
             [
                 'name' => 'Entrada de Emergencia - Soporte Técnico',
                 'description' => 'Entrada de emergencia para cubrir necesidades críticas del departamento de soporte técnico.',
-                'status' => true,
+                'status' => 1, // Recibido
                 'items' => [
                     ['item_name_contains' => 'Servidor', 'amount' => 2],
                     ['item_name_contains' => 'Router', 'amount' => 5],

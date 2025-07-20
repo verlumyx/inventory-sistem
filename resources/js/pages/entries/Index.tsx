@@ -14,7 +14,7 @@ interface Entry {
     code: string;
     name: string;
     description?: string;
-    status: boolean;
+    status: number; // 0 = Por recibir, 1 = Recibido
     status_text: string;
     created_at: string;
     updated_at: string;
@@ -250,9 +250,9 @@ export default function Index({ entries, filters, pagination }: Props) {
                                                     {entry.description || '-'}
                                                 </TableCell>
                                                 <TableCell className="py-4">
-                                                    <Badge 
-                                                        variant={entry.status ? "default" : "secondary"}
-                                                        className={entry.status ? "bg-green-100 text-green-800" : ""}
+                                                    <Badge
+                                                        variant={entry.status_text === 'Recibido' ? "default" : "secondary"}
+                                                        className={entry.status_text === 'Recibido' ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}
                                                     >
                                                         {entry.status_text}
                                                     </Badge>
@@ -261,27 +261,20 @@ export default function Index({ entries, filters, pagination }: Props) {
                                                     {new Date(entry.created_at).toLocaleDateString('es-ES')}
                                                 </TableCell>
                                                 <TableCell className="text-right py-4">
-                                                    <DropdownMenu>
-                                                        <DropdownMenuTrigger asChild>
-                                                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                                                <MoreHorizontal className="h-4 w-4" />
+                                                    <div className="flex items-center justify-end space-x-2">
+                                                        <Link href={`/entries/${entry.id}`}>
+                                                            <Button variant="ghost" size="sm">
+                                                                <Eye className="h-4 w-4" />
                                                             </Button>
-                                                        </DropdownMenuTrigger>
-                                                        <DropdownMenuContent align="end">
-                                                            <DropdownMenuItem asChild>
-                                                                <Link href={route('entries.show', entry.id)}>
-                                                                    <Eye className="mr-2 h-4 w-4" />
-                                                                    Ver
-                                                                </Link>
-                                                            </DropdownMenuItem>
-                                                            <DropdownMenuItem asChild>
-                                                                <Link href={route('entries.edit', entry.id)}>
-                                                                    <Edit className="mr-2 h-4 w-4" />
-                                                                    Editar
-                                                                </Link>
-                                                            </DropdownMenuItem>
-                                                        </DropdownMenuContent>
-                                                    </DropdownMenu>
+                                                        </Link>
+                                                        {entry.status === 0 && (
+                                                            <Link href={`/entries/${entry.id}/edit`}>
+                                                                <Button variant="ghost" size="sm">
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </Link>
+                                                        )}
+                                                    </div>
                                                 </TableCell>
                                             </TableRow>
                                         ))}

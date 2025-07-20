@@ -59,7 +59,7 @@ class CreateEntryController extends Controller
     {
         try {
             $validatedData = $request->getValidatedData();
-            
+
             $entry = $this->createEntryHandler->handleWithItems(
                 $validatedData['entry'],
                 $validatedData['items']

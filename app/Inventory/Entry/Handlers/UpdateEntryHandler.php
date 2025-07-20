@@ -31,6 +31,11 @@ class UpdateEntryHandler
                 throw new EntryNotFoundException("Entrada con ID {$id} no encontrada.");
             }
 
+            // Verificar que la entrada no esté recibida
+            if ($entry->status === 1) {
+                throw new \Exception("No se puede editar una entrada que ya ha sido recibida.");
+            }
+
             // Actualizar la entrada
             $updatedEntry = $this->entryRepository->update($id, $data);
 
@@ -67,6 +72,11 @@ class UpdateEntryHandler
             $entry = $this->entryRepository->find($id);
             if (!$entry) {
                 throw new EntryNotFoundException("Entrada con ID {$id} no encontrada.");
+            }
+
+            // Verificar que la entrada no esté recibida
+            if ($entry->status === 1) {
+                throw new \Exception("No se puede editar una entrada que ya ha sido recibida.");
             }
 
             // Validar items
@@ -189,6 +199,41 @@ class UpdateEntryHandler
     }
 
     /**
+     * Handle receive request.
+     */
+    public function handleReceive(int $id): Entry
+    {
+        try {
+            Log::info('Marcando entrada como recibida', ['entry_id' => $id]);
+
+            $entry = $this->entryRepository->find($id);
+            if (!$entry) {
+                throw new EntryNotFoundException("Entrada con ID {$id} no encontrada.");
+            }
+
+            if ($entry->status === 1) {
+                throw new \Exception("La entrada ya está marcada como recibida.");
+            }
+
+            $this->entryRepository->update($id, ['status' => 1]);
+            $updatedEntry = $this->entryRepository->findOrFail($id);
+
+            Log::info('Entrada marcada como recibida exitosamente', [
+                'entry_id' => $updatedEntry->id,
+            ]);
+
+            return $updatedEntry;
+
+        } catch (\Exception $e) {
+            Log::error('Error al marcar entrada como recibida', [
+                'entry_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Validate the data before updating.
      */
     public function validate(int $id, array $data): array
@@ -198,6 +243,12 @@ class UpdateEntryHandler
 
         if (!$entry) {
             $errors['id'] = 'Entrada no encontrada.';
+            return $errors;
+        }
+
+        // Verificar que la entrada no esté recibida
+        if ($entry->status === 1) {
+            $errors['status'] = 'No se puede editar una entrada que ya ha sido recibida.';
             return $errors;
         }
 

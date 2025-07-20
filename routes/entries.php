@@ -12,6 +12,9 @@ Route::prefix('entries')->name('entries.')->group(function () {
     Route::get('/{id}/edit', [App\Inventory\Entry\Controllers\UpdateEntryController::class, 'edit'])->name('edit');
     Route::put('/{id}', [App\Inventory\Entry\Controllers\UpdateEntryController::class, 'update'])->name('update');
     Route::patch('/{id}', [App\Inventory\Entry\Controllers\UpdateEntryController::class, 'update'])->name('patch');
+
+    // Status operations
+    Route::patch('/{id}/receive', [App\Inventory\Entry\Controllers\UpdateEntryController::class, 'receive'])->name('receive');
 });
 
 // API routes for entries

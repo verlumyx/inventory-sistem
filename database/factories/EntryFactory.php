@@ -56,7 +56,7 @@ class EntryFactory extends Factory
         return [
             'name' => $name,
             'description' => $this->faker->boolean(70) ? $this->generateDescription($type, $purpose) : null,
-            'status' => $this->faker->boolean(85), // 85% activas
+            'status' => $this->faker->randomElement([0, 1]), // 0 = Por recibir, 1 = Recibido
         ];
     }
 

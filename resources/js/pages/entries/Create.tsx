@@ -36,7 +36,7 @@ interface EntryItem {
 interface FormData {
     name: string;
     description: string;
-    status: boolean;
+    status: number; // 0 = Por recibir, 1 = Recibido
     items: EntryItem[];
 }
 
@@ -49,29 +49,14 @@ export default function Create({ items, warehouses }: Props) {
     const { data, setData, post, processing, errors } = useForm<FormData>({
         name: '',
         description: '',
-        status: true,
+        status: 0, // 0 = Por recibir (estado inicial)
         items: [],
     });
-
-    const [selectedItems, setSelectedItems] = useState<EntryItem[]>([]);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Crear el objeto de datos con los items
-        const submitData = {
-            name: data.name,
-            description: data.description,
-            status: data.status,
-            items: selectedItems
-        };
-
-        post(route('entries.store'), {
-            data: submitData,
-            onSuccess: () => {
-                // El redirect se maneja en el controlador
-            },
-        });
+        post(route('entries.store'));
     };
 
     const addItem = () => {
@@ -80,18 +65,18 @@ export default function Create({ items, warehouses }: Props) {
             warehouse_id: 0,
             amount: 1,
         };
-        setSelectedItems([...selectedItems, newItem]);
+        setData('items', [...data.items, newItem]);
     };
 
     const removeItem = (index: number) => {
-        const newItems = selectedItems.filter((_, i) => i !== index);
-        setSelectedItems(newItems);
+        const newItems = data.items.filter((_, i) => i !== index);
+        setData('items', newItems);
     };
 
     const updateItem = (index: number, field: keyof EntryItem, value: number) => {
-        const newItems = [...selectedItems];
+        const newItems = [...data.items];
         newItems[index] = { ...newItems[index], [field]: value };
-        setSelectedItems(newItems);
+        setData('items', newItems);
     };
 
     const getSelectedItem = (itemId: number): Item | undefined => {
@@ -103,17 +88,18 @@ export default function Create({ items, warehouses }: Props) {
     };
 
     const isItemAlreadySelected = (itemId: number): boolean => {
-        return selectedItems.some(item => item.item_id === itemId);
+        return data.items.some(item => item.item_id === itemId);
     };
 
     const canSubmit = () => {
-        return data.name.trim() !== '' && 
-               selectedItems.length > 0 && 
-               selectedItems.every(item => 
-                   item.item_id > 0 && 
-                   item.warehouse_id > 0 && 
-                   item.amount > 0
-               );
+        const hasValidItems = data.items.length > 0 &&
+                             data.items.every(item =>
+                                 item.item_id > 0 &&
+                                 item.warehouse_id > 0 &&
+                                 item.amount > 0
+                             );
+
+        return data.name.trim() !== '' && hasValidItems;
     };
 
     return (
@@ -192,18 +178,7 @@ export default function Create({ items, warehouses }: Props) {
                                 </p>
                             </div>
 
-                            {/* Estado */}
-                            <div className="flex items-center space-x-2">
-                                <Switch
-                                    id="status"
-                                    checked={data.status}
-                                    onCheckedChange={(checked) => setData('status', checked)}
-                                />
-                                <Label htmlFor="status">Entrada activa</Label>
-                                <p className="text-sm text-gray-500">
-                                    Las entradas activas aparecen en los listados principales
-                                </p>
-                            </div>
+
                             {/* Code Info */}
                             <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md p-4">
                                 <div className="flex items-start">
@@ -266,7 +241,7 @@ export default function Create({ items, warehouses }: Props) {
                                 </Alert>
                             )}
 
-                            {selectedItems.length === 0 ? (
+                            {data.items.length === 0 ? (
                                 <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
                                     <Package className="mx-auto h-12 w-12 text-gray-400" />
                                     <h3 className="mt-4 text-lg font-semibold text-gray-900">No hay items</h3>
@@ -287,13 +262,13 @@ export default function Create({ items, warehouses }: Props) {
                                 </div>
                             ) : (
                                 <div className="space-y-4">
-                                    {selectedItems.map((entryItem, index) => {
+                                    {data.items.map((entryItem, index) => {
                                         const selectedItem = getSelectedItem(entryItem.item_id);
                                         const selectedWarehouse = getSelectedWarehouse(entryItem.warehouse_id);
                                         
                                         return (
                                             <Card key={index} className="border-l-4 border-l-blue-500">
-                                                <CardContent className="pt-6">
+                                                <CardContent className="pt-1">
                                                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                                         {/* Item */}
                                                         <div className="space-y-2">

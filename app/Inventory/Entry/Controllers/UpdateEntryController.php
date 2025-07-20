@@ -31,6 +31,13 @@ class UpdateEntryController extends Controller
             // Obtener la entrada con sus items
             $entry = $this->getEntryHandler->handleWithItems($id);
 
+            // Verificar que la entrada no esté recibida
+            if ($entry->status === 1) {
+                return redirect()
+                    ->route('entries.show', $id)
+                    ->withErrors(['error' => 'No se puede editar una entrada que ya ha sido recibida.']);
+            }
+
             // Obtener items y almacenes activos para los selectores
             $items = $this->itemRepository->getActive()->map(function ($item) {
                 return [
@@ -221,6 +228,24 @@ class UpdateEntryController extends Controller
                 'error' => 'Error al desactivar la entrada',
                 'message' => $e->getMessage(),
             ], 500);
+        }
+    }
+
+    /**
+     * Mark an entry as received.
+     */
+    public function receive(int $id): RedirectResponse
+    {
+        try {
+            $entry = $this->updateEntryHandler->handleReceive($id);
+
+            return redirect()
+                ->route('entries.show', $entry->id)
+                ->with('success', "Entrada '{$entry->name}' marcada como recibida exitosamente.");
+        } catch (\Exception $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Error al recibir la entrada: ' . $e->getMessage()]);
         }
     }
 }

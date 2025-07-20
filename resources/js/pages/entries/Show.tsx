@@ -1,11 +1,12 @@
-import React from 'react';
-import { Head, Link } from '@inertiajs/react';
-import { ArrowLeft, Edit, Package, Calendar, User, MapPin, Hash } from 'lucide-react';
+import React, { useState } from 'react';
+import { Head, Link, router } from '@inertiajs/react';
+import { ArrowLeft, Edit, Package, Calendar, User, MapPin, Hash, CheckCircle } from 'lucide-react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 interface Item {
     id: number;
@@ -39,12 +40,12 @@ interface Entry {
     code: string;
     name: string;
     description?: string;
-    status: boolean;
+    status: number; // 0 = Por recibir, 1 = Recibido
     status_text: string;
     display_name: string;
     short_description: string;
-    is_active: boolean;
-    is_inactive: boolean;
+    is_pending: boolean; // status === 0
+    is_received: boolean; // status === 1
     created_at: string;
     updated_at: string;
 }
@@ -65,6 +66,16 @@ interface Props {
 }
 
 export default function Show({ entry, items, metadata }: Props) {
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+    const handleReceiveEntry = () => {
+        router.patch(route('entries.receive', entry.id), {}, {
+            onSuccess: () => {
+                // El redirect se maneja en el controlador
+            },
+        });
+        setShowConfirmDialog(false);
+    };
     return (
         <AuthenticatedLayout>
             <Head title={`Entrada - ${entry.code}`} />
@@ -73,32 +84,65 @@ export default function Show({ entry, items, metadata }: Props) {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <Link href={route('entries.index')}>
-                            <Button variant="outline" size="sm">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Volver
-                            </Button>
-                        </Link>
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">{entry.display_name}</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">{entry.code}</h1>
                             <p className="text-muted-foreground">
                                 {entry.short_description}
                             </p>
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Badge 
-                            variant={entry.status ? "default" : "secondary"}
-                            className={entry.status ? "bg-green-100 text-green-800" : ""}
+                        <Badge
+                            variant={entry.status === 1 ? "default" : "secondary"}
+                            className={entry.status === 1 ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}
                         >
-                            {entry.status_text}
+                            {entry.status === 1 ? "Recibido" : "Por recibir"}
                         </Badge>
-                        <Link href={route('entries.edit', entry.id)}>
-                            <Button>
-                                <Edit className="mr-2 h-4 w-4" />
-                                Editar
-                            </Button>
-                        </Link>
+                        <div className="flex gap-2">
+                            <Link href={route('entries.index')}>
+                                <Button variant="outline" size="sm">
+                                    <ArrowLeft className="mr-2 h-4 w-4" />
+                                    Volver
+                                </Button>
+                            </Link>
+                            {entry.status === 0 && (
+                                <Link href={route('entries.edit', entry.id)}>
+                                    <Button variant="outline">
+                                        <Edit className="mr-2 h-4 w-4" />
+                                        Editar
+                                    </Button>
+                                </Link>
+                            )}
+                            {entry.status === 0 && (
+                                <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                                    <AlertDialogTrigger asChild>
+                                        <Button className="bg-green-600 hover:bg-green-700">
+                                            <CheckCircle className="mr-2 h-4 w-4" />
+                                            Recibir
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Confirmar Recepción</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                ¿Está seguro de que desea marcar la entrada <strong>{entry.code}</strong> como recibida?
+                                                <br />
+                                                Esta acción no se puede deshacer.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction
+                                                onClick={handleReceiveEntry}
+                                                className="bg-green-600 hover:bg-green-700"
+                                            >
+                                                Sí, marcar como recibida
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            )}
+                        </div>
                     </div>
                 </div>
 
@@ -322,12 +366,6 @@ export default function Show({ entry, items, metadata }: Props) {
                             <div>
                                 <label className="font-medium text-gray-500">Última Modificación</label>
                                 <p className="text-gray-900">{new Date(entry.updated_at).toLocaleString('es-ES')}</p>
-                            </div>
-                            <div>
-                                <label className="font-medium text-gray-500">Estado Actual</label>
-                                <p className="text-gray-900">
-                                    {entry.is_active ? 'Activa y visible' : 'Inactiva u oculta'}
-                                </p>
                             </div>
                         </div>
                     </CardContent>
