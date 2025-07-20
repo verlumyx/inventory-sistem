@@ -20,6 +20,9 @@ Route::middleware(['auth'])->group(function () {
 
     // Incluir rutas del módulo de entradas
     require __DIR__.'/entries.php';
+
+    // Incluir rutas del módulo de facturas
+    require __DIR__.'/invoices.php';
 });
 
 require __DIR__.'/settings.php';

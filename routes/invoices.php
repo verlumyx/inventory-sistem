@@ -1,0 +1,63 @@
+<?php
+
+use App\Inventory\Invoice\Controllers\ListInvoicesController;
+use App\Inventory\Invoice\Controllers\CreateInvoiceController;
+use App\Inventory\Invoice\Controllers\UpdateInvoiceController;
+use App\Inventory\Invoice\Controllers\GetInvoiceController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Invoice Routes
+|--------------------------------------------------------------------------
+|
+| Here are the routes for the Invoice module. These routes handle
+| all CRUD operations for invoices including listing, creating,
+| updating, and viewing invoice details.
+|
+*/
+
+// Invoice web routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    
+    // List invoices
+    Route::get('/invoices', ListInvoicesController::class)
+        ->name('invoices.index');
+    
+    // Create invoice
+    Route::get('/invoices/create', [CreateInvoiceController::class, 'create'])
+        ->name('invoices.create');
+    
+    Route::post('/invoices', [CreateInvoiceController::class, 'store'])
+        ->name('invoices.store');
+    
+    // Show invoice
+    Route::get('/invoices/{invoice}', GetInvoiceController::class)
+        ->name('invoices.show')
+        ->where('invoice', '[0-9]+');
+    
+    // Edit invoice
+    Route::get('/invoices/{invoice}/edit', [UpdateInvoiceController::class, 'edit'])
+        ->name('invoices.edit')
+        ->where('invoice', '[0-9]+');
+    
+    Route::put('/invoices/{invoice}', [UpdateInvoiceController::class, 'update'])
+        ->name('invoices.update')
+        ->where('invoice', '[0-9]+');
+    
+    Route::patch('/invoices/{invoice}', [UpdateInvoiceController::class, 'update'])
+        ->name('invoices.patch')
+        ->where('invoice', '[0-9]+');
+});
+
+// Invoice API routes
+Route::middleware(['auth:sanctum'])->prefix('api')->group(function () {
+    
+    // List invoices API
+    Route::get('/invoices', [ListInvoicesController::class, 'api'])
+        ->name('api.invoices.index');
+    
+    // Search invoices API
+    Route::get('/invoices/search', [ListInvoicesController::class, 'api'])
+        ->name('api.invoices.search');
+});
