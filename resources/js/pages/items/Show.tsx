@@ -3,7 +3,8 @@ import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, Edit, QrCode, Calendar, Clock, Package } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ArrowLeft, Edit, QrCode, Calendar, Clock, Package, Warehouse, Barcode } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
 
 interface Item {
@@ -24,6 +25,14 @@ interface Item {
     updated_at: string;
 }
 
+interface Warehouse {
+    id: number;
+    code: string;
+    name: string;
+    display_name: string;
+    quantity_available: number;
+}
+
 interface Props {
     item: Item;
     metadata?: {
@@ -32,9 +41,11 @@ interface Props {
         is_recently_created: boolean;
         is_recently_updated: boolean;
     };
+    warehouses: Warehouse[];
+    totalStock: number;
 }
 
-export default function Show({ item, metadata }: Props) {
+export default function Show({ item, metadata, warehouses, totalStock }: Props) {
 
     const breadcrumbs = [
         { name: 'Panel de Control', href: '/dashboard' },
@@ -121,14 +132,14 @@ export default function Show({ item, metadata }: Props) {
                                 {item.qr_code && (
                                     <div>
                                         <label className="text-sm font-medium text-gray-500 flex items-center gap-2">
-                                            <QrCode className="h-4 w-4" />
-                                            Código QR
+                                            <Barcode className="h-4 w-4" />
+                                            Código de barra
                                         </label>
                                         <p className="text-gray-900 font-mono">{item.qr_code}</p>
                                     </div>
                                 )}
 
-                                <div>
+                                <div>r
                                     <label className="text-sm font-medium text-gray-500">Estado</label>
                                     <div className="mt-1">
                                         <Badge variant={item.status ? 'default' : 'secondary'}>
@@ -150,6 +161,69 @@ export default function Show({ item, metadata }: Props) {
                                 </CardContent>
                             </Card>
                         )}
+
+                        {/* Warehouse Availability */}
+                        <Card className="shadow-sm">
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Warehouse className="h-5 w-5" />
+                                    Disponibilidad en Almacenes
+                                </CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                {warehouses.length > 0 ? (
+                                    <>
+                                        <div className="mb-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-sm font-medium text-blue-800">Stock Total:</span>
+                                                <span className="text-lg font-bold text-blue-900">
+                                                    {totalStock.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {item.unit || 'unidades'}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        <div className="rounded-md border overflow-hidden">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead className="py-3">Código</TableHead>
+                                                        <TableHead className="py-3">Almacén</TableHead>
+                                                        <TableHead className="py-3 text-right">Cantidad Disponible</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {warehouses.map((warehouse) => (
+                                                        <TableRow key={warehouse.id}>
+                                                            <TableCell className="font-mono text-sm">
+                                                                {warehouse.code}
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                {warehouse.name}
+                                                            </TableCell>
+                                                            <TableCell className="text-right font-medium">
+                                                                <span className="text-green-700">
+                                                                    {warehouse.quantity_available.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                                </span>
+                                                                <span className="text-gray-500 ml-1 text-sm">
+                                                                    {item.unit || 'unidades'}
+                                                                </span>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <Package className="h-12 w-12 text-gray-400 mx-auto mb-3" />
+                                        <p className="text-gray-500 text-sm">
+                                            Este artículo no tiene stock disponible en ningún almacén
+                                        </p>
+                                    </div>
+                                )}
+                            </CardContent>
+                        </Card>
                     </div>
 
                     <div className="space-y-6">

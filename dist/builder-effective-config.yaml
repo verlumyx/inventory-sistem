@@ -1,0 +1,57 @@
+directories:
+  output: /Users/gibmyxgomez/Herd/desktop_inventory/dist
+  buildResources: build
+appId: com.nativephp.app
+productName: Sistema de Inventario
+copyright: ''
+files:
+  - filter:
+      - '!**/.vscode/*'
+      - '!src/*'
+      - '!electron.vite.config.{js,ts,mjs,cjs}'
+      - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
+      - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
+asarUnpack:
+  - resources/**
+afterSign: build/notarize.js
+win:
+  executableName: sistema-de-inventario
+nsis:
+  artifactName: Sistema de Inventario-${version}-setup.${ext}
+  shortcutName: ${productName}
+  uninstallDisplayName: ${productName}
+  createDesktopShortcut: always
+protocols:
+  name: ''
+  schemes:
+    - ''
+mac:
+  entitlementsInherit: build/entitlements.mac.plist
+  artifactName: Sistema de Inventario-${version}-${arch}.${ext}
+  extendInfo:
+    NSCameraUsageDescription: Application requests access to the device's camera.
+    NSMicrophoneUsageDescription: Application requests access to the device's microphone.
+    NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
+    NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
+dmg:
+  artifactName: Sistema de Inventario-${version}-${arch}.${ext}
+linux:
+  target:
+    - AppImage
+    - deb
+  maintainer: http://desktop_inventory.test
+  category: Utility
+appImage:
+  artifactName: Sistema de Inventario-${version}.${ext}
+npmRebuild: false
+publish:
+  provider: spaces
+  name: ''
+  region: ''
+  path: null
+extraMetadata:
+  name: sistema-de-inventario
+  homepage: http://desktop_inventory.test
+  version: 0.0.1
+  author: ''
+electronVersion: 32.3.3
