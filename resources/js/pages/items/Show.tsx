@@ -60,12 +60,6 @@ export default function Show({ item, metadata, warehouses, totalStock }: Props) 
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href="/items">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Volver a artículos
-                        </Link>
-                    </Button>
                     <div className="flex-1">
                         <div className="flex items-center gap-3">
                             <h1 className="text-2xl font-bold text-gray-900">{item.name}</h1>

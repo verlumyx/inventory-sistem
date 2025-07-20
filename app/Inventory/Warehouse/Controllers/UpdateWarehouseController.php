@@ -31,8 +31,8 @@ class UpdateWarehouseController extends Controller
         try {
             $warehouse = $this->updateWarehouseHandler->handle($id, $request->validated());
 
-            return redirect()->route('warehouses.index')
-                ->with('success', 'Almacén actualizado exitosamente');
+            return redirect()->route('warehouses.show', $warehouse->id)
+                ->with('success', "Almacén '{$warehouse->name}' actualizado exitosamente.");
 
         } catch (WarehouseNotFoundException $e) {
             return redirect()->route('warehouses.index')

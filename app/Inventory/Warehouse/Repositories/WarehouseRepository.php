@@ -120,7 +120,7 @@ class WarehouseRepository implements WarehouseRepositoryInterface
      */
     public function getActive(): Collection
     {
-        return Warehouse::active()->orderBy('name')->get();
+        return Warehouse::active()->orderBy('code', 'desc')->get();
     }
 
     /**
@@ -130,7 +130,7 @@ class WarehouseRepository implements WarehouseRepositoryInterface
      */
     public function getInactive(): Collection
     {
-        return Warehouse::inactive()->orderBy('name')->get();
+        return Warehouse::inactive()->orderBy('code', 'desc')->get();
     }
 
     /**

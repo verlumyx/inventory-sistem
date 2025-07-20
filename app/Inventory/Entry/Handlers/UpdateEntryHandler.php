@@ -6,7 +6,9 @@ use App\Inventory\Entry\Contracts\EntryRepositoryInterface;
 use App\Inventory\Entry\Models\Entry;
 use App\Inventory\Entry\Exceptions\EntryNotFoundException;
 use App\Inventory\Entry\Exceptions\EntryValidationException;
+use App\Inventory\WarehouseItem\Models\WarehouseItem;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class UpdateEntryHandler
 {
@@ -203,34 +205,50 @@ class UpdateEntryHandler
      */
     public function handleReceive(int $id): Entry
     {
-        try {
-            Log::info('Marcando entrada como recibida', ['entry_id' => $id]);
+        return DB::transaction(function () use ($id) {
+            try {
+                Log::info('Marcando entrada como recibida', ['entry_id' => $id]);
 
-            $entry = $this->entryRepository->find($id);
-            if (!$entry) {
-                throw new EntryNotFoundException("Entrada con ID {$id} no encontrada.");
+                $entry = $this->entryRepository->find($id);
+                if (!$entry) {
+                    throw new EntryNotFoundException("Entrada con ID {$id} no encontrada.");
+                }
+
+                if ($entry->status === 1) {
+                    throw new \Exception("La entrada ya está marcada como recibida.");
+                }
+
+                // Obtener la entrada con sus items
+                $entryWithItems = $this->entryRepository->getWithItems($id);
+
+                // Actualizar el stock en los warehouses
+                foreach ($entryWithItems->entryItems as $entryItem) {
+                    $this->updateWarehouseStock(
+                        $entryItem->warehouse_id,
+                        $entryItem->item_id,
+                        $entryItem->amount
+                    );
+                }
+
+                // Marcar la entrada como recibida
+                $this->entryRepository->update($id, ['status' => 1]);
+                $updatedEntry = $this->entryRepository->findOrFail($id);
+
+                Log::info('Entrada marcada como recibida exitosamente', [
+                    'entry_id' => $updatedEntry->id,
+                    'items_processed' => $entryWithItems->entryItems->count(),
+                ]);
+
+                return $updatedEntry;
+
+            } catch (\Exception $e) {
+                Log::error('Error al marcar entrada como recibida', [
+                    'entry_id' => $id,
+                    'error' => $e->getMessage(),
+                ]);
+                throw $e;
             }
-
-            if ($entry->status === 1) {
-                throw new \Exception("La entrada ya está marcada como recibida.");
-            }
-
-            $this->entryRepository->update($id, ['status' => 1]);
-            $updatedEntry = $this->entryRepository->findOrFail($id);
-
-            Log::info('Entrada marcada como recibida exitosamente', [
-                'entry_id' => $updatedEntry->id,
-            ]);
-
-            return $updatedEntry;
-
-        } catch (\Exception $e) {
-            Log::error('Error al marcar entrada como recibida', [
-                'entry_id' => $id,
-                'error' => $e->getMessage(),
-            ]);
-            throw $e;
-        }
+        });
     }
 
     /**
@@ -325,5 +343,51 @@ class UpdateEntryHandler
     public function isValid(int $id, array $data): bool
     {
         return empty($this->validate($id, $data));
+    }
+
+    /**
+     * Update warehouse stock when receiving an entry.
+     */
+    private function updateWarehouseStock(int $warehouseId, int $itemId, float $quantity): void
+    {
+        try {
+            Log::info('Actualizando stock en warehouse', [
+                'warehouse_id' => $warehouseId,
+                'item_id' => $itemId,
+                'quantity' => $quantity,
+            ]);
+
+            // Buscar o crear el registro de warehouse_item
+            $warehouseItem = WarehouseItem::firstOrCreate(
+                [
+                    'warehouse_id' => $warehouseId,
+                    'item_id' => $itemId,
+                ],
+                [
+                    'quantity_available' => 0,
+                ]
+            );
+
+            // Agregar la cantidad recibida al stock existente
+            $previousQuantity = $warehouseItem->quantity_available;
+            $warehouseItem->addStock($quantity);
+
+            Log::info('Stock actualizado exitosamente', [
+                'warehouse_id' => $warehouseId,
+                'item_id' => $itemId,
+                'previous_quantity' => $previousQuantity,
+                'added_quantity' => $quantity,
+                'new_quantity' => $warehouseItem->fresh()->quantity_available,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error al actualizar stock en warehouse', [
+                'warehouse_id' => $warehouseId,
+                'item_id' => $itemId,
+                'quantity' => $quantity,
+                'error' => $e->getMessage(),
+            ]);
+            throw new \Exception("Error al actualizar stock: {$e->getMessage()}");
+        }
     }
 }

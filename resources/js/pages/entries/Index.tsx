@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 interface Entry {
@@ -47,23 +48,43 @@ interface Props {
 export default function Index({ entries, filters, pagination }: Props) {
     const [searchTerm, setSearchTerm] = useState(filters.search || '');
     const [showFilters, setShowFilters] = useState(false);
+    const [statusFilter, setStatusFilter] = useState(
+        filters.status !== undefined ? (filters.status ? 'true' : 'false') : 'all'
+    );
 
-    const handleSearch = (e: React.FormEvent) => {
-        e.preventDefault();
-        router.get(route('entries.index'), { 
-            search: searchTerm,
-            ...filters 
-        }, { 
+    const handleSearch = (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
+
+        const params: any = {};
+
+        if (searchTerm) params.search = searchTerm;
+        if (statusFilter !== 'all') params.status = statusFilter;
+
+        router.get(route('entries.index'), params, {
             preserveState: true,
-            replace: true 
+            replace: true
+        });
+    };
+
+    const handleStatusChange = (value: string) => {
+        setStatusFilter(value);
+
+        const params: any = {};
+        if (searchTerm) params.search = searchTerm;
+        if (value !== 'all') params.status = value;
+
+        router.get(route('entries.index'), params, {
+            preserveState: true,
+            replace: true
         });
     };
 
     const clearFilters = () => {
         setSearchTerm('');
-        router.get(route('entries.index'), {}, { 
+        setStatusFilter('all');
+        router.get(route('entries.index'), {}, {
             preserveState: true,
-            replace: true 
+            replace: true
         });
     };
 
@@ -157,56 +178,53 @@ export default function Index({ entries, filters, pagination }: Props) {
                                 </CardDescription>
                             </div>
                             <Button
-                                variant="outline"
+                                variant="ghost"
                                 size="sm"
                                 onClick={() => setShowFilters(!showFilters)}
                             >
-                                <Filter className="mr-2 h-4 w-4" />
-                                Filtros
+                                <Filter className="h-4 w-4 mr-2" />
+                                Mostrar Filtros
                             </Button>
                         </div>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <form onSubmit={handleSearch} className="flex gap-2">
-                            <div className="relative flex-1">
-                                <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                        <div className="flex gap-4">
+                            <div className="flex-1">
                                 <Input
                                     placeholder="Buscar por nombre, código o descripción..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="pl-10"
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                                 />
                             </div>
-                            <Button type="submit">Buscar</Button>
-                            {hasFilters && (
-                                <Button type="button" variant="outline" onClick={clearFilters}>
-                                    Limpiar
-                                </Button>
-                            )}
-                        </form>
+                            <Button onClick={handleSearch}>
+                                <Search className="h-4 w-4 mr-2" />
+                                Buscar
+                            </Button>
+                        </div>
 
-                        {hasFilters && (
-                            <div className="flex flex-wrap gap-2">
-                                {filters.search && (
-                                    <Badge variant="secondary">
-                                        Búsqueda: {filters.search}
-                                    </Badge>
-                                )}
-                                {filters.status !== undefined && (
-                                    <Badge variant="secondary">
-                                        Estado: {filters.status ? 'Activo' : 'Inactivo'}
-                                    </Badge>
-                                )}
-                                {filters.name && (
-                                    <Badge variant="secondary">
-                                        Nombre: {filters.name}
-                                    </Badge>
-                                )}
-                                {filters.code && (
-                                    <Badge variant="secondary">
-                                        Código: {filters.code}
-                                    </Badge>
-                                )}
+                        {showFilters && (
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                                        Estado
+                                    </label>
+                                    <Select value={statusFilter} onValueChange={handleStatusChange}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seleccionar estado" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="all">Todos</SelectItem>
+                                            <SelectItem value="false">Por recibir</SelectItem>
+                                            <SelectItem value="true">Recibidas</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div className="flex items-end">
+                                    <Button variant="outline" onClick={clearFilters}>
+                                        Limpiar Filtros
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </CardContent>

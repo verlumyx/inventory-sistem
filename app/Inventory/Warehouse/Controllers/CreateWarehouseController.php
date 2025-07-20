@@ -29,8 +29,8 @@ class CreateWarehouseController extends Controller
         try {
             $warehouse = $this->createWarehouseHandler->handle($request->validated());
 
-            return redirect()->route('warehouses.index')
-                ->with('success', 'Almacén creado exitosamente');
+            return redirect()->route('warehouses.show', $warehouse->id)
+                ->with('success', "Almacén '{$warehouse->name}' creado exitosamente.");
 
         } catch (WarehouseValidationException $e) {
             return back()

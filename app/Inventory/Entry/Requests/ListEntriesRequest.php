@@ -27,7 +27,7 @@ class ListEntriesRequest extends FormRequest
             ],
             'status' => [
                 'sometimes',
-                'boolean',
+                'in:true,false,1,0',
             ],
             'name' => [
                 'sometimes',
@@ -71,7 +71,7 @@ class ListEntriesRequest extends FormRequest
         return [
             'search.string' => 'El término de búsqueda debe ser una cadena de texto.',
             'search.max' => 'El término de búsqueda no puede tener más de 255 caracteres.',
-            'status.boolean' => 'El estado debe ser verdadero o falso.',
+            'status.in' => 'El estado debe ser verdadero o falso.',
             'name.string' => 'El nombre debe ser una cadena de texto.',
             'name.max' => 'El nombre no puede tener más de 255 caracteres.',
             'code.string' => 'El código debe ser una cadena de texto.',

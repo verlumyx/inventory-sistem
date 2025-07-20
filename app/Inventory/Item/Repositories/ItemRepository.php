@@ -94,7 +94,7 @@ class ItemRepository implements ItemRepositoryInterface
      */
     public function getActive(): Collection
     {
-        return Item::active()->orderBy('name')->get();
+        return Item::active()->orderBy('code', 'desc')->get();
     }
 
     /**
@@ -102,7 +102,7 @@ class ItemRepository implements ItemRepositoryInterface
      */
     public function getInactive(): Collection
     {
-        return Item::inactive()->orderBy('name')->get();
+        return Item::inactive()->orderBy('code', 'desc')->get();
     }
 
     /**
