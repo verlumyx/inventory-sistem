@@ -106,7 +106,7 @@ export default function Index({ entries, filters, pagination }: Props) {
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Activas</CardTitle>
+                            <CardTitle className="text-sm font-medium">Recibidas</CardTitle>
                             <Package className="h-4 w-4 text-green-600" />
                         </CardHeader>
                         <CardContent>
@@ -114,13 +114,13 @@ export default function Index({ entries, filters, pagination }: Props) {
                                 {entries.data.filter(entry => entry.status).length}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Entradas activas
+                                Entradas recibidas
                             </p>
                         </CardContent>
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Inactivas</CardTitle>
+                            <CardTitle className="text-sm font-medium">Por recibir</CardTitle>
                             <Package className="h-4 w-4 text-red-600" />
                         </CardHeader>
                         <CardContent>
@@ -128,7 +128,7 @@ export default function Index({ entries, filters, pagination }: Props) {
                                 {entries.data.filter(entry => !entry.status).length}
                             </div>
                             <p className="text-xs text-muted-foreground">
-                                Entradas inactivas
+                                Entradas por recibir
                             </p>
                         </CardContent>
                     </Card>
