@@ -131,27 +131,35 @@ export default function Create({ items, warehouses }: Props) {
         return data.name.trim() !== '' && hasValidItems;
     };
 
+
+    const breadcrumbs = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Entradas', href: '/entries' },
+        { title: 'Crear Entrada', href: '/entries/create' },
+    ];
+
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title="Nueva Entrada" />
 
             <div className="p-6 space-y-6">
                 {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Link href={route('entries.index')}>
-                        <Button variant="outline" size="sm">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Volver
-                        </Button>
-                    </Link>
+                <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Nueva Entrada</h1>
-                        <p className="text-muted-foreground">
+                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                            Crear nuevo entrada
+                        </h1>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
                             Crea una nueva entrada de inventario con sus items
                         </p>
                     </div>
+                    <Link href="/entries">
+                        <Button variant="outline">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Volver
+                        </Button>
+                    </Link>
                 </div>
-
                 <form onSubmit={handleSubmit} className="space-y-6">
                     {/* Información Básica */}
                     <Card>

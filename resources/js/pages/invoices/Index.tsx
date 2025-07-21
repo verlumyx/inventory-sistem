@@ -119,8 +119,13 @@ export default function Index({ invoices, filters, pagination }: Props) {
         });
     };
 
+    const breadcrumbs = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Facturas', href: '/invoices' },
+    ];
+
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title="Facturas" />
 
             <div className="p-6 space-y-6">

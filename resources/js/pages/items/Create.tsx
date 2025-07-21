@@ -33,9 +33,9 @@ export default function Create() {
     };
 
     const breadcrumbs = [
-        { name: 'Panel de Control', href: '/dashboard' },
-        { name: 'Items', href: '/items' },
-        { name: 'Crear Item', href: '/items/create', current: true },
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Items', href: '/items' },
+        { title: 'Crear Item', href: '/items/create', current: true },
     ];
 
     return (
@@ -44,7 +44,6 @@ export default function Create() {
 
             <div className="p-6 space-y-6">
                 {/* Header */}
- 
                 <div className="flex items-center justify-between">
                     <div>
                         <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
@@ -54,7 +53,7 @@ export default function Create() {
                             Completa la información para crear un nuevo artículo
                         </p>
                     </div>
-                    <Link href="/warehouses">
+                    <Link href="/items">
                         <Button variant="outline">
                             <ArrowLeft className="h-4 w-4 mr-2" />
                             Volver

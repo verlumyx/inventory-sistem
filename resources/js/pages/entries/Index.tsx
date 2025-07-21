@@ -88,10 +88,15 @@ export default function Index({ entries, filters, pagination }: Props) {
         });
     };
 
+    const breadcrumbs = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Entradas', href: '/entries' },
+    ];
+
     const hasFilters = Object.keys(filters).some(key => filters[key as keyof typeof filters]);
 
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title="Entradas" />
 
             <div className="p-6 space-y-6">
