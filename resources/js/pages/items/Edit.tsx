@@ -50,10 +50,10 @@ export default function Edit({ item }: Props) {
     };
 
     const breadcrumbs = [
-        { name: 'Panel de Control', href: '/dashboard' },
-        { name: 'Items', href: '/items' },
-        { name: item.name, href: `/items/${item.id}` },
-        { name: 'Editar', href: `/items/${item.id}/edit`, current: true },
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Items', href: '/items' },
+        { title: item.name, href: `/items/${item.id}` },
+        { title: 'Editar', href: `/items/${item.id}/edit`, current: true },
     ];
 
     return (
