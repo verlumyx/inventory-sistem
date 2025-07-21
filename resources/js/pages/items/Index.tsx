@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Plus, Search, Filter, Eye, Edit, QrCode } from 'lucide-react';
+import type { BreadcrumbItem } from '@/types';
 
 interface Item {
     id: number;
@@ -116,9 +117,9 @@ export default function Index({ items, pagination, filters }: Props) {
         });
     };
 
-    const breadcrumbs = [
-        { name: 'Panel de Control', href: '/dashboard' },
-        { name: 'Items', href: '/items', current: true },
+    const breadcrumbs: BreadcrumbItem[] = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Items', href: '/items' },
     ];
 
     return (
@@ -126,18 +127,6 @@ export default function Index({ items, pagination, filters }: Props) {
             <Head title="Items" />
 
             <div className="p-6 space-y-6">
-                {/* Flash Messages */}
-                {flash?.success && (
-                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
-                        {flash.success}
-                    </div>
-                )}
-
-                {flash?.error && (
-                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
-                        {flash.error}
-                    </div>
-                )}
 
                 {/* Header */}
                 <div className="flex justify-between items-start">
@@ -154,6 +143,19 @@ export default function Index({ items, pagination, filters }: Props) {
                         </Link>
                     </Button>
                 </div>
+
+                {/* Flash Messages */}
+                {flash?.success && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded">
+                        {flash.success}
+                    </div>
+                )}
+
+                {flash?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded">
+                        {flash.error}
+                    </div>
+                )}
 
                 {/* Filters */}
                 <Card className="shadow-sm">

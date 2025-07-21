@@ -44,19 +44,22 @@ export default function Create() {
 
             <div className="p-6 space-y-6">
                 {/* Header */}
-                <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href="/items">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Volver
-                        </Link>
-                    </Button>
+ 
+                <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Crear nuevo artículo</h1>
-                        <p className="text-gray-600 mt-1">
+                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                            Crear nuevo artículo
+                        </h1>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">
                             Completa la información para crear un nuevo artículo
                         </p>
                     </div>
+                    <Link href="/warehouses">
+                        <Button variant="outline">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Volver
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Form */}

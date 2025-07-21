@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 interface Item {
     id: number;
@@ -59,13 +60,38 @@ export default function Create({ items, warehouses }: Props) {
         post(route('entries.store'));
     };
 
+    // Estados para el formulario dinámico de items
+    const [selectedItem, setSelectedItem] = useState('');
+    const [selectedWarehouse, setSelectedWarehouse] = useState('');
+    const [itemAmount, setItemAmount] = useState('');
+
     const addItem = () => {
+        if (!selectedItem || !selectedWarehouse || !itemAmount) {
+            return;
+        }
+
+        const itemId = parseInt(selectedItem);
+        const warehouseId = parseInt(selectedWarehouse);
+        const amount = parseFloat(itemAmount);
+
+        // Verificar que el item no esté ya agregado en el mismo almacén
+        if (data.items.some(item => item.item_id === itemId && item.warehouse_id === warehouseId)) {
+            alert('Este item ya está agregado en este almacén');
+            return;
+        }
+
         const newItem: EntryItem = {
-            item_id: 0,
-            warehouse_id: 0,
-            amount: 1,
+            item_id: itemId,
+            warehouse_id: warehouseId,
+            amount: amount,
         };
+
         setData('items', [...data.items, newItem]);
+
+        // Limpiar formulario de item
+        setSelectedItem('');
+        setSelectedWarehouse('');
+        setItemAmount('');
     };
 
     const removeItem = (index: number) => {
@@ -73,11 +99,7 @@ export default function Create({ items, warehouses }: Props) {
         setData('items', newItems);
     };
 
-    const updateItem = (index: number, field: keyof EntryItem, value: number) => {
-        const newItems = [...data.items];
-        newItems[index] = { ...newItems[index], [field]: value };
-        setData('items', newItems);
-    };
+
 
     const getSelectedItem = (itemId: number): Item | undefined => {
         return items.find(item => item.id === itemId);
@@ -87,9 +109,16 @@ export default function Create({ items, warehouses }: Props) {
         return warehouses.find(warehouse => warehouse.id === warehouseId);
     };
 
-    const isItemAlreadySelected = (itemId: number): boolean => {
-        return data.items.some(item => item.item_id === itemId);
+    // Funciones helper para la tabla
+    const getItemById = (itemId: number): Item | undefined => {
+        return items.find(item => item.id === itemId);
     };
+
+    const getWarehouseById = (warehouseId: number): Warehouse | undefined => {
+        return warehouses.find(warehouse => warehouse.id === warehouseId);
+    };
+
+
 
     const canSubmit = () => {
         const hasValidItems = data.items.length > 0 &&
@@ -200,29 +229,85 @@ export default function Create({ items, warehouses }: Props) {
                         </CardContent>
                     </Card>
 
+                    {/* Agregar Items */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Plus className="h-5 w-5" />
+                                Agregar Items
+                            </CardTitle>
+                            <CardDescription>
+                                Agrega items a la entrada de forma rápida y dinámica
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div>
+                                    <Label htmlFor="item_select">Item</Label>
+                                    <Select value={selectedItem} onValueChange={setSelectedItem}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seleccionar item" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {items.map((item) => (
+                                                <SelectItem key={item.id} value={item.id.toString()}>
+                                                    {item.display_name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label htmlFor="warehouse_select">Almacén</Label>
+                                    <Select value={selectedWarehouse} onValueChange={setSelectedWarehouse}>
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="Seleccionar almacén" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {warehouses.map((warehouse) => (
+                                                <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
+                                                    {warehouse.display_name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                                <div>
+                                    <Label htmlFor="amount">Cantidad</Label>
+                                    <Input
+                                        id="amount"
+                                        type="number"
+                                        step="0.01"
+                                        min="0.01"
+                                        placeholder="0.00"
+                                        value={itemAmount}
+                                        onChange={(e) => setItemAmount(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex items-end">
+                                    <Button
+                                        type="button"
+                                        onClick={addItem}
+                                        disabled={!selectedItem || !selectedWarehouse || !itemAmount}
+                                        className="w-full"
+                                    >
+                                        <Plus className="mr-2 h-4 w-4" />
+                                        Agregar
+                                    </Button>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
                     {/* Items de la Entrada */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle>Items de la Entrada</CardTitle>
-                                    <CardDescription>
-                                        Agrega los items que forman parte de esta entrada
-                                    </CardDescription>
-                                </div>
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={addItem}
-                                    disabled={items.length === 0 || warehouses.length === 0}
-                                >
-                                    <Plus className="mr-2 h-4 w-4" />
-                                    Agregar Item
-                                </Button>
-                            </div>
+                            <CardTitle className="flex items-center gap-2">
+                                <Package className="h-5 w-5" />
+                                Items de la Entrada ({data.items.length})
+                            </CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
+                        <CardContent>
                             {items.length === 0 && (
                                 <Alert>
                                     <AlertCircle className="h-4 w-4" />
@@ -242,131 +327,90 @@ export default function Create({ items, warehouses }: Props) {
                             )}
 
                             {data.items.length === 0 ? (
-                                <div className="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-                                    <Package className="mx-auto h-12 w-12 text-gray-400" />
-                                    <h3 className="mt-4 text-lg font-semibold text-gray-900">No hay items</h3>
-                                    <p className="mt-2 text-gray-500">
-                                        Agrega items a esta entrada para comenzar
-                                    </p>
-                                    {items.length > 0 && warehouses.length > 0 && (
-                                        <Button
-                                            type="button"
-                                            variant="outline"
-                                            className="mt-4"
-                                            onClick={addItem}
-                                        >
-                                            <Plus className="mr-2 h-4 w-4" />
-                                            Agregar Primer Item
-                                        </Button>
-                                    )}
+                                <div className="text-center py-8">
+                                    <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <p className="text-gray-500">No hay items agregados</p>
+                                    <p className="text-sm text-gray-400">Agrega items usando el formulario de arriba</p>
                                 </div>
                             ) : (
-                                <div className="space-y-4">
-                                    {data.items.map((entryItem, index) => {
-                                        const selectedItem = getSelectedItem(entryItem.item_id);
-                                        const selectedWarehouse = getSelectedWarehouse(entryItem.warehouse_id);
-                                        
-                                        return (
-                                            <Card key={index} className="border-l-4 border-l-blue-500">
-                                                <CardContent className="pt-1">
-                                                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                                                        {/* Item */}
-                                                        <div className="space-y-2">
-                                                            <Label>Item *</Label>
-                                                            <Select
-                                                                value={entryItem.item_id > 0 ? entryItem.item_id.toString() : ""}
-                                                                onValueChange={(value) => updateItem(index, 'item_id', parseInt(value))}
-                                                            >
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Seleccionar item" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {items
-                                                                        .filter(item => 
-                                                                            item.id === entryItem.item_id || 
-                                                                            !isItemAlreadySelected(item.id)
-                                                                        )
-                                                                        .map((item) => (
-                                                                        <SelectItem key={item.id} value={item.id.toString()}>
-                                                                            {item.display_name}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                            {selectedItem && (
-                                                                <p className="text-xs text-gray-500">
-                                                                    {selectedItem.unit && `Unidad: ${selectedItem.unit}`}
-                                                                    {selectedItem.price && ` • Precio: $${selectedItem.price}`}
-                                                                </p>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Almacén */}
-                                                        <div className="space-y-2">
-                                                            <Label>Almacén *</Label>
-                                                            <Select
-                                                                value={entryItem.warehouse_id > 0 ? entryItem.warehouse_id.toString() : ""}
-                                                                onValueChange={(value) => updateItem(index, 'warehouse_id', parseInt(value))}
-                                                            >
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Seleccionar almacén" />
-                                                                </SelectTrigger>
-                                                                <SelectContent>
-                                                                    {warehouses.map((warehouse) => (
-                                                                        <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
-                                                                            {warehouse.display_name}
-                                                                        </SelectItem>
-                                                                    ))}
-                                                                </SelectContent>
-                                                            </Select>
-                                                        </div>
-
-                                                        {/* Cantidad */}
-                                                        <div className="space-y-2">
-                                                            <Label>Cantidad *</Label>
-                                                            <Input
-                                                                type="number"
-                                                                min="0.01"
-                                                                step="0.01"
-                                                                value={entryItem.amount}
-                                                                onChange={(e) => updateItem(index, 'amount', parseFloat(e.target.value) || 0)}
-                                                                placeholder="0.00"
-                                                            />
-                                                            {selectedItem?.unit && (
-                                                                <p className="text-xs text-gray-500">
-                                                                    en {selectedItem.unit}
-                                                                </p>
-                                                            )}
-                                                        </div>
-
-                                                        {/* Acciones */}
-                                                        <div className="flex items-end">
+                                <div className="rounded-md border">
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Item</TableHead>
+                                                <TableHead>Almacén</TableHead>
+                                                <TableHead className="text-right">Cantidad</TableHead>
+                                                <TableHead className="w-[100px]">Acciones</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {data.items.map((entryItem, index) => {
+                                                const item = getItemById(entryItem.item_id);
+                                                const warehouse = getWarehouseById(entryItem.warehouse_id);
+                                                return (
+                                                    <TableRow key={index}>
+                                                        <TableCell>
+                                                            <div>
+                                                                <div className="font-medium">{item?.name}</div>
+                                                                <div className="text-sm text-gray-500">
+                                                                    {item?.code} • {item?.unit}
+                                                                </div>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <div>
+                                                                <div className="font-medium">{warehouse?.name}</div>
+                                                                <div className="text-sm text-gray-500">
+                                                                    {warehouse?.code}
+                                                                </div>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            {Number(entryItem.amount).toFixed(2)}
+                                                        </TableCell>
+                                                        <TableCell>
                                                             <Button
                                                                 type="button"
-                                                                variant="outline"
+                                                                variant="ghost"
                                                                 size="sm"
                                                                 onClick={() => removeItem(index)}
-                                                                className="text-red-600 hover:text-red-700"
                                                             >
-                                                                <Trash2 className="h-4 w-4" />
+                                                                <Trash2 className="h-4 w-4 text-red-500" />
                                                             </Button>
-                                                        </div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        );
-                                    })}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        </TableBody>
+                                    </Table>
                                 </div>
                             )}
-
                             {errors.items && (
-                                <div className="flex items-center gap-2 text-red-600 text-sm">
-                                    <AlertCircle className="h-4 w-4" />
-                                    {errors.items}
-                                </div>
+                                <p className="text-sm text-red-600 mt-2">{errors.items}</p>
                             )}
                         </CardContent>
                     </Card>
+
+                    {/* Validación adicional */}
+                    {items.length === 0 && (
+                        <Alert>
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                                No hay items disponibles. Crea algunos items primero.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+                    {warehouses.length === 0 && (
+                        <Alert>
+                            <AlertCircle className="h-4 w-4" />
+                            <AlertDescription>
+                                No hay almacenes disponibles. Crea algunos almacenes primero.
+                            </AlertDescription>
+                        </Alert>
+                    )}
+
+
 
                     {/* Botones de Acción */}
                     <div className="flex items-center justify-end space-x-4">
