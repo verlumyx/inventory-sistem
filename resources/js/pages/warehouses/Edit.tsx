@@ -30,7 +30,7 @@ export default function Edit({ warehouse }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Panel de Control', href: '/dashboard' },
         { title: 'Almacenes', href: '/warehouses' },
-        { title: warehouse.name, href: `/warehouses/${warehouse.id}` },
+        { title: warehouse.code, href: `/warehouses/${warehouse.id}` },
         { title: 'Editar', href: `/warehouses/${warehouse.id}/edit` },
     ];
 
@@ -63,7 +63,7 @@ export default function Edit({ warehouse }: Props) {
                     </div>
                     <div className="flex space-x-2">
                         <Link href={`/warehouses/${warehouse.id}`}>
-                            <Button variant="outline">
+                            <Button >
                                 <Eye className="h-4 w-4 mr-2" />
                                 Ver Detalle
                             </Button>

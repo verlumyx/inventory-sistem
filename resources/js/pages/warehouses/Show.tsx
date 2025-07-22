@@ -26,7 +26,7 @@ export default function Show({ warehouse }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Panel de Control', href: '/dashboard' },
         { title: 'Almacenes', href: '/warehouses' },
-        { title: warehouse.name, href: `/warehouses/${warehouse.id}` },
+        { title: warehouse.code, href: `/warehouses/${warehouse.id}` },
     ];
 
     return (
@@ -52,16 +52,16 @@ export default function Show({ warehouse }: Props) {
                         </div>
                     </div>
                     <div className="flex space-x-2">
-                        <Link href={`/warehouses/${warehouse.id}/edit`}>
-                            <Button>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
-                            </Button>
-                        </Link>
                         <Link href="/warehouses">
                             <Button variant="outline">
                                 <ArrowLeft className="h-4 w-4 mr-2" />
                                 Volver
+                            </Button>
+                        </Link>
+                        <Link href={`/warehouses/${warehouse.id}/edit`}>
+                            <Button>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
                             </Button>
                         </Link>
                     </div>

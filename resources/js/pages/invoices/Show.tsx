@@ -1,5 +1,5 @@
 import React from 'react';
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,34 +77,35 @@ export default function Show({ invoice }: Props) {
             <Head title={`Factura ${invoice.code}`} />
 
             <div className="p-6 space-y-6">
-                {/* Header */}
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center space-x-4">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">{invoice.code}</h1>
-                            <p className="text-muted-foreground">
-                                {invoice.warehouse.display_name}
-                            </p>
+                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                {invoice.code}
+                            </h1>
+                            <div className="flex items-center space-x-2 mt-1">
+                                <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
+                                    {invoice.warehouse.display_name}
+                                </span>
+                                {/*<Badge variant={warehouse.status ? 'default' : 'secondary'}>*/}
+                                {/*    {warehouse.status_text}*/}
+                                {/*</Badge>*/}
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <div className="flex gap-2">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => router.visit(route('invoices.index'))}
-                            >
-                                <ArrowLeft className="mr-2 h-4 w-4" />
+                    <div className="flex space-x-2">
+                        <Link href="/invoices">
+                            <Button variant="outline">
+                                <ArrowLeft className="h-4 w-4 mr-2" />
                                 Volver
                             </Button>
-                            <Button
-                                variant="outline"
-                                onClick={() => router.visit(route('invoices.edit', invoice.id))}
-                            >
-                                <Edit className="mr-2 h-4 w-4" />
+                        </Link>
+                        <Link href={`/invoices/${invoice.id}/edit`}>
+                            <Button>
+                                <Edit className="h-4 w-4 mr-2" />
                                 Editar
                             </Button>
-                        </div>
+                        </Link>
                     </div>
                 </div>
 

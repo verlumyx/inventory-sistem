@@ -63,24 +63,24 @@ export default function Edit({ item }: Props) {
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center gap-4">
-                    <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/items/${item.id}`}>
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Volver
-                        </Link>
-                    </Button>
                     <div className="flex-1">
                         <h1 className="text-2xl font-bold text-gray-900">Editar Item</h1>
                         <p className="text-gray-600 mt-1">
                             Modifica la información del artículo "{item.name}"
                         </p>
                     </div>
-                    <Button variant="outline" asChild>
+                    <Button asChild>
                         <Link href={`/items/${item.id}`}>
                             <Eye className="h-4 w-4 mr-2" />
-                            Ver artículo
+                            Ver Detalle
                         </Link>
                     </Button>
+                    <Link href="/items">
+                        <Button variant="outline">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Volver
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Form */}

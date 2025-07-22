@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Head, router, useForm } from '@inertiajs/react';
-import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Plus, Trash2, Receipt, Package, Calculator, Edit as EditIcon } from 'lucide-react';
+import AuthenticatedLayout from '@/layouts/authenticated-layout';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { ArrowLeft, Calculator, Edit as EditIcon, Eye, Package, Plus, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
 
 interface Warehouse {
     id: number;
@@ -61,7 +61,7 @@ interface Props {
 export default function Edit({ invoice, warehouses, items }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         warehouse_id: invoice.warehouse_id.toString(),
-        items: invoice.items.map(item => ({
+        items: invoice.items.map((item) => ({
             item_id: item.item_id,
             amount: item.amount,
             price: item.price,
@@ -74,7 +74,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
 
     // Calcular total de la factura
     const calculateTotal = () => {
-        return data.items.reduce((total, item) => total + (item.amount * item.price), 0);
+        return data.items.reduce((total, item) => total + item.amount * item.price, 0);
     };
 
     // Agregar item a la factura
@@ -88,7 +88,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
         const price = parseFloat(itemPrice);
 
         // Verificar que el item no esté ya agregado
-        if (data.items.some(item => item.item_id === itemId)) {
+        if (data.items.some((item) => item.item_id === itemId)) {
             alert('Este item ya está agregado a la factura');
             return;
         }
@@ -101,7 +101,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
         };
 
         setData('items', [...data.items, newItem]);
-        
+
         // Limpiar formulario de item
         setSelectedItem('');
         setItemAmount('');
@@ -117,7 +117,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
     // Actualizar precio cuando se selecciona un item
     const handleItemSelect = (itemId: string) => {
         setSelectedItem(itemId);
-        const item = items.find(i => i.id === parseInt(itemId));
+        const item = items.find((i) => i.id === parseInt(itemId));
         if (item) {
             setItemPrice(item.price.toString());
         }
@@ -126,7 +126,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
     // Enviar formulario
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         if (data.items.length === 0) {
             alert('Debe agregar al menos un item a la factura');
             return;
@@ -138,12 +138,12 @@ export default function Edit({ invoice, warehouses, items }: Props) {
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-ES', {
             style: 'currency',
-            currency: 'USD'
+            currency: 'USD',
         }).format(amount);
     };
 
     const getItemById = (id: number) => {
-        return items.find(item => item.id === id);
+        return items.find((item) => item.id === id);
     };
 
     const breadcrumbs = [
@@ -154,37 +154,32 @@ export default function Edit({ invoice, warehouses, items }: Props) {
     ];
 
     return (
-        <AuthenticatedLayout
-            breadcrumbs={breadcrumbs}
-            header={
-                <div className="flex justify-between items-center">
-                    <div className="flex items-center gap-4">
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => router.visit(route('invoices.show', invoice.id))}
-                        >
+        <AuthenticatedLayout breadcrumbs={breadcrumbs}>
+            <Head title={`Editar Factura ${invoice.code}`} />
+            <div className="space-y-6 p-6">
+                {/* Header */}
+                <div className="flex items-center gap-4">
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-bold text-gray-900">Editar Factura</h1>
+                        <p className="mt-1 text-gray-600">Modifica la factura {invoice.code} y sus items</p>
+                    </div>
+                    <Button asChild>
+                        <Link href={`/invoices/${invoice.id}`}>
+                            <Eye className="mr-2 h-4 w-4" />
+                            Ver Detalle
+                        </Link>
+                    </Button>
+                    <Link href="/invoices">
+                        <Button variant="outline">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver
                         </Button>
-                        <div>
-                            <h2 className="font-semibold text-xl text-gray-800 leading-tight">
-                                Editar Factura {invoice.code}
-                            </h2>
-                            <p className="text-sm text-gray-600">
-                                {invoice.warehouse.display_name}
-                            </p>
-                        </div>
-                    </div>
+                    </Link>
                 </div>
-            }
-        >
-            <Head title={`Editar Factura ${invoice.code}`} />
-
-            <div className="py-12">
-                <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            </div>
+            <div className="pb-12">
+                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        
                         {/* Información General */}
                         <Card>
                             <CardHeader>
@@ -192,17 +187,12 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                                     <EditIcon className="h-5 w-5" />
                                     Información General
                                 </CardTitle>
-                                <CardDescription>
-                                    Modifica el almacén para la factura
-                                </CardDescription>
+                                <CardDescription>Modifica el almacén para la factura</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div>
                                     <Label htmlFor="warehouse_id">Almacén *</Label>
-                                    <Select
-                                        value={data.warehouse_id.toString()}
-                                        onValueChange={(value) => setData('warehouse_id', value)}
-                                    >
+                                    <Select value={data.warehouse_id.toString()} onValueChange={(value) => setData('warehouse_id', value)}>
                                         <SelectTrigger>
                                             <SelectValue placeholder="Seleccionar almacén" />
                                         </SelectTrigger>
@@ -214,9 +204,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                                             ))}
                                         </SelectContent>
                                     </Select>
-                                    {errors.warehouse_id && (
-                                        <p className="text-sm text-red-600 mt-1">{errors.warehouse_id}</p>
-                                    )}
+                                    {errors.warehouse_id && <p className="mt-1 text-sm text-red-600">{errors.warehouse_id}</p>}
                                 </div>
                             </CardContent>
                         </Card>
@@ -228,12 +216,10 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                                     <Plus className="h-5 w-5" />
                                     Agregar Items
                                 </CardTitle>
-                                <CardDescription>
-                                    Agrega más items a la factura de forma rápida y dinámica
-                                </CardDescription>
+                                <CardDescription>Agrega más items a la factura de forma rápida y dinámica</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                                     <div>
                                         <Label htmlFor="item_select">Item</Label>
                                         <Select value={selectedItem} onValueChange={handleItemSelect}>
@@ -298,8 +284,8 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                             </CardHeader>
                             <CardContent>
                                 {data.items.length === 0 ? (
-                                    <div className="text-center py-8">
-                                        <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+                                    <div className="py-8 text-center">
+                                        <Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
                                         <p className="text-gray-500">No hay items agregados</p>
                                         <p className="text-sm text-gray-400">Agrega items usando el formulario de arriba</p>
                                     </div>
@@ -328,22 +314,13 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                                                                     </div>
                                                                 </div>
                                                             </TableCell>
-                                                            <TableCell className="text-right">
-                                                                {Number(invoiceItem.amount).toFixed(2)}
-                                                            </TableCell>
-                                                            <TableCell className="text-right">
-                                                                {formatCurrency(invoiceItem.price)}
-                                                            </TableCell>
+                                                            <TableCell className="text-right">{Number(invoiceItem.amount).toFixed(2)}</TableCell>
+                                                            <TableCell className="text-right">{formatCurrency(invoiceItem.price)}</TableCell>
                                                             <TableCell className="text-right font-medium">
                                                                 {formatCurrency(invoiceItem.amount * invoiceItem.price)}
                                                             </TableCell>
                                                             <TableCell>
-                                                                <Button
-                                                                    type="button"
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    onClick={() => removeItem(index)}
-                                                                >
+                                                                <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(index)}>
                                                                     <Trash2 className="h-4 w-4 text-red-500" />
                                                                 </Button>
                                                             </TableCell>
@@ -356,9 +333,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                                                         TOTAL:
                                                     </TableCell>
                                                     <TableCell className="text-right">
-                                                        <span className="text-xl font-bold text-green-600">
-                                                            {formatCurrency(calculateTotal())}
-                                                        </span>
+                                                        <span className="text-xl font-bold text-green-600">{formatCurrency(calculateTotal())}</span>
                                                     </TableCell>
                                                     <TableCell></TableCell>
                                                 </TableRow>
@@ -366,9 +341,7 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                                         </Table>
                                     </div>
                                 )}
-                                {errors.items && (
-                                    <p className="text-sm text-red-600 mt-2">{errors.items}</p>
-                                )}
+                                {errors.items && <p className="mt-2 text-sm text-red-600">{errors.items}</p>}
                             </CardContent>
                         </Card>
 
@@ -381,29 +354,19 @@ export default function Edit({ invoice, warehouses, items }: Props) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="flex justify-between items-center mb-6">
+                                <div className="mb-6 flex items-center justify-between">
                                     <div>
                                         <p className="text-sm text-gray-600">Total de Items: {data.items.length}</p>
-                                        <p className="text-2xl font-bold text-green-600">
-                                            Total: {formatCurrency(calculateTotal())}
-                                        </p>
+                                        <p className="text-2xl font-bold text-green-600">Total: {formatCurrency(calculateTotal())}</p>
                                     </div>
                                 </div>
-                                
+
                                 <div className="flex gap-4">
-                                    <Button
-                                        type="submit"
-                                        disabled={processing || data.items.length === 0}
-                                        className="flex-1"
-                                    >
+                                    <Button type="submit" disabled={processing || data.items.length === 0} className="flex-1">
                                         <EditIcon className="mr-2 h-4 w-4" />
                                         {processing ? 'Actualizando...' : 'Actualizar Factura'}
                                     </Button>
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => router.visit(route('invoices.show', invoice.id))}
-                                    >
+                                    <Button type="button" variant="outline" onClick={() => router.visit(route('invoices.show', invoice.id))}>
                                         Cancelar
                                     </Button>
                                 </div>

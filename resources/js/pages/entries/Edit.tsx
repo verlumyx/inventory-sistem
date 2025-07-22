@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Plus, Trash2, AlertCircle, Package, Lock } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, AlertCircle, Package, Lock, Eye } from 'lucide-react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -157,25 +157,39 @@ export default function Edit({ entry, items, warehouses }: Props) {
                );
     };
 
+    const breadcrumbs = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Entradas', href: '/entries' },
+        { title: entry.code, href: `/entries/${entry.id}` },
+        { title: 'Editar', href: `/entries/${entry.id}/edit` },
+    ];
+
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title={`Editar Entrada - ${entry.code}`} />
 
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center gap-4">
-                    <Link href={route('entries.index')}>
-                        <Button variant="outline" size="sm">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Volver
-                        </Button>
-                    </Link>
-                    <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Editar Entrada</h1>
-                        <p className="text-muted-foreground">
+
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-bold text-gray-900">Editar Entrada</h1>
+                        <p className="text-gray-600 mt-1">
                             Modifica la entrada {entry.code} y sus items
                         </p>
                     </div>
+                    <Button asChild>
+                        <Link href={`/entries/${entry.id}`}>
+                            <Eye className="h-4 w-4 mr-2" />
+                            Ver Detalle
+                        </Link>
+                    </Button>
+                    <Link href="/entries">
+                        <Button variant="outline">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            Volver
+                        </Button>
+                    </Link>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">

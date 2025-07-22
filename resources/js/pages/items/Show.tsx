@@ -59,29 +59,33 @@ export default function Show({ item, metadata, warehouses, totalStock }: Props) 
 
             <div className="p-6 space-y-6">
                 {/* Header */}
-                <div className="flex items-center gap-4">
-                    <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                            <h1 className="text-2xl font-bold text-gray-900">{item.name}</h1>
-                            <Badge variant={item.status ? 'default' : 'secondary'}>
-                                {item.status_text}
-                            </Badge>
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                        <div>
+                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                {item.name}
+                            </h1>
+                            <div className="flex items-center space-x-2 mt-1">
+                                <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
+                                    {item.code}
+                                </span>
+                                <Badge variant={item.status ? 'default' : 'secondary'}>
+                                    {item.status_text}
+                                </Badge>
+                            </div>
                         </div>
-                        <p className="text-gray-600 mt-1">
-                            Código: <span className="font-mono">{item.code}</span>
-                        </p>
                     </div>
                     <div className="flex space-x-2">
-                        <Button variant="outline" asChild>
-                            <Link href={`/items/${item.id}/edit`}>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
-                            </Link>
-                        </Button>
                         <Link href="/items">
                             <Button variant="outline">
                                 <ArrowLeft className="h-4 w-4 mr-2" />
                                 Volver
+                            </Button>
+                        </Link>
+                        <Link href={`/items/${item.id}/edit`}>
+                            <Button>
+                                <Edit className="h-4 w-4 mr-2" />
+                                Editar
                             </Button>
                         </Link>
                     </div>

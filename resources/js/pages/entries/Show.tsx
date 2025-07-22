@@ -80,7 +80,7 @@ export default function Show({ entry, items, metadata }: Props) {
     const breadcrumbs = [
         { title: 'Panel de Control', href: '/dashboard' },
         { title: 'Entradas', href: '/entries' },
-        { title: entry.name, href: `/entries/${entry.id}` },
+        { title: entry.code, href: `/entries/${entry.id}` },
     ];
 
     return (
@@ -90,66 +90,66 @@ export default function Show({ entry, items, metadata }: Props) {
             <div className="p-6 space-y-6">
                 {/* Header */}
                 <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center space-x-4">
                         <div>
-                            <h1 className="text-3xl font-bold tracking-tight">{entry.code}</h1>
-                            <p className="text-muted-foreground">
-                                {entry.short_description}
-                            </p>
+                            <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">
+                                {entry.name}
+                            </h1>
+                            <div className="flex items-center space-x-2 mt-1">
+                                <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
+                                    {entry.code}
+                                </span>
+                                <Badge variant={entry.status ? 'default' : 'secondary'}
+                                       className={entry.status === 1 ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                                    {entry.status_text}
+                                </Badge>
+                            </div>
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Badge
-                            variant={entry.status === 1 ? "default" : "secondary"}
-                            className={entry.status === 1 ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}
-                        >
-                            {entry.status === 1 ? "Recibido" : "Por recibir"}
-                        </Badge>
-                        <div className="flex gap-2">
-                            <Link href={route('entries.index')}>
-                                <Button variant="outline" size="sm">
-                                    <ArrowLeft className="mr-2 h-4 w-4" />
-                                    Volver
+                    <div className="flex space-x-2">
+                        <Link href="/entries">
+                            <Button variant="outline">
+                                <ArrowLeft className="h-4 w-4 mr-2" />
+                                Volver
+                            </Button>
+                        </Link>
+                        {entry.status === 0 && (
+                            <Link href={route('entries.edit', entry.id)}>
+                                <Button>
+                                    <Edit className="mr-2 h-4 w-4" />
+                                    Editar
                                 </Button>
                             </Link>
-                            {entry.status === 0 && (
-                                <Link href={route('entries.edit', entry.id)}>
-                                    <Button variant="outline">
-                                        <Edit className="mr-2 h-4 w-4" />
-                                        Editar
+                        )}
+                        {entry.status === 0 && (
+                            <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                                <AlertDialogTrigger asChild>
+                                    <Button className="bg-green-600 hover:bg-green-700">
+                                        <CheckCircle className="mr-2 h-4 w-4" />
+                                        Recibir
                                     </Button>
-                                </Link>
-                            )}
-                            {entry.status === 0 && (
-                                <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-                                    <AlertDialogTrigger asChild>
-                                        <Button className="bg-green-600 hover:bg-green-700">
-                                            <CheckCircle className="mr-2 h-4 w-4" />
-                                            Recibir
-                                        </Button>
-                                    </AlertDialogTrigger>
-                                    <AlertDialogContent>
-                                        <AlertDialogHeader>
-                                            <AlertDialogTitle>Confirmar Recepción</AlertDialogTitle>
-                                            <AlertDialogDescription>
-                                                ¿Está seguro de que desea marcar la entrada <strong>{entry.code}</strong> como recibida?
-                                                <br />
-                                                Esta acción no se puede deshacer.
-                                            </AlertDialogDescription>
-                                        </AlertDialogHeader>
-                                        <AlertDialogFooter>
-                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                                            <AlertDialogAction
-                                                onClick={handleReceiveEntry}
-                                                className="bg-green-600 hover:bg-green-700"
-                                            >
-                                                Sí, marcar como recibida
-                                            </AlertDialogAction>
-                                        </AlertDialogFooter>
-                                    </AlertDialogContent>
-                                </AlertDialog>
-                            )}
-                        </div>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Confirmar Recepción</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            ¿Está seguro de que desea marcar la entrada <strong>{entry.code}</strong> como recibida?
+                                            <br />
+                                            Esta acción no se puede deshacer.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction
+                                            onClick={handleReceiveEntry}
+                                            className="bg-green-600 hover:bg-green-700"
+                                        >
+                                            Sí, marcar como recibida
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
+                        )}
                     </div>
                 </div>
 
