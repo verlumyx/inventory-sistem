@@ -66,8 +66,14 @@ export default function Show({ invoice }: Props) {
         }).format(amount);
     };
 
+    const breadcrumbs = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Facturas', href: '/invoices' },
+        { title: invoice.code, href: `/invoices/${invoice.id}` },
+    ];
+
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title={`Factura ${invoice.code}`} />
 
             <div className="p-6 space-y-6">

@@ -28,18 +28,10 @@ interface Props {
 
 export default function Edit({ warehouse }: Props) {
     const breadcrumbs: BreadcrumbItem[] = [
-        {
-            title: 'Almacenes',
-            href: '/warehouses',
-        },
-        {
-            title: warehouse.name,
-            href: `/warehouses/${warehouse.id}`,
-        },
-        {
-            title: 'Editar',
-            href: `/warehouses/${warehouse.id}/edit`,
-        },
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Almacenes', href: '/warehouses' },
+        { title: warehouse.name, href: `/warehouses/${warehouse.id}` },
+        { title: 'Editar', href: `/warehouses/${warehouse.id}/edit` },
     ];
 
     const { data, setData, put, processing, errors, isDirty } = useForm({

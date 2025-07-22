@@ -76,8 +76,15 @@ export default function Show({ entry, items, metadata }: Props) {
         });
         setShowConfirmDialog(false);
     };
+
+    const breadcrumbs = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Entradas', href: '/entries' },
+        { title: entry.name, href: `/entries/${entry.id}` },
+    ];
+
     return (
-        <AuthenticatedLayout>
+        <AuthenticatedLayout breadcrumbs={breadcrumbs}>
             <Head title={`Entrada - ${entry.code}`} />
 
             <div className="p-6 space-y-6">

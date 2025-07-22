@@ -146,8 +146,16 @@ export default function Edit({ invoice, warehouses, items }: Props) {
         return items.find(item => item.id === id);
     };
 
+    const breadcrumbs = [
+        { title: 'Panel de Control', href: '/dashboard' },
+        { title: 'Facturas', href: '/invoices' },
+        { title: invoice.code, href: `/invoices/${invoice.id}` },
+        { title: 'Editar', href: `/invoices/${invoice.id}/edit` },
+    ];
+
     return (
         <AuthenticatedLayout
+            breadcrumbs={breadcrumbs}
             header={
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-4">

@@ -46,10 +46,8 @@ interface Props {
 }
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Almacenes',
-        href: '/warehouses',
-    },
+    { title: 'Panel de Control', href: '/dashboard' },
+    { title: 'Almacenes', href: '/warehouses' },
 ];
 
 export default function Index({ warehouses, pagination, filters }: Props) {

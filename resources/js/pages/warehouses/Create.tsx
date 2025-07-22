@@ -12,14 +12,9 @@ import { BreadcrumbItem } from '@/types';
 import InputError from '@/components/input-error';
 
 const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Almacenes',
-        href: '/warehouses',
-    },
-    {
-        title: 'Crear Almacén',
-        href: '/warehouses/create',
-    },
+    { title: 'Panel de Control', href: '/dashboard' },
+    { title: 'Almacenes', href: '/warehouses' },
+    { title: 'Crear Almacén', href: '/warehouses/create' },
 ];
 
 export default function Create() {
