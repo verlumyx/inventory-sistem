@@ -31,6 +31,11 @@ class GetInvoiceController extends Controller
                     'id' => $invoice->id,
                     'code' => $invoice->code,
                     'warehouse_id' => $invoice->warehouse_id,
+                    'status' => $invoice->status,
+                    'status_text' => $invoice->status_text,
+                    'is_pending' => $invoice->is_pending,
+                    'is_paid' => $invoice->is_paid,
+                    'can_edit' => $invoice->can_edit,
                     'warehouse' => [
                         'id' => $invoice->warehouse->id,
                         'code' => $invoice->warehouse->code,

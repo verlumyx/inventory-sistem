@@ -30,6 +30,13 @@ class UpdateInvoiceController extends Controller
         try {
             $invoice = $this->getInvoiceHandler->handleWithItems($id);
 
+            // Verificar si la factura puede ser editada
+            if ($invoice->is_paid) {
+                return redirect()
+                    ->route('invoices.show', $id)
+                    ->withErrors(['error' => 'No se puede editar una factura que ya está pagada.']);
+            }
+
             // Obtener warehouses activos para el select
             $warehouses = Warehouse::active()
                 ->orderBy('name')
@@ -110,6 +117,14 @@ class UpdateInvoiceController extends Controller
     public function update(UpdateInvoiceRequest $request, int $id): RedirectResponse
     {
         try {
+            // Verificar que la factura existe y puede ser editada
+            $invoice = $this->getInvoiceHandler->handleById($id);
+            if ($invoice->is_paid) {
+                return redirect()
+                    ->route('invoices.show', $id)
+                    ->withErrors(['error' => 'No se puede editar una factura que ya está pagada.']);
+            }
+
             $invoiceData = $request->getInvoiceData();
             $itemsData = $request->getItemsData();
 

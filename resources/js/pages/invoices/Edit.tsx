@@ -44,6 +44,11 @@ interface Invoice {
     id: number;
     code: string;
     warehouse_id: number;
+    status: number;
+    status_text: string;
+    is_pending: boolean;
+    is_paid: boolean;
+    can_edit: boolean;
     warehouse: Warehouse;
     items: InvoiceItem[];
     total_amount: number;

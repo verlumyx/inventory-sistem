@@ -25,12 +25,14 @@ class Invoice extends Model
     protected $fillable = [
         'code',
         'warehouse_id',
+        'status',
     ];
 
     /**
      * The attributes that should be cast.
      */
     protected $casts = [
+        'status' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -121,6 +123,30 @@ class Invoice extends Model
     }
 
     /**
+     * Scope a query to filter by status.
+     */
+    public function scopeByStatus(Builder $query, int $status): Builder
+    {
+        return $query->where('status', $status);
+    }
+
+    /**
+     * Scope a query to get pending invoices (por pagar).
+     */
+    public function scopePending(Builder $query): Builder
+    {
+        return $query->where('status', 0);
+    }
+
+    /**
+     * Scope a query to get paid invoices (pagadas).
+     */
+    public function scopePaid(Builder $query): Builder
+    {
+        return $query->where('status', 1);
+    }
+
+    /**
      * Get filtered invoices.
      */
     public static function getFiltered(array $filters = []): Builder
@@ -137,6 +163,10 @@ class Invoice extends Model
 
         if (!empty($filters['code'])) {
             $query->byCode($filters['code']);
+        }
+
+        if (isset($filters['status']) && $filters['status'] !== '') {
+            $query->byStatus($filters['status']);
         }
 
         return $query;
@@ -189,6 +219,56 @@ class Invoice extends Model
     }
 
     /**
+     * Get the status text attribute.
+     */
+    public function getStatusTextAttribute(): string
+    {
+        return $this->status ? 'Pagada' : 'Por pagar';
+    }
+
+    /**
+     * Get the is pending attribute.
+     */
+    public function getIsPendingAttribute(): bool
+    {
+        return $this->status === 0;
+    }
+
+    /**
+     * Get the is paid attribute.
+     */
+    public function getIsPaidAttribute(): bool
+    {
+        return $this->status === 1;
+    }
+
+    /**
+     * Check if the invoice can be edited.
+     */
+    public function getCanEditAttribute(): bool
+    {
+        return $this->status === 0; // Solo se puede editar si está por pagar
+    }
+
+    /**
+     * Mark invoice as paid.
+     */
+    public function markAsPaid(): bool
+    {
+        $this->status = 1;
+        return $this->save();
+    }
+
+    /**
+     * Mark invoice as pending.
+     */
+    public function markAsPending(): bool
+    {
+        $this->status = 0;
+        return $this->save();
+    }
+
+    /**
      * Convert the model to an array for API responses.
      */
     public function toApiArray(): array
@@ -198,6 +278,11 @@ class Invoice extends Model
             'code' => $this->code,
             'warehouse_id' => $this->warehouse_id,
             'warehouse' => $this->warehouse?->toApiArray(),
+            'status' => $this->status,
+            'status_text' => $this->status_text,
+            'is_pending' => $this->is_pending,
+            'is_paid' => $this->is_paid,
+            'can_edit' => $this->can_edit,
             'total_amount' => $this->total_amount,
             'items_count' => $this->items_count,
             'display_name' => $this->display_name,

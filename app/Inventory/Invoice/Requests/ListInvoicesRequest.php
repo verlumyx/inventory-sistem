@@ -35,6 +35,11 @@ class ListInvoicesRequest extends FormRequest
                 'string',
                 'max:20',
             ],
+            'status' => [
+                'sometimes',
+                'integer',
+                'in:0,1',
+            ],
             'per_page' => [
                 'sometimes',
                 'integer',
@@ -142,6 +147,10 @@ class ListInvoicesRequest extends FormRequest
 
         if ($this->filled('code')) {
             $filters['code'] = $this->code;
+        }
+
+        if ($this->filled('status')) {
+            $filters['status'] = $this->status;
         }
 
         return $filters;

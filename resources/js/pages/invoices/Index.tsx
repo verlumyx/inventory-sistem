@@ -14,6 +14,11 @@ interface Invoice {
     id: number;
     code: string;
     warehouse_id: number;
+    status: number;
+    status_text: string;
+    is_pending: boolean;
+    is_paid: boolean;
+    can_edit: boolean;
     warehouse: {
         id: number;
         code: string;
@@ -63,6 +68,9 @@ export default function Index({ invoices, filters, pagination }: Props) {
     const [warehouseFilter, setWarehouseFilter] = useState(
         filters.warehouse_id ? filters.warehouse_id.toString() : 'all'
     );
+    const [statusFilter, setStatusFilter] = useState(
+        filters.status !== undefined ? filters.status.toString() : 'all'
+    );
 
     const handleSearch = (e?: React.FormEvent) => {
         if (e) e.preventDefault();
@@ -71,6 +79,7 @@ export default function Index({ invoices, filters, pagination }: Props) {
         
         if (searchTerm) params.search = searchTerm;
         if (warehouseFilter !== 'all') params.warehouse_id = parseInt(warehouseFilter);
+        if (statusFilter !== 'all') params.status = parseInt(statusFilter);
         
         router.get(route('invoices.index'), params, { 
             preserveState: true,
@@ -80,27 +89,43 @@ export default function Index({ invoices, filters, pagination }: Props) {
 
     const handleWarehouseChange = (value: string) => {
         setWarehouseFilter(value);
-        
+
         const params: any = {};
         if (searchTerm) params.search = searchTerm;
         if (value !== 'all') params.warehouse_id = parseInt(value);
-        
-        router.get(route('invoices.index'), params, { 
+        if (statusFilter !== 'all') params.status = parseInt(statusFilter);
+
+        router.get(route('invoices.index'), params, {
             preserveState: true,
-            replace: true 
+            replace: true
+        });
+    };
+
+    const handleStatusChange = (value: string) => {
+        setStatusFilter(value);
+
+        const params: any = {};
+        if (searchTerm) params.search = searchTerm;
+        if (warehouseFilter !== 'all') params.warehouse_id = parseInt(warehouseFilter);
+        if (value !== 'all') params.status = parseInt(value);
+
+        router.get(route('invoices.index'), params, {
+            preserveState: true,
+            replace: true
         });
     };
 
     const clearFilters = () => {
         setSearchTerm('');
         setWarehouseFilter('all');
-        router.get(route('invoices.index'), {}, { 
+        setStatusFilter('all');
+        router.get(route('invoices.index'), {}, {
             preserveState: true,
-            replace: true 
+            replace: true
         });
     };
 
-    const hasFilters = !!(filters.search || filters.warehouse_id);
+    const hasFilters = !!(filters.search || filters.warehouse_id || filters.status !== undefined);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-ES', {
@@ -116,6 +141,20 @@ export default function Index({ invoices, filters, pagination }: Props) {
             day: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
+        });
+    };
+
+    const handlePageChange = (page: number) => {
+        const params: any = {};
+
+        if (searchTerm) params.search = searchTerm;
+        if (warehouseFilter !== 'all') params.warehouse_id = parseInt(warehouseFilter);
+        if (statusFilter !== 'all') params.status = parseInt(statusFilter);
+        params.page = page;
+
+        router.get(route('invoices.index'), params, {
+            preserveState: true,
+            preserveScroll: true
         });
     };
 
@@ -194,7 +233,7 @@ export default function Index({ invoices, filters, pagination }: Props) {
                                     </div>
 
                                     {showFilters && (
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
+                                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 pt-4 border-t">
                                             <div>
                                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                                     Almacén
@@ -206,6 +245,21 @@ export default function Index({ invoices, filters, pagination }: Props) {
                                                     <SelectContent>
                                                         <SelectItem value="all">Todos los almacenes</SelectItem>
                                                         {/* TODO: Agregar warehouses dinámicamente */}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                                    Estado
+                                                </label>
+                                                <Select value={statusFilter} onValueChange={handleStatusChange}>
+                                                    <SelectTrigger>
+                                                        <SelectValue placeholder="Seleccionar estado" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="all">Todos los estados</SelectItem>
+                                                        <SelectItem value="0">Por pagar</SelectItem>
+                                                        <SelectItem value="1">Pagada</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             </div>
@@ -248,6 +302,7 @@ export default function Index({ invoices, filters, pagination }: Props) {
                                                 <TableRow>
                                                     <TableHead>Código</TableHead>
                                                     <TableHead>Almacén</TableHead>
+                                                    <TableHead>Estado</TableHead>
                                                     <TableHead>Items</TableHead>
                                                     <TableHead>Total</TableHead>
                                                     <TableHead>Fecha</TableHead>
@@ -257,7 +312,7 @@ export default function Index({ invoices, filters, pagination }: Props) {
                                             <TableBody>
                                                 {invoices.data.length === 0 ? (
                                                     <TableRow>
-                                                        <TableCell colSpan={6} className="text-center py-8">
+                                                        <TableCell colSpan={7} className="text-center py-8">
                                                             <div className="flex flex-col items-center gap-2">
                                                                 <Receipt className="h-8 w-8 text-gray-400" />
                                                                 <p className="text-gray-500">No se encontraron facturas</p>
@@ -282,6 +337,14 @@ export default function Index({ invoices, filters, pagination }: Props) {
                                                                 </div>
                                                             </TableCell>
                                                             <TableCell>
+                                                                <Badge
+                                                                    variant={invoice.is_paid ? 'default' : 'secondary'}
+                                                                    className={invoice.is_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                                                                >
+                                                                    {invoice.status_text}
+                                                                </Badge>
+                                                            </TableCell>
+                                                            <TableCell>
                                                                 <Badge variant="outline">
                                                                     {invoice.items_count} items
                                                                 </Badge>
@@ -299,11 +362,13 @@ export default function Index({ invoices, filters, pagination }: Props) {
                                                                             <Eye className="h-4 w-4" />
                                                                         </Button>
                                                                     </Link>
-                                                                    <Link href={`/invoices/${invoice.id}/edit`}>
-                                                                        <Button variant="ghost" size="sm">
-                                                                            <Edit className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </Link>
+                                                                    {invoice.can_edit && (
+                                                                        <Link href={`/invoices/${invoice.id}/edit`}>
+                                                                            <Button variant="ghost" size="sm">
+                                                                                <Edit className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </Link>
+                                                                    )}
                                                                 </div>
                                                             </TableCell>
                                                         </TableRow>
@@ -312,6 +377,33 @@ export default function Index({ invoices, filters, pagination }: Props) {
                                             </TableBody>
                                         </Table>
                                     </div>
+
+                                    {/* Paginación */}
+                                    {pagination.last_page > 1 && (
+                                        <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                                            <div className="text-sm text-gray-700 dark:text-gray-300">
+                                                Página {pagination.current_page} de {pagination.last_page}
+                                            </div>
+                                            <div className="flex space-x-2">
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handlePageChange(pagination.current_page - 1)}
+                                                    disabled={pagination.current_page === 1}
+                                                >
+                                                    Anterior
+                                                </Button>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handlePageChange(pagination.current_page + 1)}
+                                                    disabled={pagination.current_page === pagination.last_page}
+                                                >
+                                                    Siguiente
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    )}
                                 </CardContent>
                             </Card>
             </div>

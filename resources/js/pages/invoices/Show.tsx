@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Edit, Receipt, Package, Warehouse } from 'lucide-react';
+import { ArrowLeft, Edit, Receipt, Package, Warehouse, CheckCircle, Clock, DollarSign } from 'lucide-react';
 
 interface InvoiceItem {
     id: number;
@@ -29,6 +29,11 @@ interface Invoice {
     id: number;
     code: string;
     warehouse_id: number;
+    status: number;
+    status_text: string;
+    is_pending: boolean;
+    is_paid: boolean;
+    can_edit: boolean;
     warehouse: {
         id: number;
         code: string;
@@ -66,6 +71,22 @@ export default function Show({ invoice }: Props) {
         }).format(amount);
     };
 
+    const handleMarkAsPaid = () => {
+        router.patch(`/invoices/${invoice.id}/mark-as-paid`, {}, {
+            onSuccess: () => {
+                // El redirect se maneja en el controlador
+            },
+        });
+    };
+
+    const handleMarkAsPending = () => {
+        router.patch(`/invoices/${invoice.id}/mark-as-pending`, {}, {
+            onSuccess: () => {
+                // El redirect se maneja en el controlador
+            },
+        });
+    };
+
     const breadcrumbs = [
         { title: 'Panel de Control', href: '/dashboard' },
         { title: 'Facturas', href: '/invoices' },
@@ -87,9 +108,22 @@ export default function Show({ invoice }: Props) {
                                 <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
                                     {invoice.warehouse.display_name}
                                 </span>
-                                {/*<Badge variant={warehouse.status ? 'default' : 'secondary'}>*/}
-                                {/*    {warehouse.status_text}*/}
-                                {/*</Badge>*/}
+                                <Badge
+                                    variant={invoice.is_paid ? 'default' : 'secondary'}
+                                    className={invoice.is_paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}
+                                >
+                                    {invoice.is_paid ? (
+                                        <>
+                                            <CheckCircle className="h-3 w-3 mr-1" />
+                                            {invoice.status_text}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Clock className="h-3 w-3 mr-1" />
+                                            {invoice.status_text}
+                                        </>
+                                    )}
+                                </Badge>
                             </div>
                         </div>
                     </div>
@@ -100,12 +134,31 @@ export default function Show({ invoice }: Props) {
                                 Volver
                             </Button>
                         </Link>
-                        <Link href={`/invoices/${invoice.id}/edit`}>
-                            <Button>
-                                <Edit className="h-4 w-4 mr-2" />
-                                Editar
+
+                        {/* Botones de status */}
+                        {invoice.is_pending && (
+                            <Button onClick={handleMarkAsPaid} className="bg-green-600 hover:bg-green-700">
+                                <DollarSign className="h-4 w-4 mr-2" />
+                                Marcar como Pagada
                             </Button>
-                        </Link>
+                        )}
+
+                        {invoice.is_paid && (
+                            <Button onClick={handleMarkAsPending} variant="outline">
+                                <Clock className="h-4 w-4 mr-2" />
+                                Marcar como Por Pagar
+                            </Button>
+                        )}
+
+                        {/* Botón de editar solo si puede editarse */}
+                        {invoice.can_edit && (
+                            <Link href={`/invoices/${invoice.id}/edit`}>
+                                <Button>
+                                    <Edit className="h-4 w-4 mr-2" />
+                                    Editar
+                                </Button>
+                            </Link>
+                        )}
                     </div>
                 </div>
 

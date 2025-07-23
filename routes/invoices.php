@@ -4,6 +4,7 @@ use App\Inventory\Invoice\Controllers\ListInvoicesController;
 use App\Inventory\Invoice\Controllers\CreateInvoiceController;
 use App\Inventory\Invoice\Controllers\UpdateInvoiceController;
 use App\Inventory\Invoice\Controllers\GetInvoiceController;
+use App\Http\Controllers\Inventory\Invoice\Controllers\InvoiceStatusController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,6 +48,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     
     Route::patch('/invoices/{invoice}', [UpdateInvoiceController::class, 'update'])
         ->name('invoices.patch')
+        ->where('invoice', '[0-9]+');
+
+    // Invoice status routes
+    Route::patch('/invoices/{invoice}/mark-as-paid', [InvoiceStatusController::class, 'markAsPaid'])
+        ->name('invoices.mark-as-paid')
+        ->where('invoice', '[0-9]+');
+
+    Route::patch('/invoices/{invoice}/mark-as-pending', [InvoiceStatusController::class, 'markAsPending'])
+        ->name('invoices.mark-as-pending')
         ->where('invoice', '[0-9]+');
 });
 

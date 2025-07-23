@@ -93,9 +93,10 @@ class InvoiceSeeder extends Seeder
     private function createInvoiceWithItems($warehouse, $items): void
     {
         DB::transaction(function () use ($warehouse, $items) {
-            // Crear la factura
+            // Crear la factura con status aleatorio
             $invoice = Invoice::create([
                 'warehouse_id' => $warehouse->id,
+                'status' => rand(0, 1), // 0 = Por pagar, 1 = Pagada
             ]);
 
             // Agregar items a la factura

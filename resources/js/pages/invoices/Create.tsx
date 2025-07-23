@@ -134,10 +134,10 @@ export default function Create({ warehouses, items }: Props) {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Crear nuevo artículo</h1>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Completa la información para crear un nuevo artículo</p>
+                        <h1 className="text-2xl font-semibold text-gray-900 dark:text-gray-100">Crear nueva factura</h1>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Completa la información para crear un nueva factura</p>
                     </div>
-                    <Link href="/items">
+                    <Link href="/invoices">
                         <Button variant="outline">
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Volver
