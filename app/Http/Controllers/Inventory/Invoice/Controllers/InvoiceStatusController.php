@@ -19,7 +19,7 @@ class InvoiceStatusController extends Controller
     public function markAsPaid(int $id): RedirectResponse
     {
         try {
-            $invoice = $this->getInvoiceHandler->handle($id);
+            $invoice = $this->getInvoiceHandler->handleById($id);
 
             if ($invoice->is_paid) {
                 return redirect()
@@ -52,7 +52,7 @@ class InvoiceStatusController extends Controller
     public function markAsPending(int $id): RedirectResponse
     {
         try {
-            $invoice = $this->getInvoiceHandler->handle($id);
+            $invoice = $this->getInvoiceHandler->handleById($id);
 
             if ($invoice->is_pending) {
                 return redirect()

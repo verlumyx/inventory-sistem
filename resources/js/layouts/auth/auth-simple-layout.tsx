@@ -15,10 +15,9 @@ export default function AuthSimpleLayout({ children, title, description }: Props
                 <div className="flex flex-col gap-8">
                     <div className="flex flex-col items-center gap-4">
                         <Link href={route('home')} className="flex flex-col items-center gap-3 font-medium">
-                            <div className="mb-1 flex h-12 w-12 items-center justify-center rounded-md bg-slate-100 dark:bg-slate-800">
-                                <AppLogoIcon className="size-8 fill-current text-slate-700 dark:text-slate-300" />
+                            <div className="mb-1 flex h-16 w-16 items-center justify-center rounded-lg bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 p-2">
+                                <AppLogoIcon className="w-full h-full object-contain" />
                             </div>
-                            <span className="text-sm font-semibold text-slate-600 dark:text-slate-400">Sistema de Inventario</span>
                         </Link>
 
                         <div className="space-y-2 text-center">

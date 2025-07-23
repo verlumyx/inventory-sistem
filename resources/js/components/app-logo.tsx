@@ -1,13 +1,25 @@
 import AppLogoIcon from './app-logo-icon';
 
-export default function AppLogo() {
+interface AppLogoProps {
+    variant?: 'default' | 'compact';
+    showText?: boolean;
+}
+
+export default function AppLogo({ variant = 'default', showText = true }: AppLogoProps) {
+    if (variant === 'compact') {
+        return (
+            <div className="flex items-center space-x-2">
+                <div className="flex aspect-square size-10 items-center justify-center rounded-md bg-white dark:bg-gray-800 p-1.5 shadow-sm">
+                    <AppLogoIcon className="size-8 object-contain" />
+                </div>
+            </div>
+        );
+    }
+
     return (
         <>
-            <div className="flex aspect-square size-8 items-center justify-center rounded-md bg-sidebar-primary text-sidebar-primary-foreground">
-                <AppLogoIcon className="size-5 fill-current text-white dark:text-black" />
-            </div>
-            <div className="ml-1 grid flex-1 text-left text-sm">
-                <span className="mb-0.5 truncate leading-tight font-semibold">Sistema de Inventario</span>
+            <div className="flex aspect-square size-10 items-center justify-center rounded-md bg-white dark:bg-gray-800 p-1.5 shadow-sm">
+                <AppLogoIcon className="size-8 object-contain" />
             </div>
         </>
     );
