@@ -14,6 +14,7 @@ interface Warehouse {
     code: string;
     name: string;
     display_name: string;
+    default?: boolean;
 }
 
 interface Item {
@@ -61,9 +62,10 @@ interface Props {
     invoice: Invoice;
     warehouses: Warehouse[];
     items: Item[];
+    defaultWarehouse?: Warehouse | null;
 }
 
-export default function Edit({ invoice, warehouses, items }: Props) {
+export default function Edit({ invoice, warehouses, items, defaultWarehouse }: Props) {
     const { data, setData, put, processing, errors } = useForm({
         warehouse_id: invoice.warehouse_id.toString(),
         items: invoice.items.map((item) => ({

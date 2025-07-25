@@ -26,6 +26,7 @@ interface Warehouse {
     code: string;
     name: string;
     display_name: string;
+    default?: boolean;
 }
 
 interface EntryItem {
@@ -44,9 +45,10 @@ interface FormData {
 interface Props {
     items: Item[];
     warehouses: Warehouse[];
+    defaultWarehouse?: Warehouse | null;
 }
 
-export default function Create({ items, warehouses }: Props) {
+export default function Create({ items, warehouses, defaultWarehouse }: Props) {
     const { data, setData, post, processing, errors } = useForm<FormData>({
         name: '',
         description: '',
@@ -62,7 +64,7 @@ export default function Create({ items, warehouses }: Props) {
 
     // Estados para el formulario dinámico de items
     const [selectedItem, setSelectedItem] = useState('');
-    const [selectedWarehouse, setSelectedWarehouse] = useState('');
+    const [selectedWarehouse, setSelectedWarehouse] = useState(defaultWarehouse?.id?.toString() || '');
     const [itemAmount, setItemAmount] = useState('');
 
     const addItem = () => {
@@ -88,9 +90,9 @@ export default function Create({ items, warehouses }: Props) {
 
         setData('items', [...data.items, newItem]);
 
-        // Limpiar formulario de item
+        // Limpiar formulario de item (mantener bodega por defecto seleccionada)
         setSelectedItem('');
-        setSelectedWarehouse('');
+        setSelectedWarehouse(defaultWarehouse?.id?.toString() || '');
         setItemAmount('');
     };
 

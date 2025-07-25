@@ -56,8 +56,12 @@ class UpdateEntryController extends Controller
                     'code' => $warehouse->code,
                     'name' => $warehouse->name,
                     'display_name' => $warehouse->display_name,
+                    'default' => $warehouse->default,
                 ];
             });
+
+            // Obtener el almacén por defecto
+            $defaultWarehouse = $this->warehouseRepository->getActive()->where('default', true)->first();
 
             // Formatear datos de la entrada para el formulario
             $entryData = [
@@ -95,6 +99,12 @@ class UpdateEntryController extends Controller
                 'entry' => $entryData,
                 'items' => $items,
                 'warehouses' => $warehouses,
+                'defaultWarehouse' => $defaultWarehouse ? [
+                    'id' => $defaultWarehouse->id,
+                    'code' => $defaultWarehouse->code,
+                    'name' => $defaultWarehouse->name,
+                    'display_name' => $defaultWarehouse->display_name,
+                ] : null,
             ]);
 
         } catch (\Exception $e) {

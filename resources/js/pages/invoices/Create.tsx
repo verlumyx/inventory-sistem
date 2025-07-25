@@ -14,6 +14,7 @@ interface Warehouse {
     code: string;
     name: string;
     display_name: string;
+    default?: boolean;
 }
 
 interface Item {
@@ -35,11 +36,12 @@ interface InvoiceItem {
 interface Props {
     warehouses: Warehouse[];
     items: Item[];
+    defaultWarehouse?: Warehouse | null;
 }
 
-export default function Create({ warehouses, items }: Props) {
+export default function Create({ warehouses, items, defaultWarehouse }: Props) {
     const { data, setData, post, processing, errors, reset } = useForm({
-        warehouse_id: '',
+        warehouse_id: defaultWarehouse?.id?.toString() || '',
         items: [] as InvoiceItem[],
     });
 
