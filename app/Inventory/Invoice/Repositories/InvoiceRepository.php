@@ -14,10 +14,29 @@ class InvoiceRepository implements InvoiceRepositoryInterface
      */
     public function getAll(array $filters = []): Collection
     {
-        return Invoice::getFiltered($filters)
-            ->with(['warehouse', 'invoiceItems.item'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $query = Invoice::query()->with(['warehouse', 'invoiceItems.item']);
+
+        // Filtro por status
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Filtro por rango de fechas
+        if (isset($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        // Filtro por mes y año específico
+        if (isset($filters['month']) && isset($filters['year'])) {
+            $query->whereMonth('created_at', $filters['month'])
+                  ->whereYear('created_at', $filters['year']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
     }
 
     /**

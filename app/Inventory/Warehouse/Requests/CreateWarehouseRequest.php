@@ -45,6 +45,10 @@ class CreateWarehouseRequest extends FormRequest
                 'unique:warehouses,code',
                 'regex:/^WH-\d{8}$/',
             ],
+            'default' => [
+                'sometimes',
+                'boolean',
+            ],
         ];
     }
 
@@ -70,6 +74,8 @@ class CreateWarehouseRequest extends FormRequest
             'code.max' => 'El código no puede exceder los 20 caracteres.',
             'code.unique' => 'Este código de almacén ya existe.',
             'code.regex' => 'El código debe tener el formato WH-00000000.',
+
+            'default.boolean' => 'El campo por defecto debe ser verdadero o falso.',
         ];
     }
 
@@ -85,6 +91,7 @@ class CreateWarehouseRequest extends FormRequest
             'description' => 'descripción',
             'status' => 'estado',
             'code' => 'código',
+            'default' => 'por defecto',
         ];
     }
 
@@ -96,6 +103,11 @@ class CreateWarehouseRequest extends FormRequest
         // Establecer estado por defecto si no se proporciona
         if (!$this->has('status')) {
             $this->merge(['status' => true]);
+        }
+
+        // Establecer default por defecto si no se proporciona
+        if (!$this->has('default')) {
+            $this->merge(['default' => false]);
         }
 
         // Limpiar espacios en blanco

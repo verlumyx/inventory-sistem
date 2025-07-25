@@ -14,6 +14,8 @@ interface Warehouse {
     description: string | null;
     status: boolean;
     status_text: string;
+    default: boolean;
+    default_text: string;
     created_at: string;
     updated_at: string;
 }
@@ -103,6 +105,21 @@ export default function Show({ warehouse }: Props) {
                                             <ToggleLeft className="h-4 w-4 mr-2 text-gray-400" />
                                             <Badge variant={warehouse.status ? 'default' : 'secondary'}>
                                                 {warehouse.status_text}
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <Label className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            Por Defecto
+                                        </Label>
+                                        <div className="flex items-center mt-1">
+                                            <ToggleLeft className="h-4 w-4 mr-2 text-gray-400" />
+                                            <Badge
+                                                variant={warehouse.default ? 'default' : 'outline'}
+                                                className={warehouse.default ? 'bg-green-100 text-green-800 border-green-200' : ''}
+                                            >
+                                                {warehouse.default_text}
                                             </Badge>
                                         </div>
                                     </div>

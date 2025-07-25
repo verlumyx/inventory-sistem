@@ -28,6 +28,7 @@ class Warehouse extends Model
         'name',
         'description',
         'status',
+        'default',
     ];
 
     /**
@@ -35,6 +36,7 @@ class Warehouse extends Model
      */
     protected $casts = [
         'status' => 'boolean',
+        'default' => 'boolean',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -65,6 +67,17 @@ class Warehouse extends Model
                 $warehouse->code = static::generateCode();
             }
         });
+
+        // Asegurar que solo un almacén tenga default = 1
+        static::saving(function ($warehouse) {
+            if ($warehouse->default) {
+                // Si este almacén se está marcando como default,
+                // desmarcar todos los demás
+                static::where('id', '!=', $warehouse->id)
+                      ->where('default', 1)
+                      ->update(['default' => 0]);
+            }
+        });
     }
 
     /**
@@ -87,6 +100,38 @@ class Warehouse extends Model
     }
 
     /**
+     * Get the default text attribute.
+     */
+    public function getDefaultTextAttribute(): string
+    {
+        return $this->default ? 'Sí' : 'No';
+    }
+
+    /**
+     * Check if this warehouse is the default one.
+     */
+    public function isDefault(): bool
+    {
+        return $this->default;
+    }
+
+    /**
+     * Set this warehouse as default.
+     */
+    public function setAsDefault(): bool
+    {
+        return $this->update(['default' => true]);
+    }
+
+    /**
+     * Remove default status from this warehouse.
+     */
+    public function removeDefault(): bool
+    {
+        return $this->update(['default' => false]);
+    }
+
+    /**
      * Scope a query to only include active warehouses.
      */
     public function scopeActive(Builder $query): Builder
@@ -100,6 +145,22 @@ class Warehouse extends Model
     public function scopeInactive(Builder $query): Builder
     {
         return $query->where('status', false);
+    }
+
+    /**
+     * Scope a query to only include default warehouse.
+     */
+    public function scopeDefault(Builder $query): Builder
+    {
+        return $query->where('default', true);
+    }
+
+    /**
+     * Scope a query to only include non-default warehouses.
+     */
+    public function scopeNonDefault(Builder $query): Builder
+    {
+        return $query->where('default', false);
     }
 
     /**
@@ -184,6 +245,22 @@ class Warehouse extends Model
     public static function findByCode(string $code): ?self
     {
         return static::where('code', $code)->first();
+    }
+
+    /**
+     * Get the default warehouse.
+     */
+    public static function getDefault(): ?self
+    {
+        return static::where('default', true)->first();
+    }
+
+    /**
+     * Check if there is a default warehouse.
+     */
+    public static function hasDefault(): bool
+    {
+        return static::where('default', true)->exists();
     }
 
     /**
@@ -294,10 +371,13 @@ class Warehouse extends Model
             'description' => $this->description,
             'status' => $this->status,
             'status_text' => $this->status_text,
+            'default' => $this->default,
+            'default_text' => $this->default_text,
             'display_name' => $this->display_name,
             'short_description' => $this->short_description,
             'is_active' => $this->isActive(),
             'is_inactive' => $this->isInactive(),
+            'is_default' => $this->isDefault(),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

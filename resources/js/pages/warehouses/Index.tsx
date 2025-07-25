@@ -18,6 +18,8 @@ interface Warehouse {
     description: string | null;
     status: boolean;
     status_text: string;
+    default: boolean;
+    default_text: string;
     created_at: string;
     updated_at: string;
 }
@@ -241,6 +243,7 @@ export default function Index({ warehouses, pagination, filters }: Props) {
                                                 <TableHead className="py-4">Nombre</TableHead>
                                                 <TableHead className="py-4">Descripción</TableHead>
                                                 <TableHead className="py-4">Estado</TableHead>
+                                                <TableHead className="py-4">Por Defecto</TableHead>
                                                 <TableHead className="py-4">Fecha Creación</TableHead>
                                                 <TableHead className="text-right py-4">Acciones</TableHead>
                                             </TableRow>
@@ -262,6 +265,14 @@ export default function Index({ warehouses, pagination, filters }: Props) {
                                                             variant={warehouse.status ? 'default' : 'secondary'}
                                                         >
                                                             {warehouse.status_text}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell className="py-4">
+                                                        <Badge
+                                                            variant={warehouse.default ? 'default' : 'outline'}
+                                                            className={warehouse.default ? 'bg-green-100 text-green-800 border-green-200' : ''}
+                                                        >
+                                                            {warehouse.default_text}
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell className="py-4">

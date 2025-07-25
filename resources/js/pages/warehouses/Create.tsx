@@ -22,6 +22,7 @@ export default function Create() {
         name: '',
         description: '',
         status: true,
+        default: false,
     });
 
     const submit: FormEventHandler = (e) => {
@@ -123,6 +124,27 @@ export default function Create() {
                                 <InputError message={errors.status} />
                                 <p className="text-xs text-gray-500">
                                     Define si el almacén estará disponible para operaciones
+                                </p>
+                            </div>
+
+                            {/* Default Field */}
+                            <div className="space-y-2">
+                                <Label htmlFor="default">
+                                    Almacén por Defecto
+                                </Label>
+                                <div className="flex items-center space-x-3">
+                                    <Switch
+                                        id="default"
+                                        checked={data.default}
+                                        onCheckedChange={(checked) => setData('default', checked)}
+                                    />
+                                    <span className="text-sm text-gray-600 dark:text-gray-400">
+                                        {data.default ? 'Sí' : 'No'}
+                                    </span>
+                                </div>
+                                <InputError message={errors.default} />
+                                <p className="text-xs text-gray-500">
+                                    Solo puede haber un almacén por defecto. Si activas esta opción, se desactivará automáticamente en otros almacenes.
                                 </p>
                             </div>
 

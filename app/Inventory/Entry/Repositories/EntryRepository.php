@@ -22,6 +22,30 @@ class EntryRepository implements EntryRepositoryInterface
     }
 
     /**
+     * Get all entries with optional filters.
+     */
+    public function getAll(array $filters = []): Collection
+    {
+        $query = Entry::query();
+
+        // Filtro por rango de fechas
+        if (isset($filters['date_from'])) {
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])) {
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        // Filtro por status
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        return $query->orderBy('created_at', 'desc')->get();
+    }
+
+    /**
      * Get entries with pagination.
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator

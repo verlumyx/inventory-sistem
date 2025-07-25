@@ -14,6 +14,11 @@ interface EntryRepositoryInterface
     public function all(): Collection;
 
     /**
+     * Get all entries with optional filters.
+     */
+    public function getAll(array $filters = []): Collection;
+
+    /**
      * Get entries with pagination.
      */
     public function paginate(int $perPage = 15): LengthAwarePaginator;

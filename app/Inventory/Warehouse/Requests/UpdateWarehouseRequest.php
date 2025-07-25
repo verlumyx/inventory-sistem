@@ -49,6 +49,10 @@ class UpdateWarehouseRequest extends FormRequest
                 Rule::unique('warehouses', 'code')->ignore($warehouseId),
                 'regex:/^WH-\d{8}$/',
             ],
+            'default' => [
+                'sometimes',
+                'boolean',
+            ],
         ];
     }
 
@@ -74,6 +78,8 @@ class UpdateWarehouseRequest extends FormRequest
             'code.max' => 'El código no puede exceder los 20 caracteres.',
             'code.unique' => 'Este código de almacén ya existe.',
             'code.regex' => 'El código debe tener el formato WH-00000000.',
+
+            'default.boolean' => 'El campo por defecto debe ser verdadero o falso.',
         ];
     }
 
@@ -89,6 +95,7 @@ class UpdateWarehouseRequest extends FormRequest
             'description' => 'descripción',
             'status' => 'estado',
             'code' => 'código',
+            'default' => 'por defecto',
         ];
     }
 

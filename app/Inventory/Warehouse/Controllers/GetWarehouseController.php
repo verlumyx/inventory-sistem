@@ -39,6 +39,8 @@ class GetWarehouseController extends Controller
                     'description' => $warehouse->description,
                     'status' => $warehouse->status,
                     'status_text' => $warehouse->status_text,
+                    'default' => $warehouse->default,
+                    'default_text' => $warehouse->default_text,
                     'created_at' => $warehouse->created_at->toISOString(),
                     'updated_at' => $warehouse->updated_at->toISOString(),
                 ]

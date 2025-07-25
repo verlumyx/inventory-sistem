@@ -54,6 +54,8 @@ Route::get('/warehouses/{warehouse}/edit', function (int $warehouse) {
                 'description' => $warehouseData->description,
                 'status' => $warehouseData->status,
                 'status_text' => $warehouseData->status_text,
+                'default' => $warehouseData->default,
+                'default_text' => $warehouseData->default_text,
                 'created_at' => $warehouseData->created_at->toISOString(),
                 'updated_at' => $warehouseData->updated_at->toISOString(),
             ]
