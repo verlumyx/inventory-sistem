@@ -17,6 +17,9 @@ return new class extends Migration
             // Índice para mejorar el rendimiento en consultas por default
             $table->index('default', 'idx_warehouses_default');
         });
+
+
+        \App\Inventory\Warehouse\Models\Warehouse::query()->where('name', 'Almacén Principal')->update(['default' => 1]);
     }
 
     /**

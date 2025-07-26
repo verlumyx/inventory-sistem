@@ -128,6 +128,14 @@ class WarehouseItem extends Model
     }
 
     /**
+     * Force remove stock from the warehouse item (allows negative stock).
+     */
+    public function forceRemoveStock(float $quantity): bool
+    {
+        return $this->decrement('quantity_available', $quantity);
+    }
+
+    /**
      * Set the exact stock quantity.
      */
     public function setStock(float $quantity): bool
