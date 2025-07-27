@@ -77,6 +77,17 @@ export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, tw
         password: '',
     });
 
+    const {
+        data: showCodesData,
+        setData: setShowCodesData,
+        post: showCodesPost,
+        processing: showCodesProcessing,
+        errors: showCodesErrors,
+        reset: showCodesReset,
+    } = useForm({
+        password: '',
+    });
+
     const enableTwoFactor: FormEventHandler = (e) => {
         e.preventDefault();
         console.log('Enable 2FA button clicked');
@@ -122,6 +133,17 @@ export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, tw
             preserveScroll: true,
             onSuccess: () => {
                 recoveryReset();
+                setShowRecoveryCodes(true);
+            },
+        });
+    };
+
+    const showExistingRecoveryCodes: FormEventHandler = (e) => {
+        e.preventDefault();
+        showCodesPost(route('two-factor.show-recovery-codes'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                showCodesReset();
                 setShowRecoveryCodes(true);
             },
         });
@@ -342,43 +364,78 @@ export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, tw
                             </Card>
 
                             {/* Recovery Codes */}
-                            {/*<Card>*/}
-                            {/*    <CardHeader>*/}
-                            {/*        <CardTitle className="flex items-center gap-2">*/}
-                            {/*            <Key className="h-5 w-5" />*/}
-                            {/*            Códigos de Recuperación*/}
-                            {/*        </CardTitle>*/}
-                            {/*        <CardDescription>*/}
-                            {/*            Genera nuevos códigos de recuperación para acceder a tu cuenta si pierdes tu dispositivo*/}
-                            {/*        </CardDescription>*/}
-                            {/*    </CardHeader>*/}
-                            {/*    <CardContent>*/}
-                            {/*        <form onSubmit={generateRecoveryCodes}>*/}
-                            {/*            <div className="space-y-4">*/}
-                            {/*                <div>*/}
-                            {/*                    <Label htmlFor="recovery_password">Contraseña Actual</Label>*/}
-                            {/*                    <Input*/}
-                            {/*                        id="recovery_password"*/}
-                            {/*                        type="password"*/}
-                            {/*                        value={recoveryData.password}*/}
-                            {/*                        onChange={(e) => setRecoveryData('password', e.target.value)}*/}
-                            {/*                        required*/}
-                            {/*                    />*/}
-                            {/*                    <InputError message={recoveryErrors.password} className="mt-2" />*/}
-                            {/*                </div>*/}
-                            {/*                */}
-                            {/*                <Button type="submit" disabled={recoveryProcessing}>*/}
-                            {/*                    {recoveryProcessing ? 'Generando...' : 'Generar Nuevos Códigos'}*/}
-                            {/*                </Button>*/}
-                            {/*            </div>*/}
-                            {/*        </form>*/}
-                            {/*    </CardContent>*/}
-                            {/*</Card>*/}
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle className="flex items-center gap-2">
+                                        <Key className="h-5 w-5" />
+                                        Códigos de Recuperación
+                                    </CardTitle>
+                                    <CardDescription>
+                                        Gestiona tus códigos de recuperación para acceder a tu cuenta si pierdes tu dispositivo
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="space-y-4">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {/* Mostrar códigos existentes */}
+                                            <form onSubmit={showExistingRecoveryCodes}>
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <Label htmlFor="show_codes_password">Ver Códigos Actuales</Label>
+                                                        <Input
+                                                            id="show_codes_password"
+                                                            type="password"
+                                                            placeholder="Contraseña actual"
+                                                            value={showCodesData.password}
+                                                            onChange={(e) => setShowCodesData('password', e.target.value)}
+                                                            required
+                                                        />
+                                                        <InputError message={showCodesErrors.password} className="mt-2" />
+                                                    </div>
+
+                                                    <Button type="submit" disabled={showCodesProcessing} variant="outline" className="w-full">
+                                                        {showCodesProcessing ? 'Cargando...' : 'Mostrar Códigos'}
+                                                    </Button>
+                                                </div>
+                                            </form>
+
+                                            {/* Generar nuevos códigos */}
+                                            <form onSubmit={generateRecoveryCodes}>
+                                                <div className="space-y-4">
+                                                    <div>
+                                                        <Label htmlFor="recovery_password">Generar Nuevos Códigos</Label>
+                                                        <Input
+                                                            id="recovery_password"
+                                                            type="password"
+                                                            placeholder="Contraseña actual"
+                                                            value={recoveryData.password}
+                                                            onChange={(e) => setRecoveryData('password', e.target.value)}
+                                                            required
+                                                        />
+                                                        <InputError message={recoveryErrors.password} className="mt-2" />
+                                                    </div>
+
+                                                    <Button type="submit" disabled={recoveryProcessing} className="w-full">
+                                                        {recoveryProcessing ? 'Generando...' : 'Generar Nuevos'}
+                                                    </Button>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                        <Alert>
+                                            <AlertTriangle className="h-4 w-4" />
+                                            <AlertDescription>
+                                                <strong>Importante:</strong> Generar nuevos códigos invalidará todos los códigos anteriores.
+                                            </AlertDescription>
+                                        </Alert>
+                                    </div>
+                                </CardContent>
+                            </Card>
                         </div>
                     )}
 
                     {/* Recovery Codes Display */}
-                    {(flash?.recovery_codes || (showRecoveryCodes && flash?.status === 'recovery-codes-generated')) && (
+                    {(flash?.recovery_codes || (showRecoveryCodes && (flash?.status === 'recovery-codes-generated' || flash?.status === 'recovery-codes-shown' || flash?.status === 'two-factor-confirmed'))) && (
                         <Card>
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">

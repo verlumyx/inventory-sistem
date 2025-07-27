@@ -6,7 +6,8 @@ use App\Http\Controllers\Auth\EmailVerificationNotificationController;
 use App\Http\Controllers\Auth\EmailVerificationPromptController;
 use App\Http\Controllers\Auth\NewPasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
-use App\Http\Controllers\Auth\TwoFactorChallengeController;
+use App\Http\Controllers\Auth\PasswordResetTwoFactorController;
+// use App\Http\Controllers\Auth\TwoFactorChallengeController; // Disabled
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,10 +29,20 @@ Route::middleware('guest')->group(function () {
     Route::post('reset-password', [NewPasswordController::class, 'store'])
         ->name('password.store');
 
-    Route::get('two-factor-challenge', [TwoFactorChallengeController::class, 'create'])
-        ->name('two-factor.login');
+    // Password reset with 2FA routes
+    Route::get('password-reset-two-factor', [PasswordResetTwoFactorController::class, 'create'])
+        ->name('password.two-factor');
 
-    Route::post('two-factor-challenge', [TwoFactorChallengeController::class, 'store']);
+    Route::post('password-reset-two-factor', [PasswordResetTwoFactorController::class, 'verify'])
+        ->name('password.two-factor.verify');
+
+    Route::post('password-reset-complete', [PasswordResetTwoFactorController::class, 'reset'])
+        ->name('password.two-factor.reset');
+
+    // Two-factor challenge routes disabled
+    // Route::get('two-factor-challenge', [TwoFactorChallengeController::class, 'create'])
+    //     ->name('two-factor.login');
+    // Route::post('two-factor-challenge', [TwoFactorChallengeController::class, 'store']);
 });
 
 Route::middleware('auth')->group(function () {

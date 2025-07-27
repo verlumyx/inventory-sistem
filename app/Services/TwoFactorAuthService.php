@@ -125,26 +125,34 @@ class TwoFactorAuthService
 
     /**
      * Verify two factor code for login.
+     * Note: Login 2FA verification is currently disabled.
      */
     public function verifyLoginCode(User $user, string $code): bool
     {
-        if (!$user->hasTwoFactorEnabled()) {
-            return false;
-        }
-        
-        $secret = Crypt::decryptString($user->two_factor_secret);
-        return $this->verifyCode($secret, $code);
+        // Login 2FA verification disabled
+        return true;
+
+        // Original code (commented out):
+        // if (!$user->hasTwoFactorEnabled()) {
+        //     return false;
+        // }
+        // $secret = Crypt::decryptString($user->two_factor_secret);
+        // return $this->verifyCode($secret, $code);
     }
 
     /**
      * Verify recovery code for login.
+     * Note: Login 2FA verification is currently disabled.
      */
     public function verifyRecoveryCode(User $user, string $code): bool
     {
-        if (!$user->hasTwoFactorEnabled()) {
-            return false;
-        }
-        
-        return $user->useRecoveryCode($code);
+        // Login 2FA verification disabled
+        return true;
+
+        // Original code (commented out):
+        // if (!$user->hasTwoFactorEnabled()) {
+        //     return false;
+        // }
+        // return $user->useRecoveryCode($code);
     }
 }

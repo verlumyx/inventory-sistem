@@ -91,9 +91,14 @@ class TwoFactorController extends Controller
 
         if ($this->twoFactorService->confirmTwoFactor($user, $request->code)) {
             \Log::info('2FA confirmation successful');
+
+            // Asegurar que el usuario tenga códigos de recuperación
+            $user->refresh();
+            $recoveryCodes = $user->two_factor_recovery_codes;
+
             return back()->with([
                 'status' => 'two-factor-confirmed',
-                'recovery_codes' => $user->two_factor_recovery_codes,
+                'recovery_codes' => $recoveryCodes,
             ]);
         }
 
@@ -142,6 +147,27 @@ class TwoFactorController extends Controller
         return back()->with([
             'status' => 'recovery-codes-generated',
             'recovery_codes' => $codes,
+        ]);
+    }
+
+    /**
+     * Show existing recovery codes.
+     */
+    public function showRecoveryCodes(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'current_password'],
+        ]);
+
+        $user = $request->user();
+
+        if (!$user->hasTwoFactorEnabled()) {
+            return back()->withErrors(['password' => 'La autenticación de dos factores no está habilitada.']);
+        }
+
+        return back()->with([
+            'status' => 'recovery-codes-shown',
+            'recovery_codes' => $user->two_factor_recovery_codes,
         ]);
     }
 }
