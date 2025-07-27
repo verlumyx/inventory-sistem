@@ -18,6 +18,11 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
+        title: 'Autenticación de 2 Factores',
+        href: '/settings/two-factor',
+        icon: null,
+    },
+    {
         title: 'Apariencia',
         href: '/settings/appearance',
         icon: null,
