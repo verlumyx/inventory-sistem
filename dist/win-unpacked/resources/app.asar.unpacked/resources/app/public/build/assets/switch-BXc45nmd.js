@@ -1,6 +1,0 @@
-import{a as u,c as o}from"./button-D4rUH4JB.js";import{r as d,j as t}from"./app-Doa1X8LG.js";/**
- * @license lucide-react v0.475.0 - ISC
- *
- * This source code is licensed under the ISC license.
- * See the LICENSE file in the root directory of this source tree.
- */const f=[["path",{d:"M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z",key:"1c8476"}],["path",{d:"M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7",key:"1ydtos"}],["path",{d:"M7 3v4a1 1 0 0 0 1 1h7",key:"t51u73"}]],g=u("Save",f),p=d.forwardRef(({className:e,checked:r=!1,onCheckedChange:a,disabled:s=!1,id:i,...n},l)=>{const c=()=>{!s&&a&&a(!r)};return t.jsx("button",{type:"button",role:"switch","aria-checked":r,id:i,ref:l,className:o("peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50",r?"bg-primary":"bg-input",e),disabled:s,onClick:c,...n,children:t.jsx("div",{className:o("pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform",r?"translate-x-5":"translate-x-0")})})});p.displayName="Switch";export{p as S,g as a};

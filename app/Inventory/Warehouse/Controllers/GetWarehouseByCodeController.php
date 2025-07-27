@@ -7,6 +7,7 @@ use App\Inventory\Warehouse\Exceptions\WarehouseNotFoundException;
 use App\Inventory\Warehouse\Handlers\GetWarehouseHandler;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 
 class GetWarehouseByCodeController extends Controller
 {
@@ -17,13 +18,7 @@ class GetWarehouseByCodeController extends Controller
         private GetWarehouseHandler $getWarehouseHandler
     ) {}
 
-    /**
-     * Get a warehouse by code.
-     *
-     * @param string $code
-     * @return Response
-     */
-    public function __invoke(string $code): Response
+    public function __invoke(string $code): Response | RedirectResponse
     {
         try {
             $warehouse = $this->getWarehouseHandler->handleByCode($code);
