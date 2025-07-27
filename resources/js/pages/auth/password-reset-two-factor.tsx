@@ -3,10 +3,10 @@ import { FormEventHandler, useState } from 'react';
 
 import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Shield, Key, ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Shield } from 'lucide-react';
 
 interface Props {
     email: string;
@@ -29,102 +29,44 @@ export default function PasswordResetTwoFactor({ email }: Props) {
     };
 
     return (
-        <div className="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
+        <div className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0 dark:bg-gray-900">
             <Head title="Verificación de Seguridad - Recuperar Contraseña" />
 
-            <div className="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+            <div className="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg dark:bg-gray-800">
                 <Card className="border-0 shadow-none">
                     <CardHeader className="text-center">
-                        <div className="mx-auto w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-full flex items-center justify-center mb-4">
+                        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900">
                             <Shield className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                         </div>
                         <CardTitle>Verificación de Seguridad</CardTitle>
-                        <CardDescription>
-                            Para recuperar tu contraseña, confirma tu identidad con tu aplicación de autenticación
-                        </CardDescription>
-                        <div className="mt-2 text-sm text-muted-foreground">
+                        <CardDescription>Para recuperar tu contraseña, confirma tu identidad con tu aplicación de autenticación</CardDescription>
+                        <div className="text-muted-foreground mt-2 text-sm">
                             Cuenta: <span className="font-medium">{email}</span>
                         </div>
                     </CardHeader>
                     <CardContent>
                         <div className="w-full">
-                            {/* Toggle buttons */}
-                            <div className="flex rounded-lg bg-muted p-1 mb-6">
-                                <button
-                                    type="button"
-                                    onClick={() => setRecovery(false)}
-                                    className={`flex-1 flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                                        !recovery 
-                                            ? 'bg-background text-foreground shadow-sm' 
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                >
-                                    <Shield className="h-3 w-3 mr-1" />
-                                    Aplicación
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={() => setRecovery(true)}
-                                    className={`flex-1 flex items-center justify-center px-3 py-2 text-sm font-medium rounded-md transition-colors ${
-                                        recovery 
-                                            ? 'bg-background text-foreground shadow-sm' 
-                                            : 'text-muted-foreground hover:text-foreground'
-                                    }`}
-                                >
-                                    <Key className="h-3 w-3 mr-1" />
-                                    Recuperación
-                                </button>
-                            </div>
-
                             <form onSubmit={submit}>
-                                {!recovery ? (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="code">Código de Autenticación</Label>
-                                            <Input
-                                                id="code"
-                                                type="text"
-                                                placeholder="123456"
-                                                value={data.code}
-                                                onChange={(e) => setData('code', e.target.value)}
-                                                maxLength={6}
-                                                className="text-center text-lg tracking-widest"
-                                                autoFocus
-                                                autoComplete="one-time-code"
-                                            />
-                                            <InputError message={errors.code} className="mt-2" />
-                                            <p className="text-sm text-muted-foreground mt-2">
-                                                Ingresa el código de 6 dígitos de tu aplicación de autenticación
-                                            </p>
-                                        </div>
+                                <div className="space-y-4">
+                                    <div>
+                                        <Label htmlFor="recovery_code">Código de Recuperación</Label>
+                                        <Input
+                                            id="recovery_code"
+                                            type="text"
+                                            placeholder="ABCD-EFGH"
+                                            value={data.recovery_code}
+                                            onChange={(e) => setData('recovery_code', e.target.value.toUpperCase())}
+                                            className="text-center font-mono text-lg tracking-widest"
+                                            autoComplete="one-time-code"
+                                        />
+                                        <InputError message={errors.recovery_code} className="mt-2" />
+                                        <p className="text-muted-foreground mt-2 text-sm">
+                                            Ingresa uno de tus códigos de recuperación (formato: XXXX-XXXX)
+                                        </p>
                                     </div>
-                                ) : (
-                                    <div className="space-y-4">
-                                        <div>
-                                            <Label htmlFor="recovery_code">Código de Recuperación</Label>
-                                            <Input
-                                                id="recovery_code"
-                                                type="text"
-                                                placeholder="ABCD-EFGH"
-                                                value={data.recovery_code}
-                                                onChange={(e) => setData('recovery_code', e.target.value.toUpperCase())}
-                                                className="text-center text-lg tracking-widest font-mono"
-                                                autoComplete="one-time-code"
-                                            />
-                                            <InputError message={errors.recovery_code} className="mt-2" />
-                                            <p className="text-sm text-muted-foreground mt-2">
-                                                Ingresa uno de tus códigos de recuperación (formato: XXXX-XXXX)
-                                            </p>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex items-center justify-end mt-6">
-                                    <Button 
-                                        type="submit" 
-                                        disabled={processing}
-                                        className="w-full"
-                                    >
+                                </div>
+                                <div className="mt-6 flex items-center justify-end">
+                                    <Button type="submit" disabled={processing} className="w-full">
                                         {processing ? 'Verificando...' : 'Verificar y Continuar'}
                                     </Button>
                                 </div>
@@ -132,13 +74,9 @@ export default function PasswordResetTwoFactor({ email }: Props) {
                         </div>
 
                         <div className="mt-6 text-center">
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-muted-foreground text-sm">
                                 ¿Problemas para acceder?{' '}
-                                <button
-                                    type="button"
-                                    onClick={() => setRecovery(!recovery)}
-                                    className="text-blue-600 hover:text-blue-500 underline"
-                                >
+                                <button type="button" onClick={() => setRecovery(!recovery)} className="text-blue-600 underline hover:text-blue-500">
                                     {recovery ? 'Usar aplicación de autenticación' : 'Usar código de recuperación'}
                                 </button>
                             </p>
@@ -147,9 +85,9 @@ export default function PasswordResetTwoFactor({ email }: Props) {
                         <div className="mt-4 text-center">
                             <a
                                 href={route('password.request')}
-                                className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
+                                className="text-muted-foreground hover:text-foreground inline-flex items-center text-sm"
                             >
-                                <ArrowLeft className="h-3 w-3 mr-1" />
+                                <ArrowLeft className="mr-1 h-3 w-3" />
                                 Volver a recuperación de contraseña
                             </a>
                         </div>

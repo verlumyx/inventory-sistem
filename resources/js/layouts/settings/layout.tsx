@@ -18,7 +18,7 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
-        title: 'Autenticación de 2 Factores',
+        title: 'Códigos de Recuperación',
         href: '/settings/two-factor',
         icon: null,
     },
