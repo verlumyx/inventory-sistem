@@ -41,7 +41,7 @@ class PasswordResetTwoFactorController extends Controller
     {
         $request->validate([
             'code' => 'nullable|string|size:6',
-            'recovery_code' => 'nullable|string|min:8|max:8',
+            'recovery_code' => 'nullable|string|min:8|max:9', // Permitir 8 caracteres sin guión o 9 con guión
         ]);
 
         // Verificar que al menos uno de los campos esté presente

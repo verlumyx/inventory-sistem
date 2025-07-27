@@ -113,7 +113,7 @@ export default function PasswordResetTwoFactor({ email }: Props) {
                                             />
                                             <InputError message={errors.recovery_code} className="mt-2" />
                                             <p className="text-sm text-muted-foreground mt-2">
-                                                Ingresa uno de tus códigos de recuperación de 8 caracteres
+                                                Ingresa uno de tus códigos de recuperación (formato: XXXX-XXXX)
                                             </p>
                                         </div>
                                     </div>

@@ -38,6 +38,9 @@ class TwoFactorController extends Controller
             } catch (\Exception $e) {
                 \Log::error('Error auto-generating 2FA setup: ' . $e->getMessage());
             }
+        } else {
+            // Si el usuario tiene 2FA habilitado, incluir los códigos de recuperación
+            $data['recovery_codes'] = $user->two_factor_recovery_codes;
         }
 
         return Inertia::render('settings/two-factor', $data);

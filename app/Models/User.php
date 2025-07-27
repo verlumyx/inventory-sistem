@@ -97,7 +97,10 @@ class User extends Authenticatable
     {
         $codes = [];
         for ($i = 0; $i < 8; $i++) {
-            $codes[] = strtoupper(substr(str_replace(['+', '/', '='], '', base64_encode(random_bytes(6))), 0, 8));
+            // Generar 8 caracteres alfanuméricos en formato XXXX-XXXX
+            $part1 = $this->generateRandomString(4);
+            $part2 = $this->generateRandomString(4);
+            $codes[] = $part1 . '-' . $part2;
         }
 
         $this->two_factor_recovery_codes = $codes;
@@ -107,18 +110,35 @@ class User extends Authenticatable
     }
 
     /**
+     * Generate a random string of specified length.
+     */
+    private function generateRandomString(int $length): string
+    {
+        $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $result = '';
+        for ($i = 0; $i < $length; $i++) {
+            $result .= $characters[random_int(0, strlen($characters) - 1)];
+        }
+        return $result;
+    }
+
+    /**
      * Use a recovery code.
      */
     public function useRecoveryCode(string $code): bool
     {
         $codes = $this->two_factor_recovery_codes ?? [];
-        $index = array_search(strtoupper($code), $codes);
+        $normalizedInputCode = strtoupper(str_replace('-', '', $code));
 
-        if ($index !== false) {
-            unset($codes[$index]);
-            $this->two_factor_recovery_codes = array_values($codes);
-            $this->save();
-            return true;
+        foreach ($codes as $index => $storedCode) {
+            $normalizedStoredCode = strtoupper(str_replace('-', '', $storedCode));
+
+            if ($normalizedInputCode === $normalizedStoredCode) {
+                unset($codes[$index]);
+                $this->two_factor_recovery_codes = array_values($codes);
+                $this->save();
+                return true;
+            }
         }
 
         return false;

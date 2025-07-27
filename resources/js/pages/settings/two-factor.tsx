@@ -29,11 +29,13 @@ interface Props {
         secret: string;
         qr_code_url: string;
     };
+    recovery_codes?: string[];
 }
 
-export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, two_factor_setup }: Props) {
+export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, two_factor_setup, recovery_codes }: Props) {
     const { flash, errors } = usePage().props as any;
     const [showRecoveryCodes, setShowRecoveryCodes] = useState(false);
+    const [showCurrentCodes, setShowCurrentCodes] = useState(false);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
 
     const {
@@ -363,42 +365,20 @@ export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, tw
                                 </CardContent>
                             </Card>
 
-                            {/* Recovery Codes */}
+                            {/* Recovery Codes Management */}
                             <Card>
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <Key className="h-5 w-5" />
-                                        Códigos de Recuperación
+                                        Gestionar Códigos de Recuperación
                                     </CardTitle>
                                     <CardDescription>
-                                        Gestiona tus códigos de recuperación para acceder a tu cuenta si pierdes tu dispositivo
+                                        Ver códigos actuales o generar nuevos códigos de recuperación
                                     </CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {/* Mostrar códigos existentes */}
-                                            <form onSubmit={showExistingRecoveryCodes}>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <Label htmlFor="show_codes_password">Ver Códigos Actuales</Label>
-                                                        <Input
-                                                            id="show_codes_password"
-                                                            type="password"
-                                                            placeholder="Contraseña actual"
-                                                            value={showCodesData.password}
-                                                            onChange={(e) => setShowCodesData('password', e.target.value)}
-                                                            required
-                                                        />
-                                                        <InputError message={showCodesErrors.password} className="mt-2" />
-                                                    </div>
-
-                                                    <Button type="submit" disabled={showCodesProcessing} variant="outline" className="w-full">
-                                                        {showCodesProcessing ? 'Cargando...' : 'Mostrar Códigos'}
-                                                    </Button>
-                                                </div>
-                                            </form>
-
+                                        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                                             {/* Generar nuevos códigos */}
                                             <form onSubmit={generateRecoveryCodes}>
                                                 <div className="space-y-4">
@@ -431,6 +411,93 @@ export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, tw
                                     </div>
                                 </CardContent>
                             </Card>
+
+                            {/* Current Recovery Codes Display */}
+                            {recovery_codes && recovery_codes.length > 0 && (
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle className="flex items-center gap-2">
+                                            <Key className="h-5 w-5" />
+                                            Tus Códigos de Recuperación Actuales
+                                        </CardTitle>
+                                        <CardDescription>
+                                            Estos son tus códigos de recuperación de emergencia. Guárdalos en un lugar seguro.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent>
+                                        <Alert className="mb-4">
+                                            <AlertTriangle className="h-4 w-4" />
+                                            <AlertDescription>
+                                                <strong>Importante:</strong> Cada código solo se puede usar una vez. Guárdalos en un lugar seguro.
+                                            </AlertDescription>
+                                        </Alert>
+
+                                        {!showCurrentCodes ? (
+                                            <div className="text-center py-6">
+                                                <div className="mb-4">
+                                                    <div className="text-lg font-mono text-muted-foreground">
+                                                        ••••-•••• ••••-•••• ••••-•••• ••••-••••
+                                                    </div>
+                                                    <div className="text-lg font-mono text-muted-foreground">
+                                                        ••••-•••• ••••-•••• ••••-•••• ••••-••••
+                                                    </div>
+                                                </div>
+                                                <Button
+                                                    type="button"
+                                                    onClick={() => setShowCurrentCodes(true)}
+                                                    className="gap-2"
+                                                >
+                                                    <Key className="h-4 w-4" />
+                                                    Mostrar Códigos de Recuperación
+                                                </Button>
+                                            </div>
+                                        ) : (
+                                            <>
+                                                <div className="grid grid-cols-2 gap-2 p-4 bg-muted rounded-lg font-mono text-sm">
+                                                    {recovery_codes.map((code: string, index: number) => (
+                                                        <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
+                                                            <span>{code}</span>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() => copyToClipboard(code)}
+                                                            >
+                                                                {copiedCode === code ? (
+                                                                    <CheckCircle className="h-4 w-4" />
+                                                                ) : (
+                                                                    <Copy className="h-4 w-4" />
+                                                                )}
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+
+                                                <div className="mt-4 flex gap-2">
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => {
+                                                            const codes = recovery_codes.join('\n');
+                                                            copyToClipboard(codes);
+                                                        }}
+                                                    >
+                                                        <Copy className="h-4 w-4 mr-2" />
+                                                        Copiar Todos
+                                                    </Button>
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        onClick={() => setShowCurrentCodes(false)}
+                                                    >
+                                                        Ocultar Códigos
+                                                    </Button>
+                                                </div>
+                                            </>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
                         </div>
                     )}
 
