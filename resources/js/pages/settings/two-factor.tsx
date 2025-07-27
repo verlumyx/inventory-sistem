@@ -335,170 +335,194 @@ export default function TwoFactor({ two_factor_enabled, two_factor_confirmed, tw
                     ) : (
                         <div className="space-y-6">
                             {/* Disable Two Factor */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="text-red-600">Deshabilitar Autenticación de 2 Factores</CardTitle>
-                                    <CardDescription>
-                                        Esto eliminará la protección adicional de tu cuenta
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <form onSubmit={disableTwoFactor}>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <Label htmlFor="disable_password">Contraseña Actual</Label>
-                                                <Input
-                                                    id="disable_password"
-                                                    type="password"
-                                                    value={disableData.password}
-                                                    onChange={(e) => setDisableData('password', e.target.value)}
-                                                    required
-                                                />
-                                                <InputError message={disableErrors.password} className="mt-2" />
-                                            </div>
-                                            
-                                            <Button type="submit" variant="destructive" disabled={disableProcessing}>
-                                                {disableProcessing ? 'Deshabilitando...' : 'Deshabilitar'}
-                                            </Button>
-                                        </div>
-                                    </form>
-                                </CardContent>
-                            </Card>
-
-                            {/* Recovery Codes Management */}
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle className="flex items-center gap-2">
-                                        <Key className="h-5 w-5" />
-                                        Gestionar Códigos de Recuperación
-                                    </CardTitle>
-                                    <CardDescription>
-                                        Ver códigos actuales o generar nuevos códigos de recuperación
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="space-y-4">
-                                        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
-                                            {/* Generar nuevos códigos */}
-                                            <form onSubmit={generateRecoveryCodes}>
-                                                <div className="space-y-4">
-                                                    <div>
-                                                        <Label htmlFor="recovery_password">Generar Nuevos Códigos</Label>
-                                                        <Input
-                                                            id="recovery_password"
-                                                            type="password"
-                                                            placeholder="Contraseña actual"
-                                                            value={recoveryData.password}
-                                                            onChange={(e) => setRecoveryData('password', e.target.value)}
-                                                            required
-                                                        />
-                                                        <InputError message={recoveryErrors.password} className="mt-2" />
-                                                    </div>
-
-                                                    <Button type="submit" disabled={recoveryProcessing} className="w-full">
-                                                        {recoveryProcessing ? 'Generando...' : 'Generar Nuevos'}
-                                                    </Button>
-                                                </div>
-                                            </form>
-                                        </div>
-
-                                        <Alert>
-                                            <AlertTriangle className="h-4 w-4" />
-                                            <AlertDescription>
-                                                <strong>Importante:</strong> Generar nuevos códigos invalidará todos los códigos anteriores.
-                                            </AlertDescription>
-                                        </Alert>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            {/* Current Recovery Codes Display */}
-                            {recovery_codes && recovery_codes.length > 0 && (
+                            {two_factor_enabled && (
                                 <Card>
                                     <CardHeader>
-                                        <CardTitle className="flex items-center gap-2">
-                                            <Key className="h-5 w-5" />
-                                            Tus Códigos de Recuperación Actuales
-                                        </CardTitle>
+                                        <CardTitle className="text-red-600">Deshabilitar Autenticación de 2 Factores</CardTitle>
                                         <CardDescription>
-                                            Estos son tus códigos de recuperación de emergencia. Guárdalos en un lugar seguro.
+                                            Esto eliminará la protección adicional de tu cuenta
                                         </CardDescription>
                                     </CardHeader>
                                     <CardContent>
-                                        <Alert className="mb-4">
-                                            <AlertTriangle className="h-4 w-4" />
-                                            <AlertDescription>
-                                                <strong>Importante:</strong> Cada código solo se puede usar una vez. Guárdalos en un lugar seguro.
-                                            </AlertDescription>
-                                        </Alert>
-
-                                        {!showCurrentCodes ? (
-                                            <div className="text-center py-6">
-                                                <div className="mb-4">
-                                                    <div className="text-lg font-mono text-muted-foreground">
-                                                        ••••-•••• ••••-•••• ••••-•••• ••••-••••
-                                                    </div>
-                                                    <div className="text-lg font-mono text-muted-foreground">
-                                                        ••••-•••• ••••-•••• ••••-•••• ••••-••••
-                                                    </div>
+                                        <form onSubmit={disableTwoFactor}>
+                                            <div className="space-y-4">
+                                                <div>
+                                                    <Label htmlFor="disable_password">Contraseña Actual</Label>
+                                                    <Input
+                                                        id="disable_password"
+                                                        type="password"
+                                                        value={disableData.password}
+                                                        onChange={(e) => setDisableData('password', e.target.value)}
+                                                        required
+                                                    />
+                                                    <InputError message={disableErrors.password} className="mt-2" />
                                                 </div>
-                                                <Button
-                                                    type="button"
-                                                    onClick={() => setShowCurrentCodes(true)}
-                                                    className="gap-2"
-                                                >
-                                                    <Key className="h-4 w-4" />
-                                                    Mostrar Códigos de Recuperación
+
+                                                <Button type="submit" variant="destructive" disabled={disableProcessing}>
+                                                    {disableProcessing ? 'Deshabilitando...' : 'Deshabilitar'}
                                                 </Button>
                                             </div>
-                                        ) : (
-                                            <>
-                                                <div className="grid grid-cols-2 gap-2 p-4 bg-muted rounded-lg font-mono text-sm">
-                                                    {recovery_codes.map((code: string, index: number) => (
-                                                        <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
-                                                            <span>{code}</span>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => copyToClipboard(code)}
-                                                            >
-                                                                {copiedCode === code ? (
-                                                                    <CheckCircle className="h-4 w-4" />
-                                                                ) : (
-                                                                    <Copy className="h-4 w-4" />
-                                                                )}
-                                                            </Button>
-                                                        </div>
-                                                    ))}
-                                                </div>
-
-                                                <div className="mt-4 flex gap-2">
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        onClick={() => {
-                                                            const codes = recovery_codes.join('\n');
-                                                            copyToClipboard(codes);
-                                                        }}
-                                                    >
-                                                        <Copy className="h-4 w-4 mr-2" />
-                                                        Copiar Todos
-                                                    </Button>
-                                                    <Button
-                                                        type="button"
-                                                        variant="outline"
-                                                        onClick={() => setShowCurrentCodes(false)}
-                                                    >
-                                                        Ocultar Códigos
-                                                    </Button>
-                                                </div>
-                                            </>
-                                        )}
+                                        </form>
                                     </CardContent>
                                 </Card>
                             )}
                         </div>
+                    )}
+
+                    {/* Recovery Codes Management - Always visible */}
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Key className="h-5 w-5" />
+                                Gestionar Códigos de Recuperación
+                            </CardTitle>
+                            <CardDescription>
+                                Ver códigos actuales o generar nuevos códigos de recuperación
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Mostrar códigos existentes */}
+                                    <form onSubmit={showExistingRecoveryCodes}>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="show_codes_password">Ver Códigos Actuales</Label>
+                                                <Input
+                                                    id="show_codes_password"
+                                                    type="password"
+                                                    placeholder="Contraseña actual"
+                                                    value={showCodesData.password}
+                                                    onChange={(e) => setShowCodesData('password', e.target.value)}
+                                                    required
+                                                />
+                                                <InputError message={showCodesErrors.password} className="mt-2" />
+                                            </div>
+
+                                            <Button type="submit" disabled={showCodesProcessing} className="w-full" variant="outline">
+                                                {showCodesProcessing ? 'Mostrando...' : 'Ver Códigos'}
+                                            </Button>
+                                        </div>
+                                    </form>
+
+                                    {/* Generar nuevos códigos */}
+                                    <form onSubmit={generateRecoveryCodes}>
+                                        <div className="space-y-4">
+                                            <div>
+                                                <Label htmlFor="recovery_password">Generar Nuevos Códigos</Label>
+                                                <Input
+                                                    id="recovery_password"
+                                                    type="password"
+                                                    placeholder="Contraseña actual"
+                                                    value={recoveryData.password}
+                                                    onChange={(e) => setRecoveryData('password', e.target.value)}
+                                                    required
+                                                />
+                                                <InputError message={recoveryErrors.password} className="mt-2" />
+                                            </div>
+
+                                            <Button type="submit" disabled={recoveryProcessing} className="w-full">
+                                                {recoveryProcessing ? 'Generando...' : 'Generar Nuevos'}
+                                            </Button>
+                                        </div>
+                                    </form>
+                                </div>
+
+                                <Alert>
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <AlertDescription>
+                                        <strong>Importante:</strong> Generar nuevos códigos invalidará todos los códigos anteriores.
+                                    </AlertDescription>
+                                </Alert>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Current Recovery Codes Display - Always visible */}
+                    {recovery_codes && recovery_codes.length > 0 && (
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="flex items-center gap-2">
+                                    <Key className="h-5 w-5" />
+                                    Tus Códigos de Recuperación Actuales
+                                </CardTitle>
+                                <CardDescription>
+                                    Estos son tus códigos de recuperación de emergencia. Guárdalos en un lugar seguro.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Alert className="mb-4">
+                                    <AlertTriangle className="h-4 w-4" />
+                                    <AlertDescription>
+                                        <strong>Importante:</strong> Cada código solo se puede usar una vez. Guárdalos en un lugar seguro.
+                                    </AlertDescription>
+                                </Alert>
+
+                                {!showCurrentCodes ? (
+                                    <div className="text-center py-6">
+                                        <div className="mb-4">
+                                            <div className="text-lg font-mono text-muted-foreground">
+                                                ••••-•••• ••••-•••• ••••-•••• ••••-••••
+                                            </div>
+                                            <div className="text-lg font-mono text-muted-foreground">
+                                                ••••-•••• ••••-•••• ••••-•••• ••••-••••
+                                            </div>
+                                        </div>
+                                        <Button
+                                            type="button"
+                                            onClick={() => setShowCurrentCodes(true)}
+                                            className="gap-2"
+                                        >
+                                            <Key className="h-4 w-4" />
+                                            Mostrar Códigos de Recuperación
+                                        </Button>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="grid grid-cols-2 gap-2 p-4 bg-muted rounded-lg font-mono text-sm">
+                                            {recovery_codes.map((code: string, index: number) => (
+                                                <div key={index} className="flex items-center justify-between p-2 bg-background rounded border">
+                                                    <span>{code}</span>
+                                                    <Button
+                                                        type="button"
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        onClick={() => copyToClipboard(code)}
+                                                    >
+                                                        {copiedCode === code ? (
+                                                            <CheckCircle className="h-4 w-4" />
+                                                        ) : (
+                                                            <Copy className="h-4 w-4" />
+                                                        )}
+                                                    </Button>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="mt-4 flex gap-2">
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => {
+                                                    const codes = recovery_codes.join('\n');
+                                                    copyToClipboard(codes);
+                                                }}
+                                            >
+                                                <Copy className="h-4 w-4 mr-2" />
+                                                Copiar Todos
+                                            </Button>
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                onClick={() => setShowCurrentCodes(false)}
+                                            >
+                                                Ocultar Códigos
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
+                            </CardContent>
+                        </Card>
                     )}
 
                     {/* Recovery Codes Display */}
