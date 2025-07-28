@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import { ArrowLeft, Edit, Package, Calendar, User, MapPin, Hash, CheckCircle } from 'lucide-react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
@@ -66,6 +66,7 @@ interface Props {
 }
 
 export default function Show({ entry, items, metadata }: Props) {
+    const { flash, errors: pageErrors } = usePage().props as any;
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
     const handleReceiveEntry = () => {
@@ -152,6 +153,24 @@ export default function Show({ entry, items, metadata }: Props) {
                         )}
                     </div>
                 </div>
+                {flash?.success && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        {flash.success}
+                    </div>
+                )}
+
+                {flash?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {flash.error}
+                    </div>
+                )}
+
+                {pageErrors?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {pageErrors.error}
+                    </div>
+                )}
 
                 {/* Información General */}
                 <div className="grid gap-6 md:grid-cols-2">

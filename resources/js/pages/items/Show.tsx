@@ -1,11 +1,12 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft, Edit, QrCode, Calendar, Clock, Package, Warehouse, Barcode } from 'lucide-react';
+import { ArrowLeft, Edit, QrCode, Calendar, Clock, Package, Warehouse, Barcode, CheckCircle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import React from 'react';
 
 interface Item {
     id: number;
@@ -46,6 +47,7 @@ interface Props {
 }
 
 export default function Show({ item, metadata, warehouses, totalStock }: Props) {
+    const { flash, errors: pageErrors } = usePage().props as any;
 
     const breadcrumbs = [
         { title: 'Panel de Control', href: '/dashboard' },
@@ -90,6 +92,25 @@ export default function Show({ item, metadata, warehouses, totalStock }: Props) 
                         </Link>
                     </div>
                 </div>
+
+                {flash?.success && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        {flash.success}
+                    </div>
+                )}
+
+                {flash?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {flash.error}
+                    </div>
+                )}
+
+                {pageErrors?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {pageErrors.error}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     <div className="lg:col-span-2 space-y-6">
@@ -137,7 +158,7 @@ export default function Show({ item, metadata, warehouses, totalStock }: Props) 
                                     </div>
                                 )}
 
-                                <div>r
+                                <div>
                                     <label className="text-sm font-medium text-gray-500">Estado</label>
                                     <div className="mt-1">
                                         <Badge variant={item.status ? 'default' : 'secondary'}>

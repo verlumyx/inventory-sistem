@@ -1,11 +1,12 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Edit, Calendar, Clock, Hash, FileText, ToggleLeft } from 'lucide-react';
+import { ArrowLeft, Edit, Calendar, Clock, Hash, FileText, ToggleLeft, CheckCircle } from 'lucide-react';
 import { BreadcrumbItem } from '@/types';
+import React from 'react';
 
 interface Warehouse {
     id: number;
@@ -25,6 +26,8 @@ interface Props {
 }
 
 export default function Show({ warehouse }: Props) {
+    const { flash, errors: pageErrors } = usePage().props as any;
+
     const breadcrumbs: BreadcrumbItem[] = [
         { title: 'Panel de Control', href: '/dashboard' },
         { title: 'Almacenes', href: '/warehouses' },
@@ -68,6 +71,24 @@ export default function Show({ warehouse }: Props) {
                         </Link>
                     </div>
                 </div>
+                {flash?.success && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        {flash.success}
+                    </div>
+                )}
+
+                {flash?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {flash.error}
+                    </div>
+                )}
+
+                {pageErrors?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {pageErrors.error}
+                    </div>
+                )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     {/* Main Information */}

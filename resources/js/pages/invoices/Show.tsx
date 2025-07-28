@@ -1,5 +1,5 @@
 import React from 'react';
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, usePage } from '@inertiajs/react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,6 +54,7 @@ interface Props {
 }
 
 export default function Show({ invoice }: Props) {
+    const { flash, errors: pageErrors } = usePage().props as any;
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
             year: 'numeric',
@@ -161,6 +162,26 @@ export default function Show({ invoice }: Props) {
                         )}
                     </div>
                 </div>
+
+                {/* Flash Messages */}
+                {flash?.success && (
+                    <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md flex items-center gap-2">
+                        <CheckCircle className="h-4 w-4" />
+                        {flash.success}
+                    </div>
+                )}
+
+                {flash?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {flash.error}
+                    </div>
+                )}
+
+                {pageErrors?.error && (
+                    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                        {pageErrors.error}
+                    </div>
+                )}
 
                 {/* Información General */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
