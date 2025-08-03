@@ -164,6 +164,14 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
     const startEditingAmount = (index: number) => {
         setEditingIndex(index);
         setEditingAmount(data.items[index].amount.toString());
+
+        // Seleccionar todo el texto después de que el input se renderice
+        setTimeout(() => {
+            const input = document.querySelector(`input[data-editing-index="${index}"]`) as HTMLInputElement;
+            if (input) {
+                input.select();
+            }
+        }, 50);
     };
 
     // Cancelar edición de cantidad
@@ -265,15 +273,41 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {/* Información General */}
                         <Card>
-                            <CardHeader>
+                            <CardHeader className="relative">
                                 <CardTitle className="flex items-center gap-2">
                                     <EditIcon className="h-5 w-5" />
                                     Información General
                                 </CardTitle>
                                 <CardDescription>Modifica el almacén para la factura</CardDescription>
+
+                                {/* Tasa de cambio en la esquina superior derecha */}
+                                {shouldShowRate && (
+                                    <div className="absolute top-2 right-2 text-center">
+                                        <p className="text-xs font-medium text-blue-900">Tasa de Cambio</p>
+                                        <p className="text-2xl font-bold text-blue-600">Bs {invoice.formatted_rate}</p>
+                                    </div>
+                                )}
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {/* Resumen de la factura */}
+                                    <div>
+                                        <div className="mb-6 space-y-4">
+                                            <div>
+                                                <p className="text-sm text-gray-600">Total de Items: {data.items.length}</p>
+                                                <p className="text-2xl font-bold text-green-600">Total: {formatCurrency(calculateTotal())}</p>
+                                                {shouldShowRate && (
+                                                    <p className="text-lg font-semibold text-blue-600">
+                                                        Total: {new Intl.NumberFormat('es-VE', {
+                                                        style: 'currency',
+                                                        currency: 'VES',
+                                                    }).format(calculateTotalBs())}
+                                                    </p>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div>
                                         <Label htmlFor="warehouse_id">Almacén *</Label>
                                         <Select value={data.warehouse_id.toString()} onValueChange={(value) => setData('warehouse_id', value)}>
@@ -290,15 +324,6 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                         </Select>
                                         {errors.warehouse_id && <p className="mt-1 text-sm text-red-600">{errors.warehouse_id}</p>}
                                     </div>
-
-                                    {shouldShowRate && (
-                                        <div className="flex items-center justify-center bg-blue-50 border border-blue-200 rounded-lg p-4">
-                                            <div className="text-center">
-                                                <p className="text-sm font-medium text-blue-900">Tasa de Cambio</p>
-                                                <p className="text-2xl font-bold text-blue-600">{invoice.formatted_rate}</p>
-                                            </div>
-                                        </div>
-                                    )}
                                 </div>
                             </CardContent>
                         </Card>
@@ -434,6 +459,7 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                                                         className="w-20 text-right"
                                                                         step="0.01"
                                                                         min="0.01"
+                                                                        data-editing-index={index}
                                                                         onKeyDown={(e) => {
                                                                             if (e.key === 'Enter') saveEditingAmount();
                                                                             if (e.key === 'Escape') cancelEditingAmount();
