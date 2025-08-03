@@ -4,6 +4,7 @@ namespace App\Inventory\Invoice\Providers;
 
 use App\Inventory\Invoice\Contracts\InvoiceRepositoryInterface;
 use App\Inventory\Invoice\Repositories\InvoiceRepository;
+use App\Inventory\Invoice\Services\InvoiceStockValidator;
 use Illuminate\Support\ServiceProvider;
 
 class InvoiceServiceProvider extends ServiceProvider
@@ -18,6 +19,11 @@ class InvoiceServiceProvider extends ServiceProvider
             InvoiceRepositoryInterface::class,
             InvoiceRepository::class
         );
+
+        // Register the stock validator service
+        $this->app->singleton(InvoiceStockValidator::class, function ($app) {
+            return new InvoiceStockValidator();
+        });
     }
 
     /**

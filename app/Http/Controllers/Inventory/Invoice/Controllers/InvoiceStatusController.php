@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Inventory\Invoice\Controllers;
 use App\Http\Controllers\Controller;
 use App\Inventory\Invoice\Handlers\GetInvoiceHandler;
 use App\Inventory\Invoice\Handlers\InvoiceInventoryHandler;
+use App\Inventory\Invoice\Services\InvoiceStockValidator;
 use App\Inventory\Invoice\Exceptions\InvoiceNotFoundException;
+use App\Inventory\Invoice\Exceptions\InsufficientStockException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -13,7 +15,8 @@ class InvoiceStatusController extends Controller
 {
     public function __construct(
         private readonly GetInvoiceHandler $getInvoiceHandler,
-        private readonly InvoiceInventoryHandler $invoiceInventoryHandler
+        private readonly InvoiceInventoryHandler $invoiceInventoryHandler,
+        private InvoiceStockValidator $stockValidator
     ) {}
 
     /**
@@ -32,6 +35,9 @@ class InvoiceStatusController extends Controller
                         ->withErrors(['error' => 'La factura ya está marcada como pagada.']);
                 }
 
+                // Validar que hay suficiente stock antes de marcar como pagada
+                $this->stockValidator->validateStockForPayment($invoice);
+
                 // Marcar como pagada
                 $invoice->markAsPaid();
 
@@ -46,6 +52,11 @@ class InvoiceStatusController extends Controller
         } catch (InvoiceNotFoundException $e) {
             return redirect()->route('invoices.index')
                 ->withErrors(['error' => $e->getMessage()]);
+
+        } catch (InsufficientStockException $e) {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => $e->getFormattedMessage()]);
 
         } catch (\Exception $e) {
             \Log::error('Error marking invoice as paid: ' . $e->getMessage());
