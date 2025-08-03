@@ -114,12 +114,14 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
             // Si el item ya existe, sumar la cantidad
             const updatedItems = [...data.items];
             const existingItem = updatedItems[existingItemIndex];
-            const newAmount = existingItem.amount + amount;
+            const existingAmount = parseFloat(existingItem.amount.toString()); // Convertir a número
+            const existingPrice = parseFloat(existingItem.price.toString()); // Convertir a número
+            const newAmount = existingAmount + amount;
 
             updatedItems[existingItemIndex] = {
                 ...existingItem,
                 amount: newAmount,
-                subtotal: newAmount * existingItem.price, // Usar el precio del item existente
+                subtotal: newAmount * existingPrice, // Usar el precio del item existente
             };
 
             setData('items', updatedItems);
@@ -298,6 +300,7 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                             step="0.01"
                                             min="0.01"
                                             placeholder="0.00"
+                                            disabled={true}
                                             value={itemPrice}
                                             onChange={(e) => setItemPrice(e.target.value)}
                                         />
@@ -360,7 +363,7 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                                             <TableCell className="text-right">{Number(invoiceItem.amount).toFixed(2)}</TableCell>
                                                             <TableCell className="text-right">{formatCurrency(invoiceItem.price)}</TableCell>
                                                             <TableCell className="text-right font-medium">
-                                                                {formatCurrency(invoiceItem.amount * invoiceItem.price)}
+                                                                {formatCurrency(invoiceItem.subtotal || (invoiceItem.amount * invoiceItem.price))}
                                                             </TableCell>
                                                             <TableCell>
                                                                 <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(index)}>

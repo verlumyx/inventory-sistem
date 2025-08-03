@@ -340,7 +340,7 @@ export default function Show({ invoice }: Props) {
                                                     {invoice.should_show_rate && (
                                                         <TableRow className="bg-blue-50">
                                                             <TableCell colSpan={4} className="text-right font-bold text-blue-800">
-                                                                TOTAL x TASA Bs:
+                                                                TOTAL Bs:
                                                             </TableCell>
                                                             <TableCell className="text-right">
                                                                 <span className="text-xl font-bold text-blue-600">

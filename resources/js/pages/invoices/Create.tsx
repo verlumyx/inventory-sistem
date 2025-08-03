@@ -79,12 +79,14 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
             // Si el item ya existe, sumar la cantidad
             const updatedItems = [...data.items];
             const existingItem = updatedItems[existingItemIndex];
-            const newAmount = existingItem.amount + amount;
+            const existingAmount = parseFloat(existingItem.amount.toString()); // Convertir a número
+            const existingPrice = parseFloat(existingItem.price.toString()); // Convertir a número
+            const newAmount = existingAmount + amount;
 
             updatedItems[existingItemIndex] = {
                 ...existingItem,
                 amount: newAmount,
-                subtotal: newAmount * existingItem.price, // Usar el precio del item existente
+                subtotal: newAmount * existingPrice, // Usar el precio del item existente
             };
             setData('items', updatedItems);
         } else {
