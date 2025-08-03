@@ -34,6 +34,7 @@ class CreateInvoiceHandler
                 // Crear la factura
                 $invoice = $this->invoiceRepository->create([
                     'warehouse_id' => $data['warehouse_id'],
+                    'rate' => $data['rate'] ?? 1.0000,
                 ]);
 
                 Log::info('Factura creada exitosamente', [
@@ -82,9 +83,13 @@ class CreateInvoiceHandler
             // Iniciar transacción
             return DB::transaction(function () use ($invoiceData, $items) {
                 // Crear la factura
-                $invoice = $this->invoiceRepository->create([
+                $createData = [
                     'warehouse_id' => $invoiceData['warehouse_id'],
-                ]);
+                    'rate' => $invoiceData['rate'] ?? 1.0000,
+                ];
+
+                Log::info('Creating invoice with data', $createData);
+                $invoice = $this->invoiceRepository->create($createData);
 
                 // Crear los items de la factura
                 foreach ($items as $itemData) {

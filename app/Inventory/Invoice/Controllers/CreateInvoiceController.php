@@ -9,6 +9,7 @@ use App\Inventory\Invoice\Exceptions\InvoiceValidationException;
 use App\Inventory\Invoice\Exceptions\InvoiceOperationException;
 use App\Inventory\Warehouse\Models\Warehouse;
 use App\Inventory\Item\Models\Item;
+use App\Inventory\ExchangeRate\Models\ExchangeRate;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -56,6 +57,14 @@ class CreateInvoiceController extends Controller
                 ];
             });
 
+        // Obtener tasa de cambio actual
+        $currentRate = 1.0000;
+        try {
+            $currentRate = ExchangeRate::getCurrentRate();
+        } catch (\Exception $e) {
+            // Si no hay tasa de cambio configurada, usar 1
+        }
+
         return Inertia::render('invoices/Create', [
             'warehouses' => $warehouses,
             'items' => $items,
@@ -65,6 +74,8 @@ class CreateInvoiceController extends Controller
                 'name' => $defaultWarehouse->name,
                 'display_name' => $defaultWarehouse->display_name,
             ] : null,
+            'currentRate' => $currentRate,
+            'shouldShowRate' => $currentRate != 1.0000,
         ]);
     }
 

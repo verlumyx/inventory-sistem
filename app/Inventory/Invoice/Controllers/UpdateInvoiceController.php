@@ -11,6 +11,7 @@ use App\Inventory\Invoice\Exceptions\InvoiceValidationException;
 use App\Inventory\Invoice\Exceptions\InvoiceOperationException;
 use App\Inventory\Warehouse\Models\Warehouse;
 use App\Inventory\Item\Models\Item;
+use App\Inventory\ExchangeRate\Models\ExchangeRate;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -98,6 +99,10 @@ class UpdateInvoiceController extends Controller
                     }),
                     'total_amount' => $invoice->total_amount,
                     'items_count' => $invoice->items_count,
+                    'rate' => $invoice->rate ?? 1.0000,
+                    'formatted_rate' => $invoice->formatted_rate,
+                    'should_show_rate' => $invoice->should_show_rate,
+                    'total_amount_bs' => $invoice->total_amount_bs,
                     'created_at' => $invoice->created_at->toISOString(),
                     'updated_at' => $invoice->updated_at->toISOString(),
                 ],
@@ -109,6 +114,8 @@ class UpdateInvoiceController extends Controller
                     'name' => $defaultWarehouse->name,
                     'display_name' => $defaultWarehouse->display_name,
                 ] : null,
+                'currentRate' => $invoice->rate ?? 1.0000,
+                'shouldShowRate' => $invoice->should_show_rate,
             ]);
 
         } catch (InvoiceNotFoundException $e) {

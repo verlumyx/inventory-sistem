@@ -37,12 +37,15 @@ interface Props {
     warehouses: Warehouse[];
     items: Item[];
     defaultWarehouse?: Warehouse | null;
+    currentRate: number;
+    shouldShowRate: boolean;
 }
 
-export default function Create({ warehouses, items, defaultWarehouse }: Props) {
+export default function Create({ warehouses, items, defaultWarehouse, currentRate, shouldShowRate }: Props) {
     const { data, setData, post, processing, errors, reset } = useForm({
         warehouse_id: defaultWarehouse?.id?.toString() || '',
         items: [] as InvoiceItem[],
+        rate: currentRate,
     });
 
     const [selectedItem, setSelectedItem] = useState('');
@@ -52,6 +55,11 @@ export default function Create({ warehouses, items, defaultWarehouse }: Props) {
     // Calcular total de la factura
     const calculateTotal = () => {
         return data.items.reduce((total, item) => total + item.amount * item.price, 0);
+    };
+
+    // Calcular total en bolívares
+    const calculateTotalBs = () => {
+        return calculateTotal() * (data.rate || 1);
     };
 
     // Agregar item a la factura
@@ -64,20 +72,31 @@ export default function Create({ warehouses, items, defaultWarehouse }: Props) {
         const amount = parseFloat(itemAmount);
         const price = parseFloat(itemPrice);
 
-        // Verificar que el item no esté ya agregado
-        if (data.items.some((item) => item.item_id === itemId)) {
-            alert('Este item ya está agregado a la factura');
-            return;
+        // Verificar si el item ya existe en la factura
+        const existingItemIndex = data.items.findIndex((item) => item.item_id === itemId);
+
+        if (existingItemIndex !== -1) {
+            // Si el item ya existe, sumar la cantidad
+            const updatedItems = [...data.items];
+            const existingItem = updatedItems[existingItemIndex];
+            const newAmount = existingItem.amount + amount;
+
+            updatedItems[existingItemIndex] = {
+                ...existingItem,
+                amount: newAmount,
+                subtotal: newAmount * existingItem.price, // Usar el precio del item existente
+            };
+            setData('items', updatedItems);
+        } else {
+            // Si el item no existe, agregarlo como nuevo
+            const newItem: InvoiceItem = {
+                item_id: itemId,
+                amount: amount,
+                price: price,
+                subtotal: amount * price,
+            };
+            setData('items', [...data.items, newItem]);
         }
-
-        const newItem: InvoiceItem = {
-            item_id: itemId,
-            amount: amount,
-            price: price,
-            subtotal: amount * price,
-        };
-
-        setData('items', [...data.items, newItem]);
 
         // Limpiar formulario de item
         setSelectedItem('');
@@ -161,21 +180,32 @@ export default function Create({ warehouses, items, defaultWarehouse }: Props) {
                                 <CardDescription>Selecciona el almacén para la factura</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
-                                <div>
-                                    <Label htmlFor="warehouse_id">Almacén *</Label>
-                                    <Select value={data.warehouse_id.toString()} onValueChange={(value) => setData('warehouse_id', value)}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccionar almacén" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {warehouses.map((warehouse) => (
-                                                <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
-                                                    {warehouse.display_name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                    {errors.warehouse_id && <p className="mt-1 text-sm text-red-600">{errors.warehouse_id}</p>}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <Label htmlFor="warehouse_id">Almacén *</Label>
+                                        <Select value={data.warehouse_id.toString()} onValueChange={(value) => setData('warehouse_id', value)}>
+                                            <SelectTrigger>
+                                                <SelectValue placeholder="Seleccionar almacén" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {warehouses.map((warehouse) => (
+                                                    <SelectItem key={warehouse.id} value={warehouse.id.toString()}>
+                                                        {warehouse.display_name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                        {errors.warehouse_id && <p className="mt-1 text-sm text-red-600">{errors.warehouse_id}</p>}
+                                    </div>
+
+                                    {shouldShowRate && (
+                                        <div className="flex items-center justify-center bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                            <div className="text-center">
+                                                <p className="text-sm font-medium text-blue-900">Tasa de Cambio</p>
+                                                <p className="text-2xl font-bold text-blue-600">{currentRate.toFixed(4)}</p>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </CardContent>
                         </Card>
@@ -326,10 +356,18 @@ export default function Create({ warehouses, items, defaultWarehouse }: Props) {
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <div className="mb-6 flex items-center justify-between">
+                                <div className="mb-6 space-y-4">
                                     <div>
                                         <p className="text-sm text-gray-600">Total de Items: {data.items.length}</p>
                                         <p className="text-2xl font-bold text-green-600">Total: {formatCurrency(calculateTotal())}</p>
+                                        {shouldShowRate && (
+                                            <p className="text-lg font-semibold text-blue-600">
+                                                Total : {new Intl.NumberFormat('es-VE', {
+                                                    style: 'currency',
+                                                    currency: 'VES',
+                                                }).format(calculateTotalBs())}
+                                            </p>
+                                        )}
                                     </div>
                                 </div>
 

@@ -43,6 +43,11 @@ interface Invoice {
     items: InvoiceItem[];
     total_amount: number;
     formatted_total_amount: string;
+    rate: number;
+    formatted_rate: string;
+    should_show_rate: boolean;
+    total_amount_bs: number;
+    formatted_total_amount_bs: string;
     items_count: number;
     display_name: string;
     created_at: string;
@@ -205,11 +210,24 @@ export default function Show({ invoice }: Props) {
                                                 </Badge>
                                             </p>
                                         </div>
+                                        {invoice.should_show_rate && (
+                                            <div>
+                                                <label className="text-sm font-medium text-gray-500">Tasa de Cambio</label>
+                                                <p className="text-lg font-semibold text-blue-600">
+                                                    {invoice.formatted_rate}
+                                                </p>
+                                            </div>
+                                        )}
                                         <div>
                                             <label className="text-sm font-medium text-gray-500">Monto Total</label>
                                             <p className="text-2xl font-bold text-green-600">
                                                 {invoice.formatted_total_amount}
                                             </p>
+                                            {invoice.should_show_rate && (
+                                                <p className="text-lg font-semibold text-blue-600 mt-1">
+                                                    Total Bs: {invoice.formatted_total_amount_bs}
+                                                </p>
+                                            )}
                                         </div>
                                     </CardContent>
                                 </Card>
@@ -318,6 +336,19 @@ export default function Show({ invoice }: Props) {
                                                             </span>
                                                         </TableCell>
                                                     </TableRow>
+                                                    {/* Fila de Total en Bolívares si la tasa es diferente de 1 */}
+                                                    {invoice.should_show_rate && (
+                                                        <TableRow className="bg-blue-50">
+                                                            <TableCell colSpan={4} className="text-right font-bold text-blue-800">
+                                                                TOTAL x TASA Bs:
+                                                            </TableCell>
+                                                            <TableCell className="text-right">
+                                                                <span className="text-xl font-bold text-blue-600">
+                                                                    {invoice.formatted_total_amount_bs}
+                                                                </span>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    )}
                                                 </TableBody>
                                             </Table>
                                         </div>

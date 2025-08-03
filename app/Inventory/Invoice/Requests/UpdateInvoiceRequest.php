@@ -25,6 +25,13 @@ class UpdateInvoiceRequest extends FormRequest
                 'integer',
                 'exists:warehouses,id',
             ],
+            'rate' => [
+                'sometimes',
+                'nullable',
+                'numeric',
+                'min:0.0001',
+                'max:999999.9999',
+            ],
             'items' => [
                 'sometimes',
                 'array',
@@ -126,17 +133,8 @@ class UpdateInvoiceRequest extends FormRequest
      */
     public function withValidator($validator): void
     {
-        $validator->after(function ($validator) {
-            // Validar items duplicados si se están actualizando
-            if ($this->has('items') && is_array($this->items)) {
-                $itemIds = array_column($this->items, 'item_id');
-                $duplicates = array_diff_assoc($itemIds, array_unique($itemIds));
-                
-                if (!empty($duplicates)) {
-                    $validator->errors()->add('items', 'No se pueden agregar items duplicados en la misma factura.');
-                }
-            }
-        });
+        // Removed duplicate items validation to allow quantity accumulation
+        // Items with the same ID will have their quantities summed in the frontend
     }
 
     /**
@@ -145,11 +143,16 @@ class UpdateInvoiceRequest extends FormRequest
     public function getInvoiceData(): array
     {
         $data = [];
-        
+
         if ($this->has('warehouse_id')) {
             $data['warehouse_id'] = $this->warehouse_id;
         }
-        
+
+        // Add rate if provided, otherwise keep existing rate
+        if ($this->has('rate') && $this->input('rate') !== null) {
+            $data['rate'] = (float) $this->input('rate');
+        }
+
         return $data;
     }
 

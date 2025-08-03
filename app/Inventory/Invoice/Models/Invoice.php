@@ -26,6 +26,7 @@ class Invoice extends Model
         'code',
         'warehouse_id',
         'status',
+        'rate',
     ];
 
     /**
@@ -33,6 +34,7 @@ class Invoice extends Model
      */
     protected $casts = [
         'status' => 'integer',
+        'rate' => 'decimal:4',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
@@ -227,6 +229,30 @@ class Invoice extends Model
     }
 
     /**
+     * Get the formatted rate attribute.
+     */
+    public function getFormattedRateAttribute(): string
+    {
+        return number_format($this->rate ?? 1.0000, 4);
+    }
+
+    /**
+     * Check if rate should be displayed (different from 1).
+     */
+    public function getShouldShowRateAttribute(): bool
+    {
+        return ($this->rate ?? 1.0000) != 1.0000;
+    }
+
+    /**
+     * Get total amount in bolivars (converted using rate).
+     */
+    public function getTotalAmountBsAttribute(): float
+    {
+        return $this->total_amount * ($this->rate ?? 1.0000);
+    }
+
+    /**
      * Get the is pending attribute.
      */
     public function getIsPendingAttribute(): bool
@@ -284,6 +310,10 @@ class Invoice extends Model
             'is_paid' => $this->is_paid,
             'can_edit' => $this->can_edit,
             'total_amount' => $this->total_amount,
+            'total_amount_bs' => $this->total_amount_bs,
+            'rate' => $this->rate ?? 1.0000,
+            'formatted_rate' => $this->formatted_rate,
+            'should_show_rate' => $this->should_show_rate,
             'items_count' => $this->items_count,
             'display_name' => $this->display_name,
             'created_at' => $this->created_at?->toISOString(),
