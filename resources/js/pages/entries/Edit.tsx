@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Plus, Trash2, AlertCircle, Package, Lock, Eye } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, AlertCircle, Package, Lock, Eye, Edit, Check, X } from 'lucide-react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
+import ItemSearchSelect from '@/components/ItemSearchSelect';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
@@ -94,6 +95,8 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
     const [selectedItem, setSelectedItem] = useState('');
     const [selectedWarehouse, setSelectedWarehouse] = useState(defaultWarehouse?.id?.toString() || '');
     const [itemAmount, setItemAmount] = useState('');
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingAmount, setEditingAmount] = useState('');
 
     const addItem = () => {
         if (!selectedItem || !selectedWarehouse || !itemAmount) {
@@ -129,7 +132,35 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
         setData('items', newItems);
     };
 
+    // Iniciar edición de cantidad
+    const startEditingAmount = (index: number) => {
+        setEditingIndex(index);
+        setEditingAmount(data.items[index].amount.toString());
+    };
 
+    // Cancelar edición de cantidad
+    const cancelEditingAmount = () => {
+        setEditingIndex(null);
+        setEditingAmount('');
+    };
+
+    // Guardar nueva cantidad
+    const saveEditingAmount = () => {
+        if (editingIndex === null || !editingAmount) return;
+
+        const newAmount = parseFloat(editingAmount);
+        if (newAmount <= 0) return;
+
+        const updatedItems = [...data.items];
+        updatedItems[editingIndex] = {
+            ...updatedItems[editingIndex],
+            amount: newAmount,
+        };
+
+        setData('items', updatedItems);
+        setEditingIndex(null);
+        setEditingAmount('');
+    };
 
     const getSelectedItem = (itemId: number): Item | undefined => {
         return items.find(item => item.id === itemId);
@@ -302,18 +333,12 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
                             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                                 <div>
                                     <Label htmlFor="item_select">Item</Label>
-                                    <Select value={selectedItem} onValueChange={setSelectedItem}>
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Seleccionar item" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {items.map((item) => (
-                                                <SelectItem key={item.id} value={item.id.toString()}>
-                                                    {item.display_name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <ItemSearchSelect
+                                        items={items}
+                                        value={selectedItem}
+                                        onValueChange={setSelectedItem}
+                                        placeholder="Buscar item por nombre o código..."
+                                    />
                                 </div>
                                 <div>
                                     <Label htmlFor="warehouse_select">Almacén</Label>
@@ -425,17 +450,46 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
                                                             </div>
                                                         </TableCell>
                                                         <TableCell className="text-right">
-                                                            {Number(entryItem.amount).toFixed(2)}
+                                                            {editingIndex === index ? (
+                                                                <Input
+                                                                    type="number"
+                                                                    value={editingAmount}
+                                                                    onChange={(e) => setEditingAmount(e.target.value)}
+                                                                    className="w-20 text-right"
+                                                                    step="0.01"
+                                                                    min="0.01"
+                                                                    onKeyDown={(e) => {
+                                                                        if (e.key === 'Enter') saveEditingAmount();
+                                                                        if (e.key === 'Escape') cancelEditingAmount();
+                                                                    }}
+                                                                    autoFocus
+                                                                />
+                                                            ) : (
+                                                                Number(entryItem.amount).toFixed(2)
+                                                            )}
                                                         </TableCell>
                                                         <TableCell>
-                                                            <Button
-                                                                type="button"
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                onClick={() => removeItem(index)}
-                                                            >
-                                                                <Trash2 className="h-4 w-4 text-red-500" />
-                                                            </Button>
+                                                            <div className="flex gap-1">
+                                                                {editingIndex === index ? (
+                                                                    <>
+                                                                        <Button type="button" variant="ghost" size="sm" onClick={saveEditingAmount}>
+                                                                            <Check className="h-4 w-4 text-green-500" />
+                                                                        </Button>
+                                                                        <Button type="button" variant="ghost" size="sm" onClick={cancelEditingAmount}>
+                                                                            <X className="h-4 w-4 text-gray-500" />
+                                                                        </Button>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <Button type="button" variant="ghost" size="sm" onClick={() => startEditingAmount(index)}>
+                                                                            <Edit className="h-4 w-4 text-blue-500" />
+                                                                        </Button>
+                                                                        <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(index)}>
+                                                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                                                        </Button>
+                                                                    </>
+                                                                )}
+                                                            </div>
                                                         </TableCell>
                                                     </TableRow>
                                                 );

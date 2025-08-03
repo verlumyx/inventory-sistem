@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Calculator, Edit as EditIcon, Eye, Package, Plus, Trash2, Check, X } from 'lucide-react';
+import ItemSearchSelect from '@/components/ItemSearchSelect';
 import React, { useState } from 'react';
 
 interface Warehouse {
@@ -301,18 +302,12 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                 <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
                                     <div>
                                         <Label htmlFor="item_select">Item</Label>
-                                        <Select value={selectedItem} onValueChange={handleItemSelect}>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccionar item" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {items.map((item) => (
-                                                    <SelectItem key={item.id} value={item.id.toString()}>
-                                                        {item.display_name}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <ItemSearchSelect
+                                            items={items}
+                                            value={selectedItem}
+                                            onValueChange={handleItemSelect}
+                                            placeholder="Buscar item por nombre o código..."
+                                        />
                                     </div>
                                     <div>
                                         <Label htmlFor="amount">Cantidad</Label>

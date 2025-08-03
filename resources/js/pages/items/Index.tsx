@@ -237,7 +237,7 @@ export default function Index({ items, pagination, filters }: Props) {
                                                 <TableHead className="py-4">Precio</TableHead>
                                                 <TableHead className="py-4">Unidad</TableHead>
                                                 <TableHead className="py-4">Disponible</TableHead>
-                                                <TableHead className="py-4">QR Code</TableHead>
+                                                <TableHead className="py-4">Codigo de barra</TableHead>
                                                 <TableHead className="py-4">Estado</TableHead>
                                                 <TableHead className="py-4">Fecha Creación</TableHead>
                                                 <TableHead className="text-right py-4">Acciones</TableHead>
