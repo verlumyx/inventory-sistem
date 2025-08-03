@@ -71,6 +71,8 @@ export default function ItemSearchSelect({
         setIsOpen(false);
         setSearchTerm('');
         setHighlightedIndex(-1);
+        // Desenfocar el input para permitir que el siguiente campo reciba el focus
+        inputRef.current?.blur();
     };
 
     // Limpiar selección
@@ -79,6 +81,10 @@ export default function ItemSearchSelect({
         setSearchTerm('');
         setIsOpen(false);
         setHighlightedIndex(-1);
+        // Enfocar el input después de limpiar
+        setTimeout(() => {
+            inputRef.current?.focus();
+        }, 50);
     };
 
     // Manejar teclas

@@ -8,7 +8,7 @@ import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Calculator, Edit as EditIcon, Eye, Package, Plus, Trash2, Check, X } from 'lucide-react';
 import ItemSearchSelect from '@/components/ItemSearchSelect';
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 
 interface Warehouse {
     id: number;
@@ -90,6 +90,10 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingAmount, setEditingAmount] = useState('');
 
+    // Referencias para manejar el focus
+    const amountInputRef = useRef<HTMLInputElement>(null);
+    const priceInputRef = useRef<HTMLInputElement>(null);
+
     // Calcular total de la factura
     const calculateTotal = () => {
         return data.items.reduce((total, item) => total + item.amount * item.price, 0);
@@ -143,6 +147,11 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
         setSelectedItem('');
         setItemAmount('');
         setItemPrice('');
+
+        // Enfocar de nuevo el selector de items para agregar más items rápidamente
+        setTimeout(() => {
+            // El ItemSearchSelect manejará el focus internamente cuando se limpie
+        }, 100);
     };
 
     // Remover item de la factura
@@ -190,6 +199,11 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
         if (item) {
             setItemPrice(item.price.toString());
         }
+
+        // Enfocar el campo de cantidad después de seleccionar un item
+        setTimeout(() => {
+            amountInputRef.current?.focus();
+        }, 100);
     };
 
     // Enviar formulario
@@ -312,6 +326,7 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                     <div>
                                         <Label htmlFor="amount">Cantidad</Label>
                                         <Input
+                                            ref={amountInputRef}
                                             id="amount"
                                             type="number"
                                             step="0.01"
@@ -319,11 +334,24 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                             placeholder="0.00"
                                             value={itemAmount}
                                             onChange={(e) => setItemAmount(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Tab') {
+                                                    setTimeout(() => {
+                                                        priceInputRef.current?.focus();
+                                                    }, 50);
+                                                } else if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    if (selectedItem && itemAmount && itemPrice) {
+                                                        addItem();
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </div>
                                     <div>
                                         <Label htmlFor="price">Precio</Label>
                                         <Input
+                                            ref={priceInputRef}
                                             id="price"
                                             type="number"
                                             step="0.01"
@@ -332,6 +360,14 @@ export default function Edit({ invoice, warehouses, items, defaultWarehouse, cur
                                             disabled={true}
                                             value={itemPrice}
                                             onChange={(e) => setItemPrice(e.target.value)}
+                                            onKeyDown={(e) => {
+                                                if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    if (selectedItem && itemAmount && itemPrice) {
+                                                        addItem();
+                                                    }
+                                                }
+                                            }}
                                         />
                                     </div>
                                     <div className="flex items-end">
