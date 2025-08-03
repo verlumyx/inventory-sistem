@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, Calculator, Package, Plus, Receipt, Trash2 } from 'lucide-react';
+import { ArrowLeft, Calculator, Edit, Package, Plus, Receipt, Trash2, Check, X } from 'lucide-react';
 import React, { useState } from 'react';
 
 interface Warehouse {
@@ -51,6 +51,8 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
     const [selectedItem, setSelectedItem] = useState('');
     const [itemAmount, setItemAmount] = useState('');
     const [itemPrice, setItemPrice] = useState('');
+    const [editingIndex, setEditingIndex] = useState<number | null>(null);
+    const [editingAmount, setEditingAmount] = useState('');
 
     // Calcular total de la factura
     const calculateTotal = () => {
@@ -110,6 +112,38 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
     const removeItem = (index: number) => {
         const newItems = data.items.filter((_, i) => i !== index);
         setData('items', newItems);
+    };
+
+    // Iniciar edición de cantidad
+    const startEditingAmount = (index: number) => {
+        setEditingIndex(index);
+        setEditingAmount(data.items[index].amount.toString());
+    };
+
+    // Cancelar edición de cantidad
+    const cancelEditingAmount = () => {
+        setEditingIndex(null);
+        setEditingAmount('');
+    };
+
+    // Guardar nueva cantidad
+    const saveEditingAmount = () => {
+        if (editingIndex === null || !editingAmount) return;
+
+        const newAmount = parseFloat(editingAmount);
+        if (newAmount <= 0) return;
+
+        const updatedItems = [...data.items];
+        const item = updatedItems[editingIndex];
+        updatedItems[editingIndex] = {
+            ...item,
+            amount: newAmount,
+            subtotal: newAmount * item.price,
+        };
+
+        setData('items', updatedItems);
+        setEditingIndex(null);
+        setEditingAmount('');
     };
 
     // Actualizar precio cuando se selecciona un item
@@ -318,15 +352,51 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
                                                                     </div>
                                                                 </div>
                                                             </TableCell>
-                                                            <TableCell className="text-right">{Number(invoiceItem.amount).toFixed(2)}</TableCell>
+                                                            <TableCell className="text-right">
+                                                                {editingIndex === index ? (
+                                                                    <Input
+                                                                        type="number"
+                                                                        value={editingAmount}
+                                                                        onChange={(e) => setEditingAmount(e.target.value)}
+                                                                        className="w-20 text-right"
+                                                                        step="0.01"
+                                                                        min="0.01"
+                                                                        onKeyDown={(e) => {
+                                                                            if (e.key === 'Enter') saveEditingAmount();
+                                                                            if (e.key === 'Escape') cancelEditingAmount();
+                                                                        }}
+                                                                        autoFocus
+                                                                    />
+                                                                ) : (
+                                                                    Number(invoiceItem.amount).toFixed(2)
+                                                                )}
+                                                            </TableCell>
                                                             <TableCell className="text-right">{formatCurrency(invoiceItem.price)}</TableCell>
                                                             <TableCell className="text-right font-medium">
                                                                 {formatCurrency(invoiceItem.amount * invoiceItem.price)}
                                                             </TableCell>
                                                             <TableCell>
-                                                                <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(index)}>
-                                                                    <Trash2 className="h-4 w-4 text-red-500" />
-                                                                </Button>
+                                                                <div className="flex gap-1">
+                                                                    {editingIndex === index ? (
+                                                                        <>
+                                                                            <Button type="button" variant="ghost" size="sm" onClick={saveEditingAmount}>
+                                                                                <Check className="h-4 w-4 text-green-500" />
+                                                                            </Button>
+                                                                            <Button type="button" variant="ghost" size="sm" onClick={cancelEditingAmount}>
+                                                                                <X className="h-4 w-4 text-gray-500" />
+                                                                            </Button>
+                                                                        </>
+                                                                    ) : (
+                                                                        <>
+                                                                            <Button type="button" variant="ghost" size="sm" onClick={() => startEditingAmount(index)}>
+                                                                                <Edit className="h-4 w-4 text-blue-500" />
+                                                                            </Button>
+                                                                            <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(index)}>
+                                                                                <Trash2 className="h-4 w-4 text-red-500" />
+                                                                            </Button>
+                                                                        </>
+                                                                    )}
+                                                                </div>
                                                             </TableCell>
                                                         </TableRow>
                                                     );
