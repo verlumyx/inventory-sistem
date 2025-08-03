@@ -22,7 +22,7 @@ interface Item {
     code: string;
     name: string;
     price: number;
-    unit: string;
+    unit?: string;
     display_name: string;
 }
 
@@ -225,6 +225,7 @@ export default function Create({ warehouses, items, defaultWarehouse }: Props) {
                                             type="number"
                                             step="0.01"
                                             min="0.01"
+                                            disabled={true}
                                             placeholder="0.00"
                                             value={itemPrice}
                                             onChange={(e) => setItemPrice(e.target.value)}

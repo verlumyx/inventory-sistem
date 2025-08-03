@@ -22,7 +22,7 @@ interface Item {
     code: string;
     name: string;
     price: number;
-    unit: string;
+    unit?: string;
     display_name: string;
 }
 

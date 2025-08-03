@@ -100,7 +100,12 @@ class UpdateItemHandler
             }
         }
 
-
+        // Validar precio si se proporciona
+        if (isset($data['price'])) {
+            if (empty($data['price']) || $data['price'] <= 0) {
+                $errors['price'] = 'El precio es requerido y debe ser mayor a 0.';
+            }
+        }
 
         // Validar Código de barra si se está cambiando
         if (isset($data['qr_code']) && $data['qr_code'] !== $item->qr_code) {

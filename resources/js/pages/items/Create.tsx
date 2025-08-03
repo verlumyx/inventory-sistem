@@ -143,16 +143,17 @@ export default function Create() {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 {/* Precio */}
                                 <div className="space-y-2">
-                                    <Label htmlFor="price">Precio</Label>
+                                    <Label htmlFor="price">Precio *</Label>
                                     <Input
                                         id="price"
                                         type="number"
                                         step="0.01"
-                                        min="0"
+                                        min="0.01"
                                         value={data.price}
                                         onChange={(e) => setData('price', e.target.value)}
                                         placeholder="0.00"
                                         className={errors.price ? 'border-red-500' : ''}
+                                        required
                                     />
                                     {errors.price && (
                                         <div className="flex items-center gap-2 text-red-600 text-sm">
@@ -161,7 +162,7 @@ export default function Create() {
                                         </div>
                                     )}
                                     <p className="text-sm text-gray-500">
-                                        Precio del item (opcional)
+                                        Precio del item (requerido)
                                     </p>
                                 </div>
 

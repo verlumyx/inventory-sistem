@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 // Invoice web routes
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
     
     // List invoices
     Route::get('/invoices', ListInvoicesController::class)

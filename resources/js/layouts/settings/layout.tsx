@@ -23,6 +23,11 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
+        title: 'Tasa de Cambio',
+        href: '/settings/exchange-rate',
+        icon: null,
+    },
+    {
         title: 'Apariencia',
         href: '/settings/appearance',
         icon: null,

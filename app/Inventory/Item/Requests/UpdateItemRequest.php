@@ -46,9 +46,9 @@ class UpdateItemRequest extends FormRequest
             ],
             'price' => [
                 'sometimes',
-                'nullable',
+                'required',
                 'numeric',
-                'min:0',
+                'min:0.01',
                 'max:99999999.99',
             ],
             'unit' => [
