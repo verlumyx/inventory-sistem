@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, Calculator, Edit, Package, Plus, Receipt, Trash2, Check, X } from 'lucide-react';
+import { ArrowLeft, Calculator, Edit, Package, Plus, Receipt, Trash2, Check, X, RotateCcw } from 'lucide-react';
 import ItemSearchSelect from '@/components/ItemSearchSelect';
 import React, { useState, useRef } from 'react';
 
@@ -69,6 +69,13 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
         return calculateTotal() * (data.rate || 1);
     };
 
+    // Limpiar formulario de item
+    const clearItemForm = () => {
+        setSelectedItem('');
+        setItemAmount('');
+        setItemPrice('');
+    };
+
     // Agregar item a la factura
     const addItem = () => {
         if (!selectedItem || !itemAmount || !itemPrice) {
@@ -108,9 +115,7 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
         }
 
         // Limpiar formulario de item
-        setSelectedItem('');
-        setItemAmount('');
-        setItemPrice('');
+        clearItemForm();
 
         // Enfocar de nuevo el selector de items para agregar más items rápidamente
         setTimeout(() => {
@@ -353,15 +358,24 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
                                             }}
                                         />
                                     </div>
-                                    <div className="flex items-end">
+                                    <div className="flex items-end gap-2">
                                         <Button
                                             type="button"
                                             onClick={addItem}
                                             disabled={!selectedItem || !itemAmount || !itemPrice}
-                                            className="w-full"
+                                            className="flex-1"
                                         >
                                             <Plus className="mr-2 h-4 w-4" />
                                             Agregar
+                                        </Button>
+                                        <Button
+                                            type="button"
+                                            variant="outline"
+                                            onClick={clearItemForm}
+                                            disabled={!selectedItem && !itemAmount && !itemPrice}
+                                        >
+                                            <RotateCcw className="mr-2 h-4 w-4" />
+                                            Limpiar
                                         </Button>
                                     </div>
                                 </div>
