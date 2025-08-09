@@ -40,9 +40,13 @@ Route::prefix('items')->name('items.')->group(function () {
         ->where('id', '[0-9]+');
     Route::patch('/{id}', [UpdateItemController::class, 'update'])->name('patch')
         ->where('id', '[0-9]+');
-    
 
-    
+    // Descargar plantilla de importación (GET /items/download-template)
+    Route::get('/download-template', [\App\Inventory\Item\Controllers\ImportExportController::class, 'downloadTemplate'])->name('download-template');
+
+    // Importar items desde archivo (POST /items/import)
+    Route::post('/import', [\App\Inventory\Item\Controllers\ImportExportController::class, 'import'])->name('import');
+
 });
 
 /*

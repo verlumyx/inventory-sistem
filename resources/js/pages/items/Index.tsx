@@ -7,7 +7,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Search, Filter, Eye, Edit, QrCode } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Plus, Search, Filter, Eye, Edit, QrCode, Download, Upload } from 'lucide-react';
 import type { BreadcrumbItem } from '@/types';
 
 interface Item {
@@ -60,6 +61,8 @@ export default function Index({ items, pagination, filters }: Props) {
         return 'all';
     });
     const [showFilters, setShowFilters] = useState(false);
+    const [showImportModal, setShowImportModal] = useState(false);
+    const [importFile, setImportFile] = useState<File | null>(null);
 
     // Debug log to see what filters we're receiving
     console.log('Received filters:', filters);
@@ -107,13 +110,50 @@ export default function Index({ items, pagination, filters }: Props) {
 
     const handlePageChange = (page: number) => {
         const params: any = { page };
-        
+
         if (searchTerm) params.search = searchTerm;
         if (statusFilter !== 'all') params.status = statusFilter === 'true';
-        
+
         router.get('/items', params, {
             preserveState: true,
             preserveScroll: true,
+        });
+    };
+
+    // Función para descargar plantilla
+    const handleDownloadTemplate = () => {
+        // Crear un enlace temporal para descargar la plantilla
+        const link = document.createElement('a');
+        link.href = '/items/download-template';
+        link.download = 'plantilla_articulos.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    // Función para manejar la selección de archivo
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            setImportFile(file);
+        }
+    };
+
+    // Función para importar archivo
+    const handleImportFile = () => {
+        if (!importFile) return;
+
+        const formData = new FormData();
+        formData.append('file', importFile);
+
+        router.post('/items/import', formData, {
+            onSuccess: () => {
+                setShowImportModal(false);
+                setImportFile(null);
+            },
+            onError: (errors) => {
+                console.error('Error importing file:', errors);
+            }
         });
     };
 
@@ -136,12 +176,22 @@ export default function Index({ items, pagination, filters }: Props) {
                             Gestiona los almacenes del sistema de inventario
                         </p>
                     </div>
-                    <Button asChild>
-                        <Link href="/items/create">
-                            <Plus className="h-4 w-4 mr-2" />
-                            Nuevo Artículo
-                        </Link>
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={handleDownloadTemplate}>
+                            <Download className="h-4 w-4 mr-2" />
+                            Descargar Plantilla
+                        </Button>
+                        <Button variant="outline" onClick={() => setShowImportModal(true)}>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Importar Plantilla
+                        </Button>
+                        <Button asChild>
+                            <Link href="/items/create">
+                                <Plus className="h-4 w-4 mr-2" />
+                                Nuevo Artículo
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
 
                 {/* Flash Messages */}
@@ -359,6 +409,56 @@ export default function Index({ items, pagination, filters }: Props) {
                     </CardContent>
                 </Card>
             </div>
+
+            {/* Modal de Importación */}
+            <Dialog open={showImportModal} onOpenChange={setShowImportModal}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Upload className="h-5 w-5" />
+                            Importar Artículos
+                        </DialogTitle>
+                        <DialogDescription>
+                            Selecciona un archivo CSV o Excel (.csv, .xlsx) con los artículos a importar.
+                            El código se generará automáticamente para cada artículo.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="space-y-4">
+                        <div>
+                            <Input
+                                type="file"
+                                accept=".xlsx,.xls,.csv"
+                                onChange={handleFileSelect}
+                                className="cursor-pointer"
+                            />
+                            {importFile && (
+                                <p className="text-sm text-gray-600 mt-2">
+                                    Archivo seleccionado: {importFile.name}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p className="text-sm text-blue-800">
+                                <strong>Importante:</strong> Usa la plantilla descargada para asegurar que el formato sea correcto.
+                                El archivo debe contener las columnas: Nombre, Descripción, Precio, Unidad, Código de Barra, Estado.
+                                <br /><strong>Nota:</strong> El código se generará automáticamente (IT-00000001, IT-00000002, etc.).
+                            </p>
+                        </div>
+                    </div>
+
+                    <DialogFooter className="gap-2">
+                        <Button variant="outline" onClick={() => setShowImportModal(false)}>
+                            Cancelar
+                        </Button>
+                        <Button onClick={handleImportFile} disabled={!importFile}>
+                            <Upload className="h-4 w-4 mr-2" />
+                            Importar
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </AuthenticatedLayout>
     );
 }
