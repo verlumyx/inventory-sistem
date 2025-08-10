@@ -18,6 +18,12 @@ class UpdateTransferController extends Controller
     {
         $t = app(\App\Inventory\Transfers\Handlers\GetTransferHandler::class)->handleById($id);
 
+        // Verificar que el traslado no esté completado
+        if ($t->status === 1) {
+            return redirect()->route('transfers.show', $id)
+                ->withErrors(['error' => 'No se puede editar un traslado completado.']);
+        }
+
         $warehouses = Warehouse::active()->orderBy('name')->get()->map(fn($w) => [
             'id' => $w->id,
             'code' => $w->code,
@@ -56,6 +62,13 @@ class UpdateTransferController extends Controller
 
     public function update(UpdateTransferRequest $request, int $id)
     {
+        // Verificar que el traslado no esté completado antes de actualizar
+        $transfer = app(\App\Inventory\Transfers\Handlers\GetTransferHandler::class)->handleById($id);
+        if ($transfer->status === 1) {
+            return redirect()->route('transfers.show', $id)
+                ->withErrors(['error' => 'No se puede editar un traslado completado.']);
+        }
+
         $data = $request->validated();
         $transfer = $this->updateTransferHandler->handle($id, $data);
 
