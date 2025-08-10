@@ -3,6 +3,7 @@ import { type BreadcrumbItem } from '@/types';
 import { Head } from '@inertiajs/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Package, Clock, CheckCircle, TrendingUp } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {
@@ -31,12 +32,7 @@ export default function Dashboard({ stats, chart_data }: DashboardProps) {
     // Calcular el valor máximo para normalizar las barras
     const maxValue = Math.max(...chart_data.data);
 
-    const formatCurrency = (value: number) => {
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(value);
-    };
+
 
     return (
         <AppLayout breadcrumbs={breadcrumbs}>

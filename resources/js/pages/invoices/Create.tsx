@@ -9,6 +9,7 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Calculator, Edit, Package, Plus, Receipt, Trash2, Check, X, RotateCcw } from 'lucide-react';
 import ItemSearchSelect from '@/components/ItemSearchSelect';
 import React, { useState, useRef } from 'react';
+import { formatCurrency, formatCurrencyVES } from '@/lib/utils';
 
 interface Warehouse {
     id: number;
@@ -195,12 +196,7 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
         post(route('invoices.store'));
     };
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'USD',
-        }).format(amount);
-    };
+
 
     const getItemById = (id: number) => {
         return items.find((item) => item.id === id);
@@ -261,10 +257,7 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
                                                 <p className="text-2xl font-bold text-green-600">Total: {formatCurrency(calculateTotal())}</p>
                                                 {shouldShowRate && (
                                                     <p className="text-lg font-semibold text-blue-600">
-                                                        Total: {new Intl.NumberFormat('es-VE', {
-                                                        style: 'currency',
-                                                        currency: 'VES',
-                                                    }).format(calculateTotalBs())}
+                                                        Total: {formatCurrencyVES(calculateTotalBs())}
                                                     </p>
                                                 )}
                                             </div>
@@ -505,10 +498,7 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
                                         <p className="text-2xl font-bold text-green-600">Total: {formatCurrency(calculateTotal())}</p>
                                         {shouldShowRate && (
                                             <p className="text-lg font-semibold text-blue-600">
-                                                Total : {new Intl.NumberFormat('es-VE', {
-                                                    style: 'currency',
-                                                    currency: 'VES',
-                                                }).format(calculateTotalBs())}
+                                                Total : {formatCurrencyVES(calculateTotalBs())}
                                             </p>
                                         )}
                                     </div>

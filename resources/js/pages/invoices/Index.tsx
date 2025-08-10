@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Plus, Search, Filter, Receipt, Eye, Edit, MoreHorizontal } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface Invoice {
     id: number;
@@ -127,12 +128,7 @@ export default function Index({ invoices, filters, pagination }: Props) {
 
     const hasFilters = !!(filters.search || filters.warehouse_id || filters.status !== undefined);
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount);
-    };
+
 
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {

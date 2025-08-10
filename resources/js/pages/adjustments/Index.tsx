@@ -118,18 +118,22 @@ export default function Index({ adjustments, filters, pagination }: Props) {
           </div>
         </div>
 
-        <Card>
+        {/* Filters */}
+        <Card className="shadow-sm">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5" /> Lista de Ajustes
+              <Search className="h-5 w-5" />
+              Filtros y Búsqueda
             </CardTitle>
-            <CardDescription>Filtra y navega por los ajustes</CardDescription>
+            <CardDescription>
+              Filtra y busca ajustes por diferentes criterios
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex gap-4">
               <div className="flex-1">
                 <input
-                  placeholder="Buscar por código o descripción"
+                  placeholder="Buscar por código o descripción..."
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -141,41 +145,60 @@ export default function Index({ adjustments, filters, pagination }: Props) {
                 Buscar
               </Button>
             </div>
+          </CardContent>
+        </Card>
 
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Bodega</TableHead>
-                    <TableHead>Tipo</TableHead>
-                    <TableHead>Estado</TableHead>
-                    <TableHead>Creado</TableHead>
-                    <TableHead className="w-[120px] text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {list.length === 0 ? (
+        {/* Results */}
+        <Card className="shadow-sm">
+          <CardHeader>
+            <CardTitle>
+              Resultados
+              <span className="text-sm font-normal text-gray-500 ml-2">
+                {list.length > 0 ? `Mostrando ${list.length} ajustes` : 'No hay ajustes'}
+              </span>
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {list.length > 0 ? (
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                        No se encontraron ajustes
-                      </TableCell>
+                      <TableHead className="py-4">Código</TableHead>
+                      <TableHead className="py-4">Descripción</TableHead>
+                      <TableHead className="py-4">Bodega</TableHead>
+                      <TableHead className="py-4">Tipo</TableHead>
+                      <TableHead className="py-4">Estado</TableHead>
+                      <TableHead className="py-4">Fecha Creación</TableHead>
+                      <TableHead className="text-right py-4">Acciones</TableHead>
                     </TableRow>
-                  ) : (
-                    list.map((adj: Adjustment) => (
+                  </TableHeader>
+                  <TableBody>
+                    {list.map((adj: Adjustment) => (
                       <TableRow key={adj.id}>
-                        <TableCell className="font-medium">{adj.code}</TableCell>
-                        <TableCell>{adj.description ?? '—'}</TableCell>
-                        <TableCell>{adj.warehouse?.display_name || 'Sin bodega'}</TableCell>
-                        <TableCell>
-                          <Badge variant={adj.type === 'negative' ? 'destructive' : 'default'}>{adj.type_text}</Badge>
+                        <TableCell className="font-mono text-sm py-4">
+                          {adj.code}
                         </TableCell>
-                        <TableCell>
-                          <Badge variant={adj.status === 1 ? 'default' : 'secondary'}>{adj.status_text}</Badge>
+                        <TableCell className="py-4">
+                          {adj.description || <span className="text-gray-400">-</span>}
                         </TableCell>
-                        <TableCell>{new Date(adj.created_at).toLocaleString()}</TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="py-4">
+                          {adj.warehouse?.display_name || <span className="text-gray-400">Sin bodega</span>}
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <Badge variant={adj.type === 'negative' ? 'destructive' : 'default'}>
+                            {adj.type_text}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <Badge variant={adj.status === 1 ? 'default' : 'secondary'}>
+                            {adj.status_text}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          {new Date(adj.created_at).toLocaleDateString('es-ES')}
+                        </TableCell>
+                        <TableCell className="text-right py-4">
                           <div className="flex items-center justify-end space-x-2">
                             <Link href={`/adjustments/${adj.id}`}>
                               <Button variant="ghost" size="sm">
@@ -192,11 +215,27 @@ export default function Index({ adjustments, filters, pagination }: Props) {
                           </div>
                         </TableCell>
                       </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <Wrench className="mx-auto h-12 w-12 text-gray-400" />
+                <h3 className="mt-2 text-sm font-medium text-gray-900">No hay ajustes</h3>
+                <p className="mt-1 text-sm text-gray-500">
+                  Comienza creando un nuevo ajuste de inventario.
+                </p>
+                <div className="mt-6">
+                  <Button asChild>
+                    <Link href="/adjustments/create">
+                      <Plus className="mr-2 h-4 w-4" />
+                      Nuevo Ajuste
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>

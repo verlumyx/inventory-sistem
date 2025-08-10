@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { ArrowLeft, Edit, Receipt, Package, Warehouse, CheckCircle, Clock, DollarSign } from 'lucide-react';
+import { formatCurrency } from '@/lib/utils';
 
 interface InvoiceItem {
     id: number;
@@ -70,12 +71,7 @@ export default function Show({ invoice }: Props) {
         });
     };
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-ES', {
-            style: 'currency',
-            currency: 'USD'
-        }).format(amount);
-    };
+
 
     const handleMarkAsPaid = () => {
         router.patch(`/invoices/${invoice.id}/mark-as-paid`, {}, {
