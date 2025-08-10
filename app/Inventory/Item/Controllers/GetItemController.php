@@ -8,6 +8,7 @@ use App\Inventory\Item\Requests\GetItemRequest;
 use App\Inventory\Item\Exceptions\ItemNotFoundException;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 
 class GetItemController extends Controller
 {
@@ -18,7 +19,7 @@ class GetItemController extends Controller
     /**
      * Display the specified item.
      */
-    public function __invoke(GetItemRequest $request, int $id): Response
+    public function __invoke(GetItemRequest $request, int $id): Response|RedirectResponse
     {
         try {
             $validated = $request->validated();
@@ -59,16 +60,14 @@ class GetItemController extends Controller
             ]);
 
         } catch (ItemNotFoundException $e) {
-            return Inertia::render('Errors/404', [
-                'message' => $e->getMessage(),
-            ]);
+            return redirect()->route('items.index')
+                ->with('error', "El artículo con ID {$id} no existe.");
 
         } catch (\Exception $e) {
             \Log::error('Error loading item: ' . $e->getMessage());
-            
-            return Inertia::render('Errors/500', [
-                'message' => 'Error al cargar el item. Por favor, intente nuevamente.',
-            ]);
+
+            return redirect()->route('items.index')
+                ->with('error', 'Error al cargar el artículo. Por favor, intente nuevamente.');
         }
     }
 }

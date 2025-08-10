@@ -24,14 +24,10 @@ class ApproveTransferController extends Controller
     public function __invoke(int $transferId): RedirectResponse
     {
         try {
-            return DB::transaction(function () use ($transferId) {
-                // Obtener el traslado
-                $transfer = $this->getTransferHandler->handleById($transferId);
-                
-                if (!$transfer) {
-                    return redirect()->back()
-                        ->withErrors(['error' => 'Traslado no encontrado.']);
-                }
+            // Obtener el traslado primero, fuera de la transacción
+            $transfer = $this->getTransferHandler->handleById($transferId);
+
+            return DB::transaction(function () use ($transfer, $transferId) {
 
                 // Verificar que el traslado esté pendiente
                 if ($transfer->status !== 0) {
@@ -61,6 +57,15 @@ class ApproveTransferController extends Controller
                 return redirect()->route('transfers.show', $transfer->id)
                     ->with('success', "Traslado '{$transfer->code}' aprobado exitosamente. El inventario ha sido transferido.");
             });
+        } catch (\RuntimeException $e) {
+            // Manejar específicamente cuando el traslado no existe
+            if (str_contains($e->getMessage(), 'no encontrado')) {
+                return redirect()->route('transfers.index')
+                    ->with('error', "El traslado con ID {$transferId} no existe.");
+            }
+
+            return redirect()->back()
+                ->withErrors(['error' => $e->getMessage()]);
         } catch (InsufficientStockException $e) {
             Log::warning('Traslado no aprobado por stock insuficiente', [
                 'transfer_id' => $transferId,

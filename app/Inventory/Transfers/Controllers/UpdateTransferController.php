@@ -9,14 +9,20 @@ use App\Inventory\Transfers\Requests\UpdateTransferRequest;
 use App\Inventory\Warehouse\Models\Warehouse;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\RedirectResponse;
 
 class UpdateTransferController extends Controller
 {
     public function __construct(private UpdateTransferHandler $updateTransferHandler) {}
 
-    public function edit(int $id): Response
+    public function edit(int $id): Response|RedirectResponse
     {
-        $t = app(\App\Inventory\Transfers\Handlers\GetTransferHandler::class)->handleById($id);
+        try {
+            $t = app(\App\Inventory\Transfers\Handlers\GetTransferHandler::class)->handleById($id);
+        } catch (\RuntimeException $e) {
+            return redirect()->route('transfers.index')
+                ->with('error', "El traslado con ID {$id} no existe.");
+        }
 
         // Verificar que el traslado no esté completado
         if ($t->status === 1) {
@@ -62,18 +68,23 @@ class UpdateTransferController extends Controller
 
     public function update(UpdateTransferRequest $request, int $id)
     {
-        // Verificar que el traslado no esté completado antes de actualizar
-        $transfer = app(\App\Inventory\Transfers\Handlers\GetTransferHandler::class)->handleById($id);
-        if ($transfer->status === 1) {
-            return redirect()->route('transfers.show', $id)
-                ->withErrors(['error' => 'No se puede editar un traslado completado.']);
+        try {
+            // Verificar que el traslado no esté completado antes de actualizar
+            $transfer = app(\App\Inventory\Transfers\Handlers\GetTransferHandler::class)->handleById($id);
+            if ($transfer->status === 1) {
+                return redirect()->route('transfers.show', $id)
+                    ->withErrors(['error' => 'No se puede editar un traslado completado.']);
+            }
+
+            $data = $request->validated();
+            $transfer = $this->updateTransferHandler->handle($id, $data);
+
+            return redirect()->route('transfers.show', $transfer->id)
+                ->with('success', "Traslado '{$transfer->code}' actualizado exitosamente.");
+        } catch (\RuntimeException $e) {
+            return redirect()->route('transfers.index')
+                ->with('error', "El traslado con ID {$id} no existe.");
         }
-
-        $data = $request->validated();
-        $transfer = $this->updateTransferHandler->handle($id, $data);
-
-        return redirect()->route('transfers.show', $transfer->id)
-            ->with('success', "Traslado '{$transfer->code}' actualizado exitosamente.");
     }
 }
 

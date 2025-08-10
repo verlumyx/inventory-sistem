@@ -44,9 +44,8 @@ class UpdateItemController extends Controller
             ]);
 
         } catch (ItemNotFoundException $e) {
-            return Inertia::render('Errors/404', [
-                'message' => $e->getMessage(),
-            ]);
+            return redirect()->route('items.index')
+                ->with('error', "El artículo con ID {$id} no existe.");
 
         } catch (\Exception $e) {
             \Log::error('Error loading item for edit: ' . $e->getMessage());
