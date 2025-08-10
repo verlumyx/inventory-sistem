@@ -21,6 +21,12 @@ Route::middleware(['auth'])->group(function () {
 
     // Incluir rutas del módulo de facturas
     require __DIR__.'/invoices.php';
+
+    // Incluir rutas del módulo de ajustes
+    require __DIR__.'/adjustments.php';
+
+    // Incluir rutas del módulo de traslados
+    require __DIR__.'/transfers.php';
 });
 
 require __DIR__.'/settings.php';
