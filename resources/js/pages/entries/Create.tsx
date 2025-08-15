@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ItemSearchSelect from '@/components/ItemSearchSelect';
 
 interface Item {
@@ -67,6 +68,7 @@ export default function Create({ items, warehouses, defaultWarehouse }: Props) {
     const [selectedItem, setSelectedItem] = useState('');
     const [selectedWarehouse, setSelectedWarehouse] = useState(defaultWarehouse?.id?.toString() || '');
     const [itemAmount, setItemAmount] = useState('');
+    const [showDuplicateModal, setShowDuplicateModal] = useState(false);
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingAmount, setEditingAmount] = useState('');
 
@@ -81,7 +83,7 @@ export default function Create({ items, warehouses, defaultWarehouse }: Props) {
 
         // Verificar que el item no esté ya agregado en el mismo almacén
         if (data.items.some(item => item.item_id === itemId && item.warehouse_id === warehouseId)) {
-            alert('Este item ya está agregado en este almacén');
+            setShowDuplicateModal(true);
             return;
         }
 
@@ -491,6 +493,22 @@ export default function Create({ items, warehouses, defaultWarehouse }: Props) {
                         </Button>
                     </div>
                 </form>
+
+                <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Item duplicado</DialogTitle>
+                            <DialogDescription>
+                                Este item ya está agregado en este almacén. No se pueden agregar items duplicados en el mismo almacén.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button onClick={() => setShowDuplicateModal(false)}>
+                                Entendido
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AuthenticatedLayout>
     );

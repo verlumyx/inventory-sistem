@@ -12,6 +12,7 @@ import { Switch } from '@/components/ui/switch';
 import ItemSearchSelect from '@/components/ItemSearchSelect';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface Item {
     id: number;
@@ -97,6 +98,7 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
     const [itemAmount, setItemAmount] = useState('');
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingAmount, setEditingAmount] = useState('');
+    const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
     const addItem = () => {
         if (!selectedItem || !selectedWarehouse || !itemAmount) {
@@ -109,7 +111,7 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
 
         // Verificar que el item no esté ya agregado en el mismo almacén
         if (data.items.some(item => item.item_id === itemId && item.warehouse_id === warehouseId)) {
-            alert('Este item ya está agregado en este almacén');
+            setShowDuplicateModal(true);
             return;
         }
 
@@ -524,6 +526,22 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
                         </Button>
                     </div>
                 </form>
+
+                <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+                    <DialogContent>
+                        <DialogHeader>
+                            <DialogTitle>Item duplicado</DialogTitle>
+                            <DialogDescription>
+                                Este item ya está agregado en este almacén. No se pueden agregar items duplicados en el mismo almacén.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter>
+                            <Button onClick={() => setShowDuplicateModal(false)}>
+                                Entendido
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </AuthenticatedLayout>
     );

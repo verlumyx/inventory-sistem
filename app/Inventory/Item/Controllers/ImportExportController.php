@@ -13,6 +13,7 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use App\Inventory\Item\Contracts\ItemRepositoryInterface;
 use App\Inventory\Item\Handlers\CreateItemHandler;
+use App\Inventory\Item\Handlers\ExportTemplateHandler;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -20,46 +21,23 @@ class ImportExportController extends Controller
 {
     public function __construct(
         private readonly ItemRepositoryInterface $repository,
-        private readonly CreateItemHandler $createHandler
+        private readonly CreateItemHandler $createHandler,
+        private readonly ExportTemplateHandler $exportTemplateHandler
     ) {}
 
     /**
-     * Descargar plantilla de importación de items (CSV)
+     * Descargar plantilla de importación de items (Excel)
      */
-    public function downloadTemplate()
+    public function downloadTemplate(): BinaryFileResponse
     {
-        // Crear contenido CSV (sin código porque se autogenera)
-        $headers = ['Nombre', 'Descripción', 'Precio', 'Unidad', 'Código de Barra', 'Estado'];
-
-        $examples = [
-            ['Laptop Dell Inspiron', 'Laptop para oficina con 8GB RAM', '850.00', 'pcs', '1234567890123', 'Activo'],
-            ['Mouse Inalámbrico', 'Mouse inalámbrico ergonómico', '25.50', 'pcs', '1234567890124', 'Activo'],
-            ['Teclado Mecánico', 'Teclado mecánico RGB', '120.00', 'pcs', '1234567890125', 'Activo']
-        ];
-
-        // Crear archivo temporal
-        $tempFile = tempnam(sys_get_temp_dir(), 'items_template_') . '.csv';
-        $handle = fopen($tempFile, 'w');
-
-        // Escribir BOM para UTF-8
-        fwrite($handle, "\xEF\xBB\xBF");
-
-        // Escribir headers
-        fputcsv($handle, $headers);
-
-        // Escribir ejemplos
-        foreach ($examples as $example) {
-            fputcsv($handle, $example);
-        }
-
-        fclose($handle);
+        $filePath = $this->exportTemplateHandler->generateTemplate();
 
         return response()->download(
-            $tempFile,
-            'plantilla_articulos.csv',
+            $filePath,
+            'plantilla_articulos.xlsx',
             [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="plantilla_articulos.csv"',
+                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'Content-Disposition' => 'attachment; filename="plantilla_articulos.xlsx"',
             ]
         )->deleteFileAfterSend();
     }

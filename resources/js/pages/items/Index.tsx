@@ -122,10 +122,10 @@ export default function Index({ items, pagination, filters }: Props) {
 
     // Función para descargar plantilla
     const handleDownloadTemplate = () => {
-        // Crear un enlace temporal para descargar la plantilla
+        // Crear un enlace temporal para descargar la plantilla Excel
         const link = document.createElement('a');
         link.href = '/items/download-template';
-        link.download = 'plantilla_articulos.csv';
+        link.download = 'plantilla_articulos.xlsx';
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);

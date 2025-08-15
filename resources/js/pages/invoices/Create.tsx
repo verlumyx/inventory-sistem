@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { ArrowLeft, Calculator, Edit, Package, Plus, Receipt, Trash2, Check, X, RotateCcw } from 'lucide-react';
@@ -55,6 +56,7 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
     const [itemPrice, setItemPrice] = useState('');
     const [editingIndex, setEditingIndex] = useState<number | null>(null);
     const [editingAmount, setEditingAmount] = useState('');
+    const [showEmptyItemsModal, setShowEmptyItemsModal] = useState(false);
 
     // Referencias para manejar el focus
     const amountInputRef = useRef<HTMLInputElement>(null);
@@ -189,7 +191,7 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
         e.preventDefault();
 
         if (data.items.length === 0) {
-            alert('Debe agregar al menos un item a la factura');
+            setShowEmptyItemsModal(true);
             return;
         }
 
@@ -516,6 +518,22 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
                             </CardContent>
                         </Card>
                     </form>
+
+                    <Dialog open={showEmptyItemsModal} onOpenChange={setShowEmptyItemsModal}>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Factura sin items</DialogTitle>
+                                <DialogDescription>
+                                    Debe agregar al menos un item a la factura antes de guardarla.
+                                </DialogDescription>
+                            </DialogHeader>
+                            <DialogFooter>
+                                <Button onClick={() => setShowEmptyItemsModal(false)}>
+                                    Entendido
+                                </Button>
+                            </DialogFooter>
+                        </DialogContent>
+                    </Dialog>
                 </div>
             </div>
         </AuthenticatedLayout>

@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Plus, Package, Trash2, Edit as EditIcon, Check, X } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import ItemSearchSelect from '@/components/ItemSearchSelect';
 import type { BreadcrumbItem } from '@/types';
 
@@ -52,6 +53,7 @@ export default function Edit({ transfer, warehouses, items }: Props) {
   const [itemAmount, setItemAmount] = useState('');
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editingAmount, setEditingAmount] = useState('');
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
 
   const addItem = () => {
     if (!selectedItem || !itemAmount) return;
@@ -60,7 +62,7 @@ export default function Edit({ transfer, warehouses, items }: Props) {
     const amount = parseFloat(itemAmount);
 
     if ((data.items as any[]).some((i: any) => i.item_id === itemId)) {
-      alert('Este item ya está agregado');
+      setShowDuplicateModal(true);
       return;
     }
 
@@ -318,6 +320,22 @@ export default function Edit({ transfer, warehouses, items }: Props) {
             </Button>
           </div>
         </form>
+
+        <Dialog open={showDuplicateModal} onOpenChange={setShowDuplicateModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Item duplicado</DialogTitle>
+              <DialogDescription>
+                Este item ya está agregado al traslado. No se pueden agregar items duplicados.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button onClick={() => setShowDuplicateModal(false)}>
+                Entendido
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </AuthenticatedLayout>
   );
