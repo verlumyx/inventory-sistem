@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
-import { ArrowLeft, Plus, Trash2, AlertCircle, Package, Lock, Eye, Edit, Check, X } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, AlertCircle, Package, Lock, Eye, Edit as EditIcon, Check, X } from 'lucide-react';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -113,10 +113,15 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
             return;
         }
 
+        const selectedItemData = items.find(item => item.id === itemId);
+        const selectedWarehouseData = warehouses.find(warehouse => warehouse.id === warehouseId);
+
         const newItem: EntryItem = {
             item_id: itemId,
             warehouse_id: warehouseId,
             amount: amount,
+            item: selectedItemData,
+            warehouse: selectedWarehouseData,
         };
 
         setData('items', [...data.items, newItem]);
@@ -428,24 +433,24 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
                                         </TableHeader>
                                         <TableBody>
                                             {data.items.map((entryItem, index) => {
-                                                const item = getItemById(entryItem.item_id) || entryItem.item;
-                                                const warehouse = getWarehouseById(entryItem.warehouse_id) || entryItem.warehouse;
-                                        
+                                                const item = entryItem.item || getItemById(entryItem.item_id);
+                                                const warehouse = entryItem.warehouse || getWarehouseById(entryItem.warehouse_id);
+
                                                 return (
                                                     <TableRow key={index}>
                                                         <TableCell>
                                                             <div>
-                                                                <div className="font-medium">{item?.name}</div>
+                                                                <div className="font-medium">{item?.name || `Item ID: ${entryItem.item_id}`}</div>
                                                                 <div className="text-sm text-gray-500">
-                                                                    {item?.code} • {item?.unit}
+                                                                    {item?.code || 'N/A'} • {item?.unit || 'N/A'}
                                                                 </div>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
                                                             <div>
-                                                                <div className="font-medium">{warehouse?.name}</div>
+                                                                <div className="font-medium">{warehouse?.name || `Warehouse ID: ${entryItem.warehouse_id}`}</div>
                                                                 <div className="text-sm text-gray-500">
-                                                                    {warehouse?.code}
+                                                                    {warehouse?.code || 'N/A'}
                                                                 </div>
                                                             </div>
                                                         </TableCell>
@@ -482,7 +487,7 @@ export default function Edit({ entry, items, warehouses, defaultWarehouse }: Pro
                                                                 ) : (
                                                                     <>
                                                                         <Button type="button" variant="ghost" size="sm" onClick={() => startEditingAmount(index)}>
-                                                                            <Edit className="h-4 w-4 text-blue-500" />
+                                                                            <EditIcon className="h-4 w-4 text-blue-500" />
                                                                         </Button>
                                                                         <Button type="button" variant="ghost" size="sm" onClick={() => removeItem(index)}>
                                                                             <Trash2 className="h-4 w-4 text-red-500" />
