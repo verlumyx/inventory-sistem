@@ -247,6 +247,67 @@ Si tienes problemas con la impresión:
 3. Prueba con comandos manuales
 4. Consulta la documentación de tu impresora
 
+## 🍎 Configuración Específica para macOS
+
+### **Configuración Recomendada para macOS**
+
+Si estás en macOS (como tu caso), usa esta configuración en tu `.env`:
+
+```bash
+# Configuración para macOS
+PRINTING_ENABLED=true
+PRINTING_TYPE=cups
+PRINTING_PORT=TECH_CLA58  # Nombre de tu impresora
+PRINTING_TIMEOUT=5
+PRINTING_RETRY_ENABLED=true
+PRINTING_RETRY_ATTEMPTS=3
+```
+
+### **Encontrar el Nombre de tu Impresora en macOS**
+
+```bash
+# Listar todas las impresoras configuradas
+lpstat -p
+
+# Ver estado de una impresora específica
+lpstat -p TECH_CLA58
+
+# Probar impresión básica
+echo "Prueba" | lp -d TECH_CLA58 -o raw
+```
+
+### **Configurar Impresora en macOS**
+
+1. **Conecta la impresora** por USB
+2. **Ve a Preferencias del Sistema → Impresoras y Escáneres**
+3. **Haz clic en "+"** para agregar impresora
+4. **Selecciona tu impresora** (TECH CLA58)
+5. **Configura como "Generic PostScript Printer"** si es necesario
+6. **Verifica que aparezca como "Idle"** en el estado
+
+### **Solución de Problemas en macOS**
+
+#### Error: "Impresora no disponible"
+```bash
+# Verificar que la impresora existe
+lpstat -p TECH_CLA58
+
+# Si no aparece, agregarla manualmente
+sudo lpadmin -p TECH_CLA58 -E -v usb://TECH/CLA58 -m raw
+```
+
+#### Error: "Permission denied"
+```bash
+# Agregar usuario al grupo de impresión
+sudo dseditgroup -o edit -a $USER -t user lpadmin
+```
+
+#### Probar conexión directa
+```bash
+# Enviar datos directamente a la impresora
+echo -e "\x1B\x40Prueba de impresión\x0A\x0A\x0A\x1D\x56\x00" | lp -d TECH_CLA58 -o raw
+```
+
 ---
 
 **Nota:** Esta funcionalidad está optimizada para papel térmico de 58mm. Para otros tamaños, ajusta la configuración en `config/printing.php`.

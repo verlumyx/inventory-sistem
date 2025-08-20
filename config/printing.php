@@ -31,26 +31,41 @@ return [
     |--------------------------------------------------------------------------
     |
     | Tipo de conexión con la impresora térmica:
-    | - 'usb': Conexión USB directa
+    | - 'usb': Conexión USB directa (Linux)
     | - 'serial': Conexión por puerto serial
     | - 'network': Conexión por red (IP)
+    | - 'cups': Impresora configurada en CUPS (macOS/Linux)
+    | - 'macos': Alias para 'cups' en macOS
     |
     */
 
-    'type' => env('PRINTING_TYPE', 'usb'),
+    'type' => env('PRINTING_TYPE', 'cups'),
 
     /*
     |--------------------------------------------------------------------------
-    | Puerto de Conexión
+    | Puerto de Conexión / Nombre de Impresora
     |--------------------------------------------------------------------------
     |
     | Puerto o dirección para conectar con la impresora:
     | - USB/Serial: /dev/usb/lp0, /dev/ttyUSB0, COM1, etc.
     | - Red: IP:Puerto (ej: 192.168.1.100:9100)
+    | - CUPS/macOS: Nombre de la impresora (ej: TECH_CLA58)
     |
     */
 
-    'port' => env('PRINTING_PORT', '/dev/usb/lp0'),
+    'port' => env('PRINTING_PORT', 'TECH_CLA58'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Nombre de Impresora (CUPS)
+    |--------------------------------------------------------------------------
+    |
+    | Nombre específico de la impresora en CUPS. Si no se especifica,
+    | se usará el valor de 'port'.
+    |
+    */
+
+    'printer_name' => env('PRINTING_PRINTER_NAME', null),
 
     /*
     |--------------------------------------------------------------------------

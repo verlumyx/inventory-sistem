@@ -116,19 +116,20 @@ class PrintService
         $lines[] = ['text' => $this->repeatChar('-', self::PAPER_WIDTH), 'style' => 'normal'];
 
         // Items
-        foreach ($invoice->items as $item) {
+        $items = $invoice->items ?? $invoice->invoiceItems ?? collect();
+        foreach ($items as $item) {
             // Nombre del item
             $lines[] = ['text' => $this->wrapText($item->item->name), 'style' => 'normal'];
-            
+
             // Cantidad x Precio = Subtotal
             $qty = number_format($item->amount, 2);
             $price = '$' . number_format($item->price, 2);
             $subtotal = '$' . number_format($item->subtotal, 2);
-            
+
             $itemLine = $qty . ' x ' . $price;
             $spaces = self::PAPER_WIDTH - strlen($itemLine) - strlen($subtotal);
             $itemLine .= str_repeat(' ', max(1, $spaces)) . $subtotal;
-            
+
             $lines[] = ['text' => $itemLine, 'style' => 'normal'];
         }
 
@@ -190,10 +191,14 @@ class PrintService
                 case 'usb':
                 case 'serial':
                     return $this->sendToSerialPort($data);
-                
+
                 case 'network':
                     return $this->sendToNetworkPrinter($data);
-                
+
+                case 'cups':
+                case 'macos':
+                    return $this->sendToCupsPrinter($data);
+
                 default:
                     throw new Exception('Tipo de impresora no soportado: ' . $this->config['type']);
             }
@@ -235,6 +240,58 @@ class PrintService
     {
         // Implementar envío por red si es necesario
         throw new Exception('Impresión por red no implementada aún');
+    }
+
+    /**
+     * Enviar a impresora usando CUPS (macOS/Linux)
+     */
+    private function sendToCupsPrinter(string $data): bool
+    {
+        $printerName = $this->config['printer_name'] ?? $this->config['port'];
+
+        if (empty($printerName)) {
+            throw new Exception('Nombre de impresora no configurado para CUPS');
+        }
+
+        // Crear archivo temporal con los datos
+        $tempFile = tempnam(sys_get_temp_dir(), 'invoice_print_');
+        if (!$tempFile) {
+            throw new Exception('No se pudo crear archivo temporal');
+        }
+
+        try {
+            // Escribir datos al archivo temporal
+            file_put_contents($tempFile, $data);
+
+            // Usar lp command para enviar a la impresora
+            $command = sprintf(
+                'lp -d %s -o raw %s 2>&1',
+                escapeshellarg($printerName),
+                escapeshellarg($tempFile)
+            );
+
+            $output = [];
+            $returnCode = 0;
+            exec($command, $output, $returnCode);
+
+            if ($returnCode !== 0) {
+                throw new Exception('Error ejecutando comando lp: ' . implode(' ', $output));
+            }
+
+            Log::info('Datos enviados a impresora CUPS', [
+                'printer' => $printerName,
+                'command' => $command,
+                'output' => $output
+            ]);
+
+            return true;
+
+        } finally {
+            // Limpiar archivo temporal
+            if (file_exists($tempFile)) {
+                unlink($tempFile);
+            }
+        }
     }
 
     /**
@@ -288,7 +345,46 @@ class PrintService
      */
     public function isAvailable(): bool
     {
-        return $this->config['enabled'] && file_exists($this->config['port']);
+        if (!$this->config['enabled']) {
+            return false;
+        }
+
+        switch ($this->config['type']) {
+            case 'usb':
+            case 'serial':
+                return file_exists($this->config['port']);
+
+            case 'cups':
+            case 'macos':
+                return $this->isCupsPrinterAvailable();
+
+            case 'network':
+                // Para red, asumimos que está disponible si está habilitado
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Verificar si la impresora CUPS está disponible
+     */
+    private function isCupsPrinterAvailable(): bool
+    {
+        $printerName = $this->config['printer_name'] ?? $this->config['port'];
+
+        if (empty($printerName)) {
+            return false;
+        }
+
+        // Verificar si la impresora existe en CUPS
+        $command = sprintf('lpstat -p %s 2>/dev/null', escapeshellarg($printerName));
+        $output = [];
+        $returnCode = 0;
+        exec($command, $output, $returnCode);
+
+        return $returnCode === 0;
     }
 
     /**
