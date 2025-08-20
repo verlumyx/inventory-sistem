@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Settings\CompanyController;
 use App\Http\Controllers\Settings\PasswordController;
 use App\Http\Controllers\Settings\ProfileController;
 use App\Http\Controllers\Settings\TwoFactorController;
@@ -27,6 +28,10 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/appearance', function () {
         return Inertia::render('settings/appearance');
     })->name('appearance');
+
+    // Company Configuration Routes
+    Route::get('settings/company', [CompanyController::class, 'edit'])->name('settings.company');
+    Route::put('settings/company', [CompanyController::class, 'update'])->name('settings.company.update');
 
     // Exchange Rate Configuration Routes
     Route::get('settings/exchange-rate', [ExchangeRateController::class, 'index'])->name('settings.exchange-rate');

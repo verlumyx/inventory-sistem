@@ -58,6 +58,11 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/invoices/{invoice}/mark-as-pending', [InvoiceStatusController::class, 'markAsPending'])
         ->name('invoices.mark-as-pending')
         ->where('invoice', '[0-9]+');
+
+    // Invoice print route
+    Route::post('/invoices/{invoice}/print', [InvoiceStatusController::class, 'print'])
+        ->name('invoices.print')
+        ->where('invoice', '[0-9]+');
 });
 
 // Invoice API routes

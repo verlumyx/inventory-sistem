@@ -1,10 +1,11 @@
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, Clock, DollarSign, Edit, Package, Receipt, Warehouse } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, DollarSign, Edit, Package, Receipt, Warehouse, Printer } from 'lucide-react';
 
 interface InvoiceItem {
     id: number;
@@ -59,6 +60,7 @@ interface Props {
 
 export default function Show({ invoice }: Props) {
     const { flash, errors: pageErrors } = usePage().props as any;
+    const [isPrinting, setIsPrinting] = React.useState(false);
     const formatDate = (dateString: string) => {
         return new Date(dateString).toLocaleDateString('es-ES', {
             year: 'numeric',
@@ -88,6 +90,30 @@ export default function Show({ invoice }: Props) {
             {
                 onSuccess: () => {
                     // El redirect se maneja en el controlador
+                },
+            },
+        );
+    };
+
+    const handlePrint = () => {
+        if (isPrinting) return;
+
+        setIsPrinting(true);
+
+        router.post(
+            `/invoices/${invoice.id}/print`,
+            {},
+            {
+                onSuccess: (page) => {
+                    // La respuesta exitosa se maneja automáticamente
+                    setIsPrinting(false);
+                },
+                onError: (errors) => {
+                    setIsPrinting(false);
+                    // Los errores se muestran automáticamente en flash messages
+                },
+                onFinish: () => {
+                    setIsPrinting(false);
                 },
             },
         );
@@ -146,10 +172,22 @@ export default function Show({ invoice }: Props) {
                         )}
 
                         {invoice.is_paid && (
-                            <Button onClick={handleMarkAsPending} variant="outline">
-                                <Clock className="mr-2 h-4 w-4" />
-                                Marcar como Por Pagar
-                            </Button>
+                            <>
+                                <Button onClick={handleMarkAsPending} variant="outline">
+                                    <Clock className="mr-2 h-4 w-4" />
+                                    Marcar como Por Pagar
+                                </Button>
+
+                                {/* Botón de impresión solo para facturas pagadas */}
+                                <Button
+                                    onClick={handlePrint}
+                                    disabled={isPrinting}
+                                    className="bg-blue-600 hover:bg-blue-700"
+                                >
+                                    <Printer className="mr-2 h-4 w-4" />
+                                    {isPrinting ? 'Imprimiendo...' : 'Imprimir'}
+                                </Button>
+                            </>
                         )}
 
                         {/* Botón de editar solo si puede editarse */}

@@ -23,6 +23,11 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
+        title: 'Configuración de Empresa',
+        href: '/settings/company',
+        icon: null,
+    },
+    {
         title: 'Tasa de Cambio',
         href: '/settings/exchange-rate',
         icon: null,

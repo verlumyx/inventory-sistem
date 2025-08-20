@@ -8,6 +8,7 @@ use App\Inventory\Invoice\Handlers\InvoiceInventoryHandler;
 use App\Inventory\Invoice\Services\InvoiceStockValidator;
 use App\Inventory\Invoice\Exceptions\InvoiceNotFoundException;
 use App\Inventory\Invoice\Exceptions\InsufficientStockException;
+use App\Services\PrintService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +17,8 @@ class InvoiceStatusController extends Controller
     public function __construct(
         private readonly GetInvoiceHandler $getInvoiceHandler,
         private readonly InvoiceInventoryHandler $invoiceInventoryHandler,
-        private InvoiceStockValidator $stockValidator
+        private InvoiceStockValidator $stockValidator,
+        private PrintService $printService
     ) {}
 
     /**
@@ -104,6 +106,65 @@ class InvoiceStatusController extends Controller
             return redirect()
                 ->back()
                 ->withErrors(['error' => 'Error al marcar la factura como por pagar. Por favor, intente nuevamente.']);
+        }
+    }
+
+    /**
+     * Print invoice.
+     */
+    public function print(int $id): RedirectResponse
+    {
+        try {
+            // Obtener la factura con sus relaciones
+            $invoice = $this->getInvoiceHandler->handleWithItems($id);
+
+            // Verificar que la factura esté pagada
+            if (!$invoice->is_paid) {
+                return redirect()
+                    ->back()
+                    ->withErrors(['error' => 'Solo se pueden imprimir facturas pagadas.']);
+            }
+
+            // Verificar que la impresión esté disponible
+            if (!$this->printService->isAvailable()) {
+                return redirect()
+                    ->back()
+                    ->withErrors(['error' => 'La impresora no está disponible. Verifique la configuración de impresión.']);
+            }
+
+            // Imprimir la factura
+            $result = $this->printService->printInvoice($invoice);
+
+            if ($result) {
+                \Log::info('Factura impresa exitosamente', [
+                    'invoice_id' => $invoice->id,
+                    'invoice_code' => $invoice->code,
+                    'user_id' => auth()->id()
+                ]);
+
+                return redirect()
+                    ->back()
+                    ->with('success', "Factura '{$invoice->code}' impresa exitosamente.");
+            } else {
+                return redirect()
+                    ->back()
+                    ->withErrors(['error' => 'Error al enviar la factura a la impresora.']);
+            }
+
+        } catch (InvoiceNotFoundException $e) {
+            return redirect()->route('invoices.index')
+                ->withErrors(['error' => 'Factura no encontrada.']);
+
+        } catch (\Exception $e) {
+            \Log::error('Error printing invoice', [
+                'invoice_id' => $id,
+                'error' => $e->getMessage(),
+                'user_id' => auth()->id()
+            ]);
+
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Error al imprimir la factura: ' . $e->getMessage()]);
         }
     }
 }
