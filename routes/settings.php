@@ -33,6 +33,12 @@ Route::middleware('auth')->group(function () {
     Route::get('settings/company', [CompanyController::class, 'edit'])->name('settings.company');
     Route::put('settings/company', [CompanyController::class, 'update'])->name('settings.company.update');
 
+    // Printer Configuration Routes
+    Route::get('settings/printer', [\App\Http\Controllers\PrinterSettingsController::class, 'index'])->name('settings.printer');
+    Route::put('settings/printer', [\App\Http\Controllers\PrinterSettingsController::class, 'update'])->name('settings.printer.update');
+    Route::post('settings/printer/test', [\App\Http\Controllers\PrinterSettingsController::class, 'testConnection'])->name('settings.printer.test');
+    Route::get('settings/printer/available', [\App\Http\Controllers\PrinterSettingsController::class, 'getAvailablePrinters'])->name('settings.printer.available');
+
     // Exchange Rate Configuration Routes
     Route::get('settings/exchange-rate', [ExchangeRateController::class, 'index'])->name('settings.exchange-rate');
     Route::put('settings/exchange-rate', [ExchangeRateController::class, 'update'])->name('settings.exchange-rate.update');

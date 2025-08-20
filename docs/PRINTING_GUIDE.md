@@ -302,6 +302,12 @@ sudo lpadmin -p TECH_CLA58 -E -v usb://TECH/CLA58 -m raw
 sudo dseditgroup -o edit -a $USER -t user lpadmin
 ```
 
+#### Error: "Method Not Allowed" en Probar Conexión
+Este error indica un problema en el frontend. Asegúrate de que:
+- El botón "Probar Conexión" use POST, no GET
+- La página esté actualizada en el navegador
+- No hay errores de JavaScript en la consola
+
 #### Probar conexión directa
 ```bash
 # Enviar datos directamente a la impresora

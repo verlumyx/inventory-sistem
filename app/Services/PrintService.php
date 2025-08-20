@@ -33,14 +33,45 @@ class PrintService
      */
     private array $config;
 
-    public function __construct()
+    public function __construct(?array $customConfig = null)
     {
-        $this->config = config('printing', [
-            'enabled' => env('PRINTING_ENABLED', false),
+        if ($customConfig) {
+            // Usar configuración personalizada (desde base de datos)
+            $this->config = $customConfig;
+        } else {
+            // Intentar cargar desde base de datos primero
+            $this->config = $this->loadConfigFromDatabase();
+
+            // Si no hay configuración en BD, usar archivo config
+            if (!$this->config['enabled']) {
+                $this->config = array_merge($this->config, config('printing', []));
+            }
+        }
+    }
+
+    /**
+     * Cargar configuración desde base de datos
+     */
+    private function loadConfigFromDatabase(): array
+    {
+        try {
+            $settings = \App\Models\PrinterSettings::getActive();
+
+            if ($settings) {
+                return $settings->toPrintConfig();
+            }
+        } catch (\Exception $e) {
+            // Si hay error (ej: tabla no existe), usar configuración por defecto
+            \Log::debug('No se pudo cargar configuración de impresora desde BD: ' . $e->getMessage());
+        }
+
+        // Configuración por defecto si no hay en BD (sin crear registro)
+        return [
+            'enabled' => false, // Por defecto deshabilitado si no hay configuración
             'port' => env('PRINTING_PORT', '/dev/usb/lp0'),
-            'type' => env('PRINTING_TYPE', 'usb'), // usb, serial, network
+            'type' => env('PRINTING_TYPE', 'usb'),
             'timeout' => env('PRINTING_TIMEOUT', 5),
-        ]);
+        ];
     }
 
     /**
@@ -398,5 +429,27 @@ class PrintService
             'type' => $this->config['type'],
             'available' => $this->isAvailable(),
         ];
+    }
+
+    /**
+     * Enviar datos de prueba a la impresora
+     */
+    public function sendTestData(string $data): bool
+    {
+        try {
+            Log::info('Enviando datos de prueba a impresora', [
+                'data_length' => strlen($data),
+                'config' => $this->config
+            ]);
+
+            return $this->sendToPrinter($data);
+
+        } catch (Exception $e) {
+            Log::error('Error enviando datos de prueba', [
+                'error' => $e->getMessage(),
+                'config' => $this->config
+            ]);
+            throw $e;
+        }
     }
 }

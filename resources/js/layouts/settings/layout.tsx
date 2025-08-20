@@ -28,6 +28,11 @@ const sidebarNavItems: NavItem[] = [
         icon: null,
     },
     {
+        title: 'Configuración de Impresora',
+        href: '/settings/printer',
+        icon: null,
+    },
+    {
         title: 'Tasa de Cambio',
         href: '/settings/exchange-rate',
         icon: null,
