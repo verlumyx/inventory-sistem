@@ -95,10 +95,10 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Configuración de Texto
+    | Configuracion de Texto
     |--------------------------------------------------------------------------
     |
-    | Configuración para el formato del texto en el ticket.
+    | Configuracion para el formato del texto en el ticket.
     |
     */
 

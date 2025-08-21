@@ -185,16 +185,16 @@ class PrinterSettingsController extends Controller
     {
         $lines = [];
         $lines[] = str_repeat('=', 32);
-        $lines[] = $this->centerText('PRUEBA DE IMPRESIÓN');
+        $lines[] = $this->centerText('PRUEBA DE IMPRESION');
         $lines[] = str_repeat('=', 32);
         $lines[] = '';
         $lines[] = 'Fecha: ' . now()->format('d/m/Y H:i:s');
         $lines[] = 'Sistema: Inventario Desktop';
         $lines[] = '';
         $lines[] = str_repeat('-', 32);
-        $lines[] = 'Esta es una prueba de impresión';
-        $lines[] = 'para verificar la configuración';
-        $lines[] = 'de la impresora térmica.';
+        $lines[] = 'Esta es una prueba de impresion';
+        $lines[] = 'para verificar la configuracion';
+        $lines[] = 'de la impresora termica.';
         $lines[] = str_repeat('-', 32);
         $lines[] = '';
         $lines[] = $this->centerText('Prueba exitosa');

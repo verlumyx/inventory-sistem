@@ -10,12 +10,12 @@ use Exception;
 class PrintService
 {
     /**
-     * Ancho de papel térmico de 58mm (aproximadamente 32 caracteres)
+     * Ancho de papel termico de 58mm (aproximadamente 32 caracteres)
      */
     const PAPER_WIDTH = 32;
-    
+
     /**
-     * Comandos ESC/POS básicos
+     * Comandos ESC/POS basicos
      */
     const ESC = "\x1B";
     const GS = "\x1D";
@@ -29,7 +29,7 @@ class PrintService
     const FEED = "\x0A";               // Salto de línea
 
     /**
-     * Configuración de impresión
+     * Configuracion de impresion
      */
     private array $config;
 
@@ -50,7 +50,7 @@ class PrintService
     }
 
     /**
-     * Cargar configuración desde base de datos
+     * Cargar configuracion desde base de datos
      */
     private function loadConfigFromDatabase(): array
     {
@@ -139,11 +139,11 @@ class PrintService
         $lines[] = ['text' => $this->centerText($company->phone), 'style' => 'normal'];
         $lines[] = ['text' => $this->repeatChar('=', self::PAPER_WIDTH), 'style' => 'normal'];
 
-        // Información de la factura
+        // Informacion de la factura
         $lines[] = ['text' => $this->centerText('FACTURA'), 'style' => 'bold'];
         $lines[] = ['text' => 'No: ' . $invoice->code, 'style' => 'normal'];
         $lines[] = ['text' => 'Fecha: ' . $invoice->created_at->format('d/m/Y H:i'), 'style' => 'normal'];
-        $lines[] = ['text' => 'Almacen: ' . $invoice->warehouse->name, 'style' => 'normal'];
+        $lines[] = ['text' => 'Almacen: ' . $this->normalizeText($invoice->warehouse->name), 'style' => 'normal'];
         $lines[] = ['text' => $this->repeatChar('-', self::PAPER_WIDTH), 'style' => 'normal'];
 
         // Items
@@ -166,21 +166,28 @@ class PrintService
 
         $lines[] = ['text' => $this->repeatChar('-', self::PAPER_WIDTH), 'style' => 'normal'];
 
-        // Total
-        $totalText = 'TOTAL: $' . number_format($invoice->total_amount, 2);
-        $lines[] = ['text' => $this->rightAlign($totalText), 'style' => 'bold'];
-
-        // Total en Bolívares si aplica
+        // Total - formato diferente si hay tasa de cambio
         if ($invoice->should_show_rate) {
+            // Cuando hay tasa, mostrar primero el total en bolívares
             $totalBsText = 'TOTAL Bs: ' . number_format($invoice->total_amount_bs, 2);
             $lines[] = ['text' => $this->rightAlign($totalBsText), 'style' => 'bold'];
+
+            // Luego el total de referencia en dólares (en minúsculas)
+            $totalRefText = 'total ref: $' . number_format($invoice->total_amount, 2);
+            $lines[] = ['text' => $this->rightAlign($totalRefText), 'style' => 'normal'];
+
+            // Finalmente la tasa
             $lines[] = ['text' => 'Tasa: ' . number_format($invoice->rate, 4), 'style' => 'normal'];
+        } else {
+            // Cuando no hay tasa, mostrar solo el total en dólares
+            $totalText = 'TOTAL: $' . number_format($invoice->total_amount, 2);
+            $lines[] = ['text' => $this->rightAlign($totalText), 'style' => 'bold'];
         }
 
         $lines[] = ['text' => $this->repeatChar('=', self::PAPER_WIDTH), 'style' => 'normal'];
 
         // Pie de página
-        $lines[] = ['text' => $this->centerText('¡Gracias por su compra!'), 'style' => 'normal'];
+        $lines[] = ['text' => $this->centerText('Gracias por su compra!'), 'style' => 'normal'];
         $lines[] = ['text' => '', 'style' => 'normal']; // Línea en blanco
         $lines[] = ['text' => '', 'style' => 'normal']; // Línea en blanco
 
@@ -248,7 +255,7 @@ class PrintService
     private function sendToSerialPort(string $data): bool
     {
         $port = $this->config['port'];
-        
+
         if (!file_exists($port)) {
             throw new Exception("Puerto de impresora no encontrado: {$port}");
         }
@@ -330,6 +337,7 @@ class PrintService
      */
     private function centerText(string $text): string
     {
+        $text = $this->normalizeText($text);
         $length = strlen($text);
         if ($length >= self::PAPER_WIDTH) {
             return substr($text, 0, self::PAPER_WIDTH);
@@ -347,11 +355,12 @@ class PrintService
      */
     private function rightAlign(string $text): string
     {
+        $text = $this->normalizeText($text);
         $length = strlen($text);
         if ($length >= self::PAPER_WIDTH) {
             return substr($text, 0, self::PAPER_WIDTH);
         }
-        
+
         return str_repeat(' ', self::PAPER_WIDTH - $length) . $text;
     }
 
@@ -360,6 +369,7 @@ class PrintService
      */
     private function wrapText(string $text): string
     {
+        $text = $this->normalizeText($text);
         return wordwrap($text, self::PAPER_WIDTH, "\n", true);
     }
 
@@ -369,6 +379,44 @@ class PrintService
     private function repeatChar(string $char, int $times): string
     {
         return str_repeat($char, $times);
+    }
+
+    /**
+     * Normalizar texto para impresión térmica
+     * Elimina acentos y caracteres especiales que pueden causar problemas
+     * Esta función es pública para que pueda ser usada desde otros lugares
+     */
+    public function normalizeText(string $text): string
+    {
+        // Mapa de caracteres con acentos a sin acentos
+        $replacements = [
+            // Vocales con acentos
+            'á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'ā' => 'a', 'ã' => 'a',
+            'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e', 'ē' => 'e',
+            'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i', 'ī' => 'i',
+            'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o', 'ō' => 'o', 'õ' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u', 'ū' => 'u',
+
+            // Mayúsculas
+            'Á' => 'A', 'À' => 'A', 'Ä' => 'A', 'Â' => 'A', 'Ā' => 'A', 'Ã' => 'A',
+            'É' => 'E', 'È' => 'E', 'Ë' => 'E', 'Ê' => 'E', 'Ē' => 'E',
+            'Í' => 'I', 'Ì' => 'I', 'Ï' => 'I', 'Î' => 'I', 'Ī' => 'I',
+            'Ó' => 'O', 'Ò' => 'O', 'Ö' => 'O', 'Ô' => 'O', 'Ō' => 'O', 'Õ' => 'O',
+            'Ú' => 'U', 'Ù' => 'U', 'Ü' => 'U', 'Û' => 'U', 'Ū' => 'U',
+
+            // Caracteres especiales del español
+            'ñ' => 'n', 'Ñ' => 'N',
+            'ç' => 'c', 'Ç' => 'C',
+
+            // Signos de puntuación problemáticos
+            '¡' => '', '¿' => '',
+            '–' => '-', '—' => '-',
+        ];
+
+        // Aplicar reemplazos
+        $normalizedText = strtr($text, $replacements);
+
+        return $normalizedText;
     }
 
     /**

@@ -108,7 +108,7 @@ class PrintServiceExample
     }
 
     /**
-     * Configuración recomendada para diferentes tipos de impresoras
+     * Configuracion recomendada para diferentes tipos de impresoras
      */
     public function getRecommendedSettings(): array
     {
@@ -184,24 +184,60 @@ class PrintServiceExample
         }
 
         $preview .= "--------------------------------\n";
-        $totalText = 'TOTAL: $' . number_format($invoice->total_amount, 2);
-        $preview .= str_repeat(' ', 32 - strlen($totalText)) . $totalText . "\n";
 
+        // Total - formato diferente si hay tasa de cambio
         if ($invoice->should_show_rate) {
+            // Cuando hay tasa, mostrar primero el total en bolívares
             $totalBsText = 'TOTAL Bs: ' . number_format($invoice->total_amount_bs, 2);
             $preview .= str_repeat(' ', 32 - strlen($totalBsText)) . $totalBsText . "\n";
+
+            // Luego el total de referencia en dólares (en minúsculas)
+            $totalRefText = 'total ref: $' . number_format($invoice->total_amount, 2);
+            $preview .= str_repeat(' ', 32 - strlen($totalRefText)) . $totalRefText . "\n";
+
+            // Finalmente la tasa
             $preview .= 'Tasa: ' . number_format($invoice->rate, 4) . "\n";
+        } else {
+            // Cuando no hay tasa, mostrar solo el total en dólares
+            $totalText = 'TOTAL: $' . number_format($invoice->total_amount, 2);
+            $preview .= str_repeat(' ', 32 - strlen($totalText)) . $totalText . "\n";
         }
 
         $preview .= "================================\n";
-        $preview .= "      ¡Gracias por su compra!\n";
+        $preview .= "      Gracias por su compra!\n";
         $preview .= "\n\n";
 
         return $preview;
     }
 
     /**
-     * Comandos útiles para configurar impresoras en Linux
+     * Ejemplo de como normalizar texto con acentos
+     */
+    public function demonstrateTextNormalization(): array
+    {
+        $examples = [
+            'Empresa: Panadería "El Buen Sabor"' => $this->printService->normalizeText('Empresa: Panadería "El Buen Sabor"'),
+            'Almacén Principal' => $this->printService->normalizeText('Almacén Principal'),
+            'Descripción del producto' => $this->printService->normalizeText('Descripción del producto'),
+            '¡Gracias por su compra!' => $this->printService->normalizeText('¡Gracias por su compra!'),
+            'Configuración avanzada' => $this->printService->normalizeText('Configuración avanzada'),
+            'Niño pequeño' => $this->printService->normalizeText('Niño pequeño'),
+        ];
+
+        return [
+            'description' => 'Ejemplos de normalización de texto para impresión térmica',
+            'examples' => $examples,
+            'usage' => [
+                'Para normalizar cualquier texto antes de imprimir:',
+                '$printService = new PrintService();',
+                '$normalizedText = $printService->normalizeText("Texto con acentós");',
+                'echo $normalizedText; // "Texto con acentos"'
+            ]
+        ];
+    }
+
+    /**
+     * Comandos utiles para configurar impresoras en Linux
      */
     public function getLinuxCommands(): array
     {

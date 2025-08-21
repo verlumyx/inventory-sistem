@@ -250,4 +250,29 @@ class PrintServiceTest extends TestCase
             'phone' => '+58 412-123-4567',
         ]);
     }
+
+    /** @test */
+    public function it_can_normalize_text_with_accents_and_special_characters()
+    {
+        // Test basic accents
+        $this->assertEquals('aeiou', $this->printService->normalizeText('áéíóú'));
+        $this->assertEquals('AEIOU', $this->printService->normalizeText('ÁÉÍÓÚ'));
+
+        // Test Spanish characters
+        $this->assertEquals('nino', $this->printService->normalizeText('niño'));
+        $this->assertEquals('NINO', $this->printService->normalizeText('NIÑO'));
+
+        // Test special punctuation
+        $this->assertEquals('Gracias por su compra!', $this->printService->normalizeText('¡Gracias por su compra!'));
+        $this->assertEquals('Que tal?', $this->printService->normalizeText('¿Qué tal?'));
+
+        // Test quotes and dashes
+        $this->assertEquals('"Texto"', $this->printService->normalizeText('"Texto"'));
+        $this->assertEquals('Texto-separado', $this->printService->normalizeText('Texto–separado'));
+
+        // Test real world examples
+        $this->assertEquals('Panaderia "El Buen Sabor"', $this->printService->normalizeText('Panadería "El Buen Sabor"'));
+        $this->assertEquals('Almacen Principal', $this->printService->normalizeText('Almacén Principal'));
+        $this->assertEquals('Descripcion del producto', $this->printService->normalizeText('Descripción del producto'));
+    }
 }
