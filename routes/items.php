@@ -41,8 +41,11 @@ Route::prefix('items')->name('items.')->group(function () {
     Route::patch('/{id}', [UpdateItemController::class, 'update'])->name('patch')
         ->where('id', '[0-9]+');
 
-    // Descargar plantilla de importación (GET /items/download-template)
+    // Descargar plantilla de importación (archivo estático)
     Route::get('/download-template', [\App\Inventory\Item\Controllers\ImportExportController::class, 'downloadTemplate'])->name('download-template');
+
+    // Ruta alternativa para descarga directa (sin AJAX)
+    Route::get('/plantilla-excel', [\App\Inventory\Item\Controllers\ImportExportController::class, 'downloadTemplate'])->name('plantilla-excel');
 
     // Importar items desde archivo (POST /items/import)
     Route::post('/import', [\App\Inventory\Item\Controllers\ImportExportController::class, 'import'])->name('import');

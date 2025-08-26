@@ -121,14 +121,42 @@ export default function Index({ items, pagination, filters }: Props) {
     };
 
     // Función para descargar plantilla
-    const handleDownloadTemplate = () => {
-        // Crear un enlace temporal para descargar la plantilla Excel
-        const link = document.createElement('a');
-        link.href = '/items/download-template';
-        link.download = 'plantilla_articulos.xlsx';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+    const handleDownloadTemplate = async () => {
+        try {
+            // Usar fetch para manejar mejor los errores
+            const response = await fetch('/items/download-template', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'X-Requested-With': 'XMLHttpRequest',
+                },
+            });
+
+            if (!response.ok) {
+                // Si hay error, intentar leer como JSON para obtener el mensaje
+                const errorData = await response.json().catch(() => ({ error: 'Error desconocido' }));
+                throw new Error(errorData.error || `Error ${response.status}: ${response.statusText}`);
+            }
+
+            // Crear blob del archivo
+            const blob = await response.blob();
+
+            // Crear enlace de descarga
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'plantilla_articulos.xlsx';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Limpiar URL del blob
+            window.URL.revokeObjectURL(url);
+
+        } catch (error) {
+            console.error('Error descargando plantilla:', error);
+            alert('Error al descargar la plantilla: ' + error.message);
+        }
     };
 
     // Función para manejar la selección de archivo

@@ -275,4 +275,96 @@ class PrintServiceTest extends TestCase
         $this->assertEquals('Almacen Principal', $this->printService->normalizeText('Almacén Principal'));
         $this->assertEquals('Descripcion del producto', $this->printService->normalizeText('Descripción del producto'));
     }
+
+    /** @test */
+    public function it_shows_prices_in_bolivars_when_invoice_has_exchange_rate()
+    {
+        // Crear company de prueba
+        $company = $this->createTestCompany();
+
+        // Crear factura con tasa de cambio
+        $invoice = Invoice::factory()->create([
+            'rate' => 36.5000, // Tasa de ejemplo
+        ]);
+
+        // Crear item con precio en dólares
+        $item = Item::factory()->create([
+            'name' => 'Producto de prueba',
+            'price' => 10.00, // $10.00
+        ]);
+
+        // Crear invoice item manualmente
+        $invoiceItem = InvoiceItem::create([
+            'invoice_id' => $invoice->id,
+            'item_id' => $item->id,
+            'amount' => 2.00,
+            'price' => 10.00, // $10.00
+        ]);
+
+        $invoice->load(['warehouse', 'invoiceItems.item']);
+
+        // Generar líneas de impresión usando reflexión para acceder al método privado
+        $reflection = new \ReflectionClass($this->printService);
+        $method = $reflection->getMethod('formatInvoiceFor58mm');
+        $method->setAccessible(true);
+        $lines = $method->invoke($this->printService, $invoice, $company);
+
+        // Buscar la línea del item
+        $itemLines = array_filter($lines, function($line) {
+            return strpos($line['text'], 'Bs ') !== false;
+        });
+
+        $this->assertNotEmpty($itemLines, 'Debería haber líneas con precios en bolívares');
+
+        // Verificar que el precio esté en bolívares (10.00 * 36.5000 = 365.00)
+        $itemLine = array_values($itemLines)[0];
+        $this->assertStringContainsString('Bs 365.00', $itemLine['text']);
+        $this->assertStringContainsString('Bs 730.00', $itemLine['text']); // Subtotal: 2 x 365.00 = 730.00
+    }
+
+    /** @test */
+    public function it_shows_prices_in_dollars_when_invoice_has_no_exchange_rate()
+    {
+        // Crear company de prueba
+        $company = $this->createTestCompany();
+
+        // Crear factura sin tasa de cambio (rate = 1.0000)
+        $invoice = Invoice::factory()->create([
+            'rate' => 1.0000,
+        ]);
+
+        // Crear item
+        $item = Item::factory()->create([
+            'name' => 'Producto de prueba',
+            'price' => 10.00,
+        ]);
+
+        // Crear invoice item manualmente
+        $invoiceItem = InvoiceItem::create([
+            'invoice_id' => $invoice->id,
+            'item_id' => $item->id,
+            'amount' => 2.00,
+            'price' => 10.00,
+        ]);
+
+        $invoice->load(['warehouse', 'invoiceItems.item']);
+
+        // Generar líneas de impresión usando reflexión para acceder al método privado
+        $reflection = new \ReflectionClass($this->printService);
+        $method = $reflection->getMethod('formatInvoiceFor58mm');
+        $method->setAccessible(true);
+        $lines = $method->invoke($this->printService, $invoice, $company);
+
+        // Buscar la línea del item
+        $itemLines = array_filter($lines, function($line) {
+            return strpos($line['text'], '$') !== false && strpos($line['text'], 'x') !== false;
+        });
+
+        $this->assertNotEmpty($itemLines, 'Debería haber líneas con precios en dólares');
+
+        // Verificar que el precio esté en dólares
+        $itemLine = array_values($itemLines)[0];
+        $this->assertStringContainsString('$10.00', $itemLine['text']);
+        $this->assertStringContainsString('$20.00', $itemLine['text']); // Subtotal: 2 x 10.00 = 20.00
+    }
 }

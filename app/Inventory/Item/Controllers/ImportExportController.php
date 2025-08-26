@@ -26,20 +26,58 @@ class ImportExportController extends Controller
     ) {}
 
     /**
-     * Descargar plantilla de importación de items (Excel)
+     * Descargar plantilla de importación de items (archivo estático)
      */
-    public function downloadTemplate(): BinaryFileResponse
+    public function downloadTemplate()
     {
-        $filePath = $this->exportTemplateHandler->generateTemplate();
+        try {
+            // Ruta del archivo de plantilla estático
+            $templatePath = public_path('templates/plantilla_articulos.xlsx');
 
-        return response()->download(
-            $filePath,
-            'plantilla_articulos.xlsx',
-            [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                'Content-Disposition' => 'attachment; filename="plantilla_articulos.xlsx"',
-            ]
-        )->deleteFileAfterSend();
+            // Verificar que el archivo existe
+            if (!file_exists($templatePath)) {
+                throw new \Exception('El archivo de plantilla no existe: ' . $templatePath);
+            }
+
+            // Verificar que el archivo no está vacío
+            if (filesize($templatePath) === 0) {
+                throw new \Exception('El archivo de plantilla está vacío');
+            }
+
+            Log::info('Descargando plantilla estática', [
+                'file_path' => $templatePath,
+                'file_size' => filesize($templatePath)
+            ]);
+
+            return response()->download(
+                $templatePath,
+                'plantilla_articulos.xlsx.xlsx',
+                [
+                    'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'Content-Disposition' => 'attachment; filename="plantilla_articulos.xlsx"',
+                    'Cache-Control' => 'no-cache, no-store, must-revalidate',
+                    'Pragma' => 'no-cache',
+                    'Expires' => '0'
+                ]
+            );
+
+        } catch (\Exception $e) {
+            Log::error('Error descargando plantilla estática', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+
+            // Si es una petición AJAX, retornar JSON
+            if (request()->expectsJson() || request()->ajax()) {
+                return response()->json([
+                    'error' => 'Error descargando plantilla: ' . $e->getMessage()
+                ], 500);
+            }
+
+            // Si es una petición normal, redirigir con error
+            return redirect()->back()->with('error', 'Error al descargar la plantilla: ' . $e->getMessage());
+        }
     }
 
     /**

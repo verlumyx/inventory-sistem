@@ -15,8 +15,9 @@ class ExportTemplateHandler
      */
     public function generateTemplate(): string
     {
-        $spreadsheet = new Spreadsheet();
-        $sheet = $spreadsheet->getActiveSheet();
+        try {
+            $spreadsheet = new Spreadsheet();
+            $sheet = $spreadsheet->getActiveSheet();
 
         // Configurar título de la hoja
         $sheet->setTitle('Plantilla Artículos');
@@ -121,11 +122,40 @@ class ExportTemplateHandler
 
         $instructionsSheet->getColumnDimension('A')->setWidth(60);
 
-        // Guardar archivo temporal
-        $tempFile = tempnam(sys_get_temp_dir(), 'items_template_') . '.xlsx';
-        $writer = new Xlsx($spreadsheet);
-        $writer->save($tempFile);
+            // Guardar archivo temporal
+            $tempFile = tempnam(sys_get_temp_dir(), 'items_template_') . '.xlsx';
 
-        return $tempFile;
+            // Verificar que el directorio temporal sea escribible
+            if (!is_writable(dirname($tempFile))) {
+                throw new \Exception('El directorio temporal no es escribible: ' . dirname($tempFile));
+            }
+
+            $writer = new Xlsx($spreadsheet);
+            $writer->save($tempFile);
+
+            // Verificar que el archivo se creó correctamente
+            if (!file_exists($tempFile) || filesize($tempFile) === 0) {
+                throw new \Exception('No se pudo crear el archivo Excel');
+            }
+
+            return $tempFile;
+
+        } catch (\Exception $e) {
+            // Log del error específico
+            \Log::error('Error en ExportTemplateHandler::generateTemplate', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'temp_dir' => sys_get_temp_dir(),
+                'temp_dir_writable' => is_writable(sys_get_temp_dir()),
+                'extensions' => [
+                    'xmlwriter' => extension_loaded('xmlwriter'),
+                    'zip' => extension_loaded('zip'),
+                    'gd' => extension_loaded('gd'),
+                ]
+            ]);
+
+            throw $e;
+        }
     }
 }

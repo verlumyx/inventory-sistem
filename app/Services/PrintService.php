@@ -154,8 +154,19 @@ class PrintService
 
             // Cantidad x Precio = Subtotal
             $qty = number_format($item->amount, 2);
-            $price = '$' . number_format($item->price, 2);
-            $subtotal = '$' . number_format($item->subtotal, 2);
+
+            if ($invoice->should_show_rate) {
+                // Cuando hay tasa, mostrar precios en bolívares
+                $priceInBs = $item->price * $invoice->rate;
+                $subtotalInBs = $item->subtotal * $invoice->rate;
+
+                $price = 'Bs' . number_format($priceInBs, 2);
+                $subtotal = 'Bs' . number_format($subtotalInBs, 2);
+            } else {
+                // Sin tasa, mostrar precios en dólares
+                $price = '$' . number_format($item->price, 2);
+                $subtotal = '$' . number_format($item->subtotal, 2);
+            }
 
             $itemLine = $qty . ' x ' . $price;
             $spaces = self::PAPER_WIDTH - strlen($itemLine) - strlen($subtotal);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Inventory\Entry\Contracts\EntryRepositoryInterface;
 use App\Inventory\Invoice\Contracts\InvoiceRepositoryInterface;
+use App\Inventory\Item\Contracts\ItemRepositoryInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -13,7 +14,8 @@ class DashboardController extends Controller
 {
     public function __construct(
         private EntryRepositoryInterface $entryRepository,
-        private InvoiceRepositoryInterface $invoiceRepository
+        private InvoiceRepositoryInterface $invoiceRepository,
+        private ItemRepositoryInterface $itemRepository
     ) {}
 
     /**
@@ -58,13 +60,17 @@ class DashboardController extends Controller
         // 4. Datos para la gráfica de montos por mes (últimos 12 meses)
         $monthlyData = $this->getMonthlyInvoiceAmounts();
 
+        // 5. Items con menor disponibilidad (top 10)
+        $lowStockItems = $this->getLowStockItems();
+
         return [
             'stats' => [
                 'recent_entries' => $recentEntries,
                 'pending_invoices' => $pendingInvoices,
                 'paid_invoices' => $paidInvoices,
             ],
-            'chart_data' => $monthlyData
+            'chart_data' => $monthlyData,
+            'low_stock_items' => $lowStockItems
         ];
     }
 
@@ -102,5 +108,40 @@ class DashboardController extends Controller
             'labels' => $months,
             'data' => $data
         ];
+    }
+
+    /**
+     * Get items with lowest stock availability (top 10).
+     */
+    private function getLowStockItems(): array
+    {
+        // Obtener items con su stock total ordenados por menor disponibilidad
+        $items = \App\Inventory\Item\Models\Item::select([
+                'items.id',
+                'items.code',
+                'items.name',
+                'items.price',
+                'items.unit'
+            ])
+            ->join('warehouse_items', 'items.id', '=', 'warehouse_items.item_id')
+            ->selectRaw('SUM(warehouse_items.quantity_available) as total_stock')
+            ->where('items.status', true) // Solo items activos
+            ->groupBy('items.id', 'items.code', 'items.name', 'items.price', 'items.unit')
+            ->orderBy('total_stock', 'asc') // Menor stock primero
+            ->limit(10)
+            ->get();
+
+        return $items->map(function ($item) {
+            return [
+                'id' => $item->id,
+                'code' => $item->code,
+                'name' => $item->name,
+                'price' => $item->price,
+                'unit' => $item->unit,
+                'total_stock' => (float) $item->total_stock,
+                'stock_status' => $item->total_stock <= 0 ? 'Sin Stock' :
+                                ($item->total_stock <= 5 ? 'Stock Bajo' : 'En Stock')
+            ];
+        })->toArray();
     }
 }
