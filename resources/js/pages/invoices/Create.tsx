@@ -437,9 +437,17 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
                                                                     Number(invoiceItem.amount).toFixed(2)
                                                                 )}
                                                             </TableCell>
-                                                            <TableCell className="text-right">{formatCurrency(invoiceItem.price)}</TableCell>
+                                                            <TableCell className="text-right">
+                                                                {shouldShowRate
+                                                                    ? `Bs ${(invoiceItem.price * currentRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                                    : formatCurrency(invoiceItem.price)
+                                                                }
+                                                            </TableCell>
                                                             <TableCell className="text-right font-medium">
-                                                                {formatCurrency(invoiceItem.amount * invoiceItem.price)}
+                                                                {shouldShowRate
+                                                                    ? `Bs ${(invoiceItem.amount * invoiceItem.price * currentRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                                    : formatCurrency(invoiceItem.amount * invoiceItem.price)
+                                                                }
                                                             </TableCell>
                                                             <TableCell>
                                                                 <div className="flex gap-1">
@@ -473,7 +481,12 @@ export default function Create({ warehouses, items, defaultWarehouse, currentRat
                                                         TOTAL:
                                                     </TableCell>
                                                     <TableCell className="text-right">
-                                                        <span className="text-xl font-bold text-green-600">{formatCurrency(calculateTotal())}</span>
+                                                        <span className="text-xl font-bold text-green-600">
+                                                            {shouldShowRate
+                                                                ? `Bs ${(calculateTotal() * currentRate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                                : formatCurrency(calculateTotal())
+                                                            }
+                                                        </span>
                                                     </TableCell>
                                                     <TableCell></TableCell>
                                                 </TableRow>

@@ -366,10 +366,20 @@ export default function Show({ invoice }: Props) {
                                                     <span className="font-medium">{invoiceItem.formatted_amount}</span>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <span className="font-medium">{invoiceItem.formatted_price}</span>
+                                                    <span className="font-medium">
+                                                        {invoice.should_show_rate
+                                                            ? `Bs ${(invoiceItem.price * invoice.rate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                            : invoiceItem.formatted_price
+                                                        }
+                                                    </span>
                                                 </TableCell>
                                                 <TableCell className="text-right">
-                                                    <span className="font-bold text-green-600">{invoiceItem.formatted_subtotal}</span>
+                                                    <span className="font-bold text-green-600">
+                                                        {invoice.should_show_rate
+                                                            ? `Bs ${(invoiceItem.subtotal * invoice.rate).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                                                            : invoiceItem.formatted_subtotal
+                                                        }
+                                                    </span>
                                                 </TableCell>
                                             </TableRow>
                                         ))}
