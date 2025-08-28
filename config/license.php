@@ -14,7 +14,8 @@ return [
      * Email addresses of system administrators who will receive license codes
      */
     'administrators' => [
-        env('LICENSE_ADMIN_EMAIL', 'admin@sistema.com'),
+        env('LICENSE_ADMIN_EMAIL_1', 'admin@sistema.com'),
+        env('LICENSE_ADMIN_EMAIL_2', 'admin@sistema.com'),
         // Add more administrator emails here
         // 'admin2@sistema.com',
         // 'admin3@sistema.com',
