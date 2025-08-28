@@ -30,13 +30,19 @@ interface RenewalProps {
     lastLicense?: License;
     machineId: string;
     hasActiveLicense: boolean;
+    flash?: {
+        success?: string;
+        error?: string;
+        warning?: string;
+        info?: string;
+    };
 }
 
 type ActivateForm = {
     license_code: string;
 };
 
-export default function Renewal({ currentLicense, lastLicense, machineId, hasActiveLicense }: RenewalProps) {
+export default function Renewal({ currentLicense, lastLicense, machineId, hasActiveLicense, flash }: RenewalProps) {
     const { data, setData, post, processing, errors, reset } = useForm<ActivateForm>({
         license_code: '',
     });
@@ -78,6 +84,55 @@ export default function Renewal({ currentLicense, lastLicense, machineId, hasAct
             <Head title="Renovación de Licencia" />
 
             <div className="space-y-6">
+                {/* Flash Messages */}
+                {flash?.success && (
+                    <div className="rounded-md border border-green-200 bg-green-50 p-4 mb-6">
+                        <div className="flex items-center">
+                            <CheckCircle className="h-5 w-5 text-green-400 mr-3" />
+                            <div>
+                                <h3 className="text-sm font-medium text-green-800">Éxito</h3>
+                                <p className="mt-1 text-sm text-green-700">{flash.success}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {flash?.error && (
+                    <div className="rounded-md border border-red-200 bg-red-50 p-4 mb-6">
+                        <div className="flex items-center">
+                            <AlertCircle className="h-5 w-5 text-red-400 mr-3" />
+                            <div>
+                                <h3 className="text-sm font-medium text-red-800">Error</h3>
+                                <p className="mt-1 text-sm text-red-700">{flash.error}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {flash?.warning && (
+                    <div className="rounded-md border border-yellow-200 bg-yellow-50 p-4 mb-6">
+                        <div className="flex items-center">
+                            <AlertCircle className="h-5 w-5 text-yellow-400 mr-3" />
+                            <div>
+                                <h3 className="text-sm font-medium text-yellow-800">Advertencia</h3>
+                                <p className="mt-1 text-sm text-yellow-700">{flash.warning}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {flash?.info && (
+                    <div className="rounded-md border border-blue-200 bg-blue-50 p-4 mb-6">
+                        <div className="flex items-center">
+                            <AlertCircle className="h-5 w-5 text-blue-400 mr-3" />
+                            <div>
+                                <h3 className="text-sm font-medium text-blue-800">Información</h3>
+                                <p className="mt-1 text-sm text-blue-700">{flash.info}</p>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {/* Estado actual de la licencia */}
                 <Card>
                     <CardHeader>
