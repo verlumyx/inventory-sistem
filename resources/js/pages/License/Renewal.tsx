@@ -264,35 +264,6 @@ export default function Renewal({ currentLicense, lastLicense, machineId, hasAct
                         </form>
                     </CardContent>
                 </Card>
-
-                {/* Información adicional */}
-                {lastLicense && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Última Licencia</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 gap-4 text-sm">
-                                <div>
-                                    <Label className="text-muted-foreground">Código</Label>
-                                    <p className="font-mono">{lastLicense.license_code}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-muted-foreground">Estado</Label>
-                                    <p className="capitalize">{lastLicense.status}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-muted-foreground">Fecha de Expiración</Label>
-                                    <p>{formatDate(lastLicense.end_date)}</p>
-                                </div>
-                                <div>
-                                    <Label className="text-muted-foreground">Creada</Label>
-                                    <p>{formatDate(lastLicense.created_at)}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                )}
             </div>
         </AuthLayout>
     );
