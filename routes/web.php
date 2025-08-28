@@ -7,6 +7,9 @@ Route::get('/', function () {
     return redirect('dashboard');
 })->name('home');
 
+// Incluir rutas de licencia (sin middleware de auth para permitir acceso cuando la licencia expira)
+require __DIR__.'/license.php';
+
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
