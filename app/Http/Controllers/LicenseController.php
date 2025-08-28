@@ -48,7 +48,7 @@ class LicenseController extends Controller
             LicenseLog::logCodeGenerated($license, $request);
 
             return back()->with('success',
-                '✅ Código de renovación generado exitosamente. Se ha enviado a los administradores del sistema. Código de referencia: ' . $license->license_code
+                '✅ Código de renovación generado exitosamente. Se ha enviado a los administradores del sistema'
             );
 
         } catch (\Exception $e) {
