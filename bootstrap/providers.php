@@ -8,5 +8,6 @@ return [
     App\Inventory\ExchangeRate\Providers\ExchangeRateServiceProvider::class,
     App\Providers\AppServiceProvider::class,
     App\Providers\ItemServiceProvider::class,
+    App\Providers\EncryptionServiceProvider::class,
     App\Inventory\Transfers\Providers\TransferServiceProvider::class,
 ];
