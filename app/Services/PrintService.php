@@ -267,6 +267,12 @@ class PrintService
     {
         $port = $this->config['port'];
 
+        // Detectar si estamos en Windows
+        if (PHP_OS_FAMILY === 'Windows') {
+            return $this->sendToWindowsPort($port, $data);
+        }
+
+        // Lógica original para Linux/macOS
         if (!file_exists($port)) {
             throw new Exception("Puerto de impresora no encontrado: {$port}");
         }
@@ -283,6 +289,145 @@ class PrintService
     }
 
     /**
+     * Enviar datos a puerto en Windows
+     */
+    private function sendToWindowsPort(string $port, string $data): bool
+    {
+        // Para puertos USB en Windows, usar el comando copy
+        if (strpos($port, 'USB') !== false) {
+            return $this->sendToWindowsUSB($port, $data);
+        }
+
+        // Para puertos COM en Windows
+        if (strpos($port, 'COM') !== false) {
+            return $this->sendToWindowsCOM($port, $data);
+        }
+
+        // Si no es USB ni COM, intentar como nombre de impresora
+        return $this->sendToWindowsPrinter($port, $data);
+    }
+
+    /**
+     * Enviar a puerto USB en Windows
+     */
+    private function sendToWindowsUSB(string $port, string $data): bool
+    {
+        try {
+            // Crear archivo temporal
+            $tempFile = tempnam(sys_get_temp_dir(), 'print_');
+            file_put_contents($tempFile, $data);
+
+            // Usar comando copy para enviar a puerto USB
+            $command = sprintf('copy /B "%s" "%s"', $tempFile, $port);
+
+            $output = [];
+            $returnCode = 0;
+            exec($command, $output, $returnCode);
+
+            // Limpiar archivo temporal
+            unlink($tempFile);
+
+            if ($returnCode !== 0) {
+                throw new Exception('Error enviando a puerto USB: ' . implode(' ', $output));
+            }
+
+            Log::info('Datos enviados a puerto USB Windows', [
+                'port' => $port,
+                'command' => $command
+            ]);
+
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Error enviando a puerto USB Windows', [
+                'port' => $port,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Enviar a puerto COM en Windows
+     */
+    private function sendToWindowsCOM(string $port, string $data): bool
+    {
+        try {
+            // Crear archivo temporal
+            $tempFile = tempnam(sys_get_temp_dir(), 'print_');
+            file_put_contents($tempFile, $data);
+
+            // Usar comando copy para enviar a puerto COM
+            $command = sprintf('copy /B "%s" "%s"', $tempFile, $port);
+
+            $output = [];
+            $returnCode = 0;
+            exec($command, $output, $returnCode);
+
+            // Limpiar archivo temporal
+            unlink($tempFile);
+
+            if ($returnCode !== 0) {
+                throw new Exception('Error enviando a puerto COM: ' . implode(' ', $output));
+            }
+
+            Log::info('Datos enviados a puerto COM Windows', [
+                'port' => $port,
+                'command' => $command
+            ]);
+
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Error enviando a puerto COM Windows', [
+                'port' => $port,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
+     * Enviar a impresora por nombre en Windows
+     */
+    private function sendToWindowsPrinter(string $printerName, string $data): bool
+    {
+        try {
+            // Crear archivo temporal
+            $tempFile = tempnam(sys_get_temp_dir(), 'print_');
+            file_put_contents($tempFile, $data);
+
+            // Usar comando print para enviar a impresora por nombre
+            $command = sprintf('print /D:"%s" "%s"', $printerName, $tempFile);
+
+            $output = [];
+            $returnCode = 0;
+            exec($command, $output, $returnCode);
+
+            // Limpiar archivo temporal
+            unlink($tempFile);
+
+            if ($returnCode !== 0) {
+                throw new Exception('Error enviando a impresora: ' . implode(' ', $output));
+            }
+
+            Log::info('Datos enviados a impresora Windows', [
+                'printer' => $printerName,
+                'command' => $command
+            ]);
+
+            return true;
+
+        } catch (Exception $e) {
+            Log::error('Error enviando a impresora Windows', [
+                'printer' => $printerName,
+                'error' => $e->getMessage()
+            ]);
+            throw $e;
+        }
+    }
+
+    /**
      * Enviar a impresora de red
      */
     private function sendToNetworkPrinter(string $data): bool
@@ -292,16 +437,30 @@ class PrintService
     }
 
     /**
-     * Enviar a impresora usando CUPS (macOS/Linux)
+     * Enviar a impresora usando CUPS (macOS/Linux) o sistema nativo (Windows)
      */
     private function sendToCupsPrinter(string $data): bool
     {
         $printerName = $this->config['printer_name'] ?? $this->config['port'];
 
         if (empty($printerName)) {
-            throw new Exception('Nombre de impresora no configurado para CUPS');
+            throw new Exception('Nombre de impresora no configurado');
         }
 
+        // Detectar sistema operativo
+        if (PHP_OS_FAMILY === 'Windows') {
+            return $this->sendToWindowsPrinter($printerName, $data);
+        }
+
+        // Lógica original para macOS/Linux con CUPS
+        return $this->sendToCupsLinux($printerName, $data);
+    }
+
+    /**
+     * Enviar a impresora usando CUPS en Linux/macOS
+     */
+    private function sendToCupsLinux(string $printerName, string $data): bool
+    {
         // Crear archivo temporal con los datos
         $tempFile = tempnam(sys_get_temp_dir(), 'invoice_print_');
         if (!$tempFile) {
@@ -327,7 +486,7 @@ class PrintService
                 throw new Exception('Error ejecutando comando lp: ' . implode(' ', $output));
             }
 
-            Log::info('Datos enviados a impresora CUPS', [
+            Log::info('Datos enviados a impresora CUPS Linux/macOS', [
                 'printer' => $printerName,
                 'command' => $command,
                 'output' => $output
@@ -510,5 +669,42 @@ class PrintService
             ]);
             throw $e;
         }
+    }
+
+    /**
+     * Imprimir página de prueba
+     */
+    public function printTest(): bool
+    {
+        if (!$this->config['enabled']) {
+            throw new Exception('La impresión no está habilitada');
+        }
+
+        $testData = $this->generateTestPage();
+        return $this->sendToPrinter($testData);
+    }
+
+    /**
+     * Generar página de prueba
+     */
+    private function generateTestPage(): string
+    {
+        $data = self::INIT; // Reset printer
+        $data .= self::CENTER; // Center align
+        $data .= self::BOLD_ON;
+        $data .= "=== PAGINA DE PRUEBA ===\n\n";
+        $data .= self::BOLD_OFF;
+        $data .= self::LEFT; // Left align
+        $data .= "Sistema de Inventario\n";
+        $data .= "Fecha: " . now()->format('d/m/Y H:i:s') . "\n";
+        $data .= "Impresora: " . ($this->config['port'] ?? 'N/A') . "\n";
+        $data .= "Tipo: " . ($this->config['type'] ?? 'N/A') . "\n\n";
+        $data .= "Si puede leer este texto,\n";
+        $data .= "la impresora esta funcionando\n";
+        $data .= "correctamente.\n\n";
+        $data .= str_repeat("-", 32) . "\n\n";
+        $data .= self::CUT; // Cut paper
+
+        return $data;
     }
 }
