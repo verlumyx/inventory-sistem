@@ -157,7 +157,6 @@ class LicenseController extends Controller
 
                 Log::info('Email enviado exitosamente', [
                     'admin_email' => $adminEmail,
-                    'license_code' => $license->license_code,
                     'company_name' => $company?->name_company,
                     'result' => $result ? 'success' : 'failed'
                 ]);
