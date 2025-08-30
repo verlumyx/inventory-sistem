@@ -63,6 +63,17 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/invoices/{invoice}/print', [InvoiceStatusController::class, 'print'])
         ->name('invoices.print')
         ->where('invoice', '[0-9]+');
+
+    // Rutas para PDF térmico 58mm
+    // Vista previa PDF visual para navegador
+    Route::get('/invoices/{invoice}/pdf/thermal/preview', [InvoiceStatusController::class, 'generateThermalPdfPreview'])
+        ->name('invoices.pdf.thermal.preview')
+        ->where('invoice', '[0-9]+');
+
+    // Impresión directa con comandos ESC/POS para impresora térmica
+    Route::get('/invoices/{invoice}/pdf/thermal/print', [InvoiceStatusController::class, 'generateThermalPrint'])
+        ->name('invoices.pdf.thermal.print')
+        ->where('invoice', '[0-9]+');
 });
 
 // Invoice API routes

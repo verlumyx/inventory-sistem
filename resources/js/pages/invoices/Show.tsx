@@ -3,9 +3,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import AuthenticatedLayout from '@/layouts/authenticated-layout';
 import { Head, Link, router, usePage } from '@inertiajs/react';
-import { ArrowLeft, CheckCircle, Clock, DollarSign, Edit, Package, Receipt, Warehouse, Printer } from 'lucide-react';
+import { ArrowLeft, CheckCircle, Clock, DollarSign, Edit, Package, Receipt, Warehouse, Printer, FileText, Eye, ChevronDown } from 'lucide-react';
 
 interface InvoiceItem {
     id: number;
@@ -187,6 +188,34 @@ export default function Show({ invoice }: Props) {
                                     <Printer className="mr-2 h-4 w-4" />
                                     {isPrinting ? 'Imprimiendo...' : 'Imprimir'}
                                 </Button>
+
+                                {/* Menú desplegable PDF térmico 58mm */}
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button
+                                            className="bg-orange-600 hover:bg-orange-700 font-bold"
+                                            variant="outline"
+                                        >
+                                            <FileText className="mr-2 h-4 w-4" />
+                                            🎫 PDF 58mm
+                                            <ChevronDown className="ml-2 h-4 w-4" />
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem
+                                            onClick={() => window.open(route('invoices.pdf.thermal.preview', invoice.id), '_blank')}
+                                        >
+                                            <Eye className="mr-2 h-4 w-4" />
+                                            Vista Previa
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem
+                                            onClick={() => window.open(route('invoices.pdf.thermal.print', invoice.id), '_blank')}
+                                        >
+                                            <Printer className="mr-2 h-4 w-4" />
+                                            Imprimir Directo
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </>
                         )}
 
