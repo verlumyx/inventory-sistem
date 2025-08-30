@@ -16,6 +16,7 @@
         "nativephp/electron": "^1.1",
         "phpoffice/phpspreadsheet": "^4.5",
         "pragmarx/google2fa": "^8.0",
+        "setasign/fpdf": "^1.8",
         "tightenco/ziggy": "^2.4"
     },
     "require-dev": {

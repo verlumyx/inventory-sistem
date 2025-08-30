@@ -74,7 +74,7 @@ class Invoice extends Model
     {
         $lastInvoice = static::orderBy('id', 'desc')->first();
         $nextNumber = $lastInvoice ? $lastInvoice->id + 1 : 1;
-        
+
         return 'FV-' . str_pad($nextNumber, 8, '0', STR_PAD_LEFT);
     }
 
@@ -92,6 +92,14 @@ class Invoice extends Model
     public function invoiceItems(): HasMany
     {
         return $this->hasMany(InvoiceItem::class);
+    }
+
+    /**
+     * Get the company information (singleton pattern).
+     */
+    public function getCompanyAttribute()
+    {
+        return \App\Models\Company::getCompany();
     }
 
     /**
@@ -180,11 +188,11 @@ class Invoice extends Model
     public static function isCodeUnique(string $code, ?int $excludeId = null): bool
     {
         $query = static::where('code', $code);
-        
+
         if ($excludeId) {
             $query->where('id', '!=', $excludeId);
         }
-        
+
         return !$query->exists();
     }
 

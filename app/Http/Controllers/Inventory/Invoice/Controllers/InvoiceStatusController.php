@@ -179,6 +179,9 @@ class InvoiceStatusController extends Controller
             // Obtener la factura con sus relaciones
             $invoice = $this->getInvoiceHandler->handleWithItems($id);
 
+            // Agregar alias para items (compatibilidad con PrintService)
+            $invoice->setRelation('items', $invoice->invoiceItems);
+
             // Verificar que la factura esté pagada
             if (!$invoice->is_paid) {
                 abort(403, 'Solo se pueden generar tickets de facturas pagadas.');
@@ -344,91 +347,113 @@ class InvoiceStatusController extends Controller
     }
 
     /**
-     * Generar PDF visual para vista previa (58mm)
+     * Generar PDF visual para vista previa (58mm) - Estructura igual al PrintService
      */
     private function generateVisualPdf($invoice): string
     {
         // Crear instancia de FPDF con tamaño personalizado para 58mm
-        $pdf = new FPDF('P', 'mm', [58, 200]); // 58mm de ancho, altura variable
+        $pdf = new FPDF('P', 'mm', [58, 250]); // 58mm de ancho, altura aumentada
         $pdf->AddPage();
-        $pdf->SetMargins(2, 2, 2); // Márgenes mínimos
+        $pdf->SetMargins(1, 2, 1); // Márgenes laterales reducidos (1mm en lugar de 2mm)
         $pdf->SetAutoPageBreak(true, 2);
 
-        // Configurar fuente
-        $pdf->SetFont('Arial', 'B', 8);
+        // Obtener datos de la empresa
+        $company = $invoice->company ?? \App\Models\Company::getOrCreateCompany();
 
-        // Título centrado
-        $pdf->Cell(54, 4, 'SISTEMA DE INVENTARIO', 0, 1, 'C');
-        $pdf->Ln(2);
+        // 1. CABECERA DE LA EMPRESA (igual que PrintService líneas 135-140)
+        $pdf->SetFont('Arial', '', 8); // Fuente más grande
+        $pdf->Cell(0, 4,trim($this->normalizeText($company->name_company)), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Cell(0, 4, 'RIF: ' . $this->normalizeText($company->dni), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Cell(0, 4, $this->normalizeText($company->address), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Cell(0, 4, $this->normalizeText($company->phone), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Ln(2); // Más espacio
+        $pdf->Cell(0, 1, str_repeat('=', 32), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Ln(2); // Más espacio
 
-        // Información de la empresa
-        $pdf->SetFont('Arial', '', 6);
-        $company = $invoice->company;
-        if ($company) {
-            $pdf->Cell(54, 3, $company->name_company, 0, 1, 'C');
-            $pdf->Cell(54, 3, 'RIF: ' . $company->dni, 0, 1, 'C');
-            $pdf->Cell(54, 3, $company->phone, 0, 1, 'C');
-        }
-        $pdf->Ln(2);
+        // 2. INFORMACIÓN DE LA FACTURA (igual que PrintService líneas 142-147)
+        $pdf->SetFont('Arial', 'B', 9); // Fuente más grande
+        $pdf->Cell(0, 4, 'FACTURA', 0, 1, 'C'); // Usar ancho completo (0) para centrar
+        $pdf->Ln(2); // Más espacio
 
-        // Línea separadora
-        $pdf->Cell(54, 1, str_repeat('=', 32), 0, 1, 'C');
-        $pdf->Ln(1);
+        $pdf->SetFont('Arial', '', 8); // Fuente más grande
+        $pdf->Cell(0, 4, 'No: ' . $invoice->code, 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Cell(0, 4, 'Fecha: ' . $invoice->created_at->format('d/m/Y H:i'), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Cell(0, 4, 'Almacen: ' . $this->normalizeText($invoice->warehouse->name), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Ln(2); // Más espacio
+        $pdf->Cell(0, 1, str_repeat('=', 32), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Ln(2); // Más espacio
 
-        // Información de la factura
-        $pdf->SetFont('Arial', 'B', 7);
-        $pdf->Cell(54, 3, 'FACTURA: ' . $invoice->code, 0, 1, 'L');
-        $pdf->SetFont('Arial', '', 6);
-        $pdf->Cell(54, 3, 'Fecha: ' . $invoice->created_at->format('d/m/Y H:i:s'), 0, 1, 'L');
-        $pdf->Cell(54, 3, 'Cliente: ' . $invoice->customer_name, 0, 1, 'L');
-        $pdf->Ln(2);
+        // 3. ITEMS (igual que PrintService líneas 149-176)
+        $items = $invoice->items ?? $invoice->invoiceItems ?? collect();
+        $pdf->SetFont('Arial', '', 7); // Fuente más grande
 
-        // Items
-        if ($invoice->items && count($invoice->items) > 0) {
-            $pdf->SetFont('Arial', 'B', 6);
-            $pdf->Cell(54, 3, 'PRODUCTOS:', 0, 1, 'L');
-            $pdf->Cell(54, 1, str_repeat('-', 32), 0, 1, 'L');
+        foreach ($items as $item) {
+            // Nombre del item
+            $itemName = $item->item->name ?? $item->product_name ?? 'Item';
+            $pdf->Cell(0, 3.5, $this->normalizeText($this->wrapTextForPdf($itemName, 32)), 0, 1, 'L'); // Usar ancho completo (0)
 
-            $pdf->SetFont('Arial', '', 5);
-            foreach ($invoice->items as $item) {
-                // Nombre del producto (puede ocupar múltiples líneas)
-                $productName = $this->wrapTextForPdf($item->product_name, 32);
-                $pdf->Cell(54, 2.5, $productName, 0, 1, 'L');
+            // Cantidad x Precio = Subtotal (lógica exacta del PrintService)
+            $qty = number_format($item->amount ?? $item->quantity ?? 0, 2);
 
-                // Cantidad y precio en una línea
-                $qty = number_format($item->quantity, 2);
-                $price = number_format($item->unit_price, 2);
-                $total = number_format($item->total_price, 2);
+            if ($invoice->should_show_rate) {
+                // Cuando hay tasa, mostrar precios en bolívares
+                $priceInBs = ($item->price ?? $item->unit_price ?? 0) * $invoice->rate;
+                $subtotalInBs = ($item->subtotal ?? $item->total_price ?? 0) * $invoice->rate;
 
-                $line = sprintf('%s x $%s = $%s', $qty, $price, $total);
-                $pdf->Cell(54, 2.5, $line, 0, 1, 'R');
-                $pdf->Ln(0.5);
+                $price = 'Bs' . number_format($priceInBs, 2);
+                $subtotal = 'Bs' . number_format($subtotalInBs, 2);
+            } else {
+                // Sin tasa, mostrar precios en dólares
+                $price = '$' . number_format($item->price ?? $item->unit_price ?? 0, 2);
+                $subtotal = '$' . number_format($item->subtotal ?? $item->total_price ?? 0, 2);
             }
+
+            // Formato exacto del PrintService: "qty x price    subtotal"
+            $itemLine = $qty . ' x ' . $price;
+            $spaces = 32 - strlen($itemLine) - strlen($subtotal);
+            $itemLine .= str_repeat(' ', max(1, $spaces)) . $subtotal;
+
+            $pdf->Cell(0, 3.5, $itemLine, 0, 1, 'L'); // Usar ancho completo (0)
         }
+        $pdf->Ln(2); // Más espacio
 
-        $pdf->Ln(1);
-        $pdf->Cell(54, 1, str_repeat('=', 32), 0, 1, 'C');
+        $pdf->Cell(0, 1, str_repeat('=', 32), 0, 1, 'L'); // Usar ancho completo (0)
+        $pdf->Ln(2); // Más espacio
 
-        // Totales
-        $pdf->SetFont('Arial', 'B', 7);
-        if ($invoice->rate && $invoice->rate > 0) {
-            // Mostrar subtotal, tasa y total cuando hay tasa
-            $subtotal = $invoice->subtotal ?? $invoice->total_amount ?? 0;
-            $pdf->Cell(54, 3, 'SUBTOTAL: $' . number_format($subtotal, 2), 0, 1, 'R');
-            $pdf->Cell(54, 3, 'TASA: ' . number_format($invoice->rate, 4), 0, 1, 'R');
-            $pdf->Cell(54, 3, 'TOTAL Bs: ' . number_format($invoice->total_amount ?? 0, 2), 0, 1, 'R');
+        // 4. TOTALES (igual que PrintService líneas 180-196)
+        if ($invoice->should_show_rate) {
+            // Cuando hay tasa, mostrar primero el total en bolívares
+            $pdf->SetFont('Arial', 'B', 9); // Fuente más grande
+            $totalBsText = 'TOTAL Bs: ' . number_format($invoice->total_amount_bs, 2);
+            $pdf->Cell(0, 4, $totalBsText, 0, 1, 'R'); // Usar ancho completo (0)
+
+            // Luego el total de referencia en dólares (en minúsculas)
+            $pdf->SetFont('Arial', '', 8); // Fuente más grande
+            $totalRefText = 'total ref: $' . number_format($invoice->total_amount, 2);
+            $pdf->Cell(0, 4, $totalRefText, 0, 1, 'R'); // Usar ancho completo (0)
+
+            // Finalmente la tasa
+            $pdf->Cell(0, 4, 'Tasa: ' . number_format($invoice->rate, 4), 0, 1, 'L'); // Usar ancho completo (0)
         } else {
-            // Solo mostrar total en dólares cuando no hay tasa
-            $pdf->Cell(54, 3, 'TOTAL: $' . number_format($invoice->total_amount ?? 0, 2), 0, 1, 'R');
+            // Cuando no hay tasa, mostrar solo el total en dólares
+            $pdf->SetFont('Arial', 'B', 9); // Fuente más grande
+            $totalText = 'TOTAL: $' . number_format($invoice->total_amount, 2);
+            $pdf->Cell(0, 4, $totalText, 0, 1, 'R'); // Usar ancho completo (0)
         }
+        $pdf->Ln(2); // Más espacio
 
-        $pdf->Ln(2);
-        $pdf->Cell(54, 1, str_repeat('=', 32), 0, 1, 'C');
-        $pdf->Ln(1);
+        $pdf->Cell(0, 1, str_repeat('=', 32), 0, 1, 'C'); // Usar ancho completo (0) y centrar
 
-        // Pie de página
-        $pdf->SetFont('Arial', '', 6);
-        $pdf->Cell(54, 3, 'Gracias por su compra!', 0, 1, 'C');
+        // 5. PIE DE PÁGINA (igual que PrintService líneas 200-203)
+        $pdf->SetFont('Arial', '', 8); // Fuente más grande
+        $pdf->Cell(0, 4, $this->normalizeText('Gracias por su compra!'), 0, 1, 'C'); // Usar ancho completo (0)
+
+        // Más espacio al final para poder romper el ticket
+        $pdf->Ln(5); // Más espacio
+        $pdf->Ln(5); // Más espacio
+        $pdf->Ln(5); // Más espacio
+        $pdf->Ln(5); // Más espacio para romper fácilmente
+        $pdf->Cell(56, 1, str_repeat('=', 32), 0, 1, 'L');
 
         return $pdf->Output('S'); // Retornar como string
     }
@@ -443,5 +468,40 @@ class InvoiceStatusController extends Controller
         }
 
         return substr($text, 0, $maxLength - 3) . '...';
+    }
+
+    /**
+     * Normalizar texto para impresión térmica (igual que PrintService)
+     * Elimina acentos y caracteres especiales que pueden causar problemas
+     */
+    private function normalizeText(string $text): string
+    {
+        // Mapa de caracteres con acentos a sin acentos (igual que PrintService)
+        $replacements = [
+            // Vocales con acentos
+            'á' => 'a', 'à' => 'a', 'ä' => 'a', 'â' => 'a', 'ā' => 'a', 'ã' => 'a',
+            'é' => 'e', 'è' => 'e', 'ë' => 'e', 'ê' => 'e', 'ē' => 'e',
+            'í' => 'i', 'ì' => 'i', 'ï' => 'i', 'î' => 'i', 'ī' => 'i',
+            'ó' => 'o', 'ò' => 'o', 'ö' => 'o', 'ô' => 'o', 'ō' => 'o', 'õ' => 'o',
+            'ú' => 'u', 'ù' => 'u', 'ü' => 'u', 'û' => 'u', 'ū' => 'u',
+
+            // Mayúsculas
+            'Á' => 'A', 'À' => 'A', 'Ä' => 'A', 'Â' => 'A', 'Ā' => 'A', 'Ã' => 'A',
+            'É' => 'E', 'È' => 'E', 'Ë' => 'E', 'Ê' => 'E', 'Ē' => 'E',
+            'Í' => 'I', 'Ì' => 'I', 'Ï' => 'I', 'Î' => 'I', 'Ī' => 'I',
+            'Ó' => 'O', 'Ò' => 'O', 'Ö' => 'O', 'Ô' => 'O', 'Ō' => 'O', 'Õ' => 'O',
+            'Ú' => 'U', 'Ù' => 'U', 'Ü' => 'U', 'Û' => 'U', 'Ū' => 'U',
+
+            // Caracteres especiales del español
+            'ñ' => 'n', 'Ñ' => 'N',
+            'ç' => 'c', 'Ç' => 'C',
+
+            // Signos de puntuación problemáticos
+            '¡' => '', '¿' => '',
+            '–' => '-', '—' => '-',
+        ];
+
+        // Aplicar reemplazos
+        return strtr($text, $replacements);
     }
 }
